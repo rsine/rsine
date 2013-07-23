@@ -1,5 +1,6 @@
-package changesetservice;
+package eu.lod2.changesetservice;
 
+import eu.lod2.changesetstore.ChangeSetStore;
 import org.apache.http.ConnectionClosedException;
 import org.apache.http.HttpException;
 import org.apache.http.HttpServerConnection;
@@ -22,31 +23,34 @@ public class ChangesetService {
 
     private final Logger logger = LoggerFactory.getLogger(ChangesetService.class);
 
+    private ServerSocket serverSocket;
+    private Thread requestListenerThread;
     private boolean shoudStop;
 
     public ChangesetService(int port) throws IOException {
-        Thread requestListenerThread = new RequestListenerThread(port);
+        requestListenerThread = new RequestListenerThread(port);
         requestListenerThread.setDaemon(false);
         requestListenerThread.start();
     }
 
-    public void stop() {
+    public void stop() throws InterruptedException, IOException {
         shoudStop = true;
+
+        serverSocket.close();
+        requestListenerThread.join();
     }
 
     private class RequestListenerThread extends Thread {
 
-        private ServerSocket serverSocket;
         private SyncBasicHttpParams params;
         private HttpService httpService;
+        private HttpRequestHandlerRegistry reqistry;
 
         RequestListenerThread(int port) throws IOException {
             serverSocket = new ServerSocket(port);
-            params = new SyncBasicHttpParams();
 
-            // Set up request handlers
-            HttpRequestHandlerRegistry reqistry = new HttpRequestHandlerRegistry();
-            reqistry.register("*", new ChangeTripleHandler());
+            setupParams();
+            setupRequestHandler();
 
             httpService = new HttpService(
                 new BasicHttpProcessor(),
@@ -54,14 +58,24 @@ public class ChangesetService {
                 new DefaultHttpResponseFactory(),
                 reqistry,
                 params);
+        }
 
-            params
-                    .setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 5000)
-                    .setIntParameter(CoreConnectionPNames.SOCKET_BUFFER_SIZE, 8 * 1024)
-                    .setBooleanParameter(CoreConnectionPNames.STALE_CONNECTION_CHECK, false)
-                    .setBooleanParameter(CoreConnectionPNames.TCP_NODELAY, true)
-                    .setParameter(CoreProtocolPNames.ORIGIN_SERVER, "HttpComponents/1.1");
+        private void setupParams() {
+            params = new SyncBasicHttpParams();
+            params.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 5000)
+                .setIntParameter(CoreConnectionPNames.SOCKET_BUFFER_SIZE, 8 * 1024)
+                .setBooleanParameter(CoreConnectionPNames.STALE_CONNECTION_CHECK, false)
+                .setBooleanParameter(CoreConnectionPNames.TCP_NODELAY, true)
+                .setParameter(CoreProtocolPNames.ORIGIN_SERVER, "HttpComponents/1.1");
 
+        }
+
+        private void setupRequestHandler() {
+            reqistry = new HttpRequestHandlerRegistry();
+            ChangeTripleHandler changeTripleHandler = new ChangeTripleHandler();
+            changeTripleHandler.setChangeSetCreator(new ChangeSetCreator());
+            changeTripleHandler.setChangeSetStore(new ChangeSetStore());
+            reqistry.register("*", changeTripleHandler);
         }
 
         @Override
@@ -107,17 +121,6 @@ public class ChangesetService {
             this.conn = conn;
         }
 
-        void cancel() {
-            shoudStop = true;
-
-            try {
-                conn.shutdown();
-            }
-            catch (IOException e) {
-                logger.error("Error shutting down connection");
-            }
-        }
-
         @Override
         public void run() {
             HttpContext context = new BasicHttpContext(null);
@@ -125,7 +128,7 @@ public class ChangesetService {
                 while (!shoudStop && conn.isOpen()) {
                     httpservice.handleRequest(conn, context);
                 }
-
+                conn.shutdown();
             }
             catch (ConnectionClosedException ex) {
                 logger.error("Client closed connection");

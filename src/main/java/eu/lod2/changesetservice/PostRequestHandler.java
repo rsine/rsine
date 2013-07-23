@@ -1,4 +1,4 @@
-package changesetservice;
+package eu.lod2.changesetservice;
 
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
@@ -18,10 +18,10 @@ public abstract class PostRequestHandler implements HttpRequestHandler {
         if (request.getRequestLine().getMethod().equalsIgnoreCase("POST") &&
             request instanceof BasicHttpEntityEnclosingRequest)
         {
-            handlePost((BasicHttpEntityEnclosingRequest) request);
+            handlePost((BasicHttpEntityEnclosingRequest) request, response);
         }
     }
 
-    protected abstract void handlePost(BasicHttpEntityEnclosingRequest request);
+    protected abstract void handlePost(BasicHttpEntityEnclosingRequest request, HttpResponse response);
 
 }

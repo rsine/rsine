@@ -1,7 +1,7 @@
 package at.punkt.lod2;
 
-import changesetservice.ChangeTripleHandler;
-import changesetservice.ChangesetService;
+import eu.lod2.changesetservice.ChangeTripleHandler;
+import eu.lod2.changesetservice.ChangesetService;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -14,6 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,25 +28,114 @@ public class ChangesetServiceTest {
     }
 
     @After
-    public void tearDown() {
+    public void tearDown() throws InterruptedException, IOException {
         changesetService.stop();
     }
 
     @Test
     public void postTripleChange() throws IOException {
-        DefaultHttpClient httpclient = new DefaultHttpClient();
+        DefaultHttpClient httpClient = new DefaultHttpClient();
+        HttpResponse response = httpClient.execute(createValidTripleChangePost());
+
+        Assert.assertEquals(200, response.getStatusLine().getStatusCode());
+    }
+
+    private HttpPost createValidTripleChangePost() throws UnsupportedEncodingException {
+        HttpPost httpPost = new HttpPost("http://localhost:8080");
+
+        List<NameValuePair> nvps = new ArrayList<NameValuePair>();
+        nvps.add(new BasicNameValuePair(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD));
+        nvps.add(new BasicNameValuePair(ChangeTripleHandler.POST_BODY_TRIPLE, "<http://example.org/myconcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"somelabel\"@en ."));
+
+        httpPost.setEntity(new UrlEncodedFormEntity(nvps));
+        return httpPost;
+    }
+
+    @Test
+    public void postEmptyTriple() throws IOException {
+        DefaultHttpClient httpClient = new DefaultHttpClient();
+        HttpResponse response = httpClient.execute(createEmptyTripleChangePost());
+
+        Assert.assertEquals(400, response.getStatusLine().getStatusCode());
+    }
+
+    private HttpPost createEmptyTripleChangePost() throws UnsupportedEncodingException {
+        HttpPost httpPost = new HttpPost("http://localhost:8080");
+
+        List<NameValuePair> nvps = new ArrayList<NameValuePair>();
+        nvps.add(new BasicNameValuePair(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD));
+        nvps.add(new BasicNameValuePair(ChangeTripleHandler.POST_BODY_TRIPLE, ""));
+
+        httpPost.setEntity(new UrlEncodedFormEntity(nvps));
+        return httpPost;
+    }
+
+    @Test
+    public void postIllegalTriple() throws IOException {
+        DefaultHttpClient httpClient = new DefaultHttpClient();
+        HttpResponse response = httpClient.execute(createIllegalTripleChangePost());
+
+        Assert.assertEquals(400, response.getStatusLine().getStatusCode());
+    }
+
+    private HttpPost createIllegalTripleChangePost() throws UnsupportedEncodingException {
+        HttpPost httpPost = new HttpPost("http://localhost:8080");
+
+        List<NameValuePair> nvps = new ArrayList<NameValuePair>();
+        nvps.add(new BasicNameValuePair(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD));
+        nvps.add(new BasicNameValuePair(ChangeTripleHandler.POST_BODY_TRIPLE, "http://www.example.org/someconcept a skos:Concept ."));
+
+        httpPost.setEntity(new UrlEncodedFormEntity(nvps));
+        return httpPost;
+    }
+
+    @Test
+    public void postInvalidEofTriple() throws IOException {
+        DefaultHttpClient httpClient = new DefaultHttpClient();
+        HttpResponse response = httpClient.execute(createInvalidEofTripleChangePost());
+
+        Assert.assertEquals(400, response.getStatusLine().getStatusCode());
+    }
+
+    private HttpPost createInvalidEofTripleChangePost() throws UnsupportedEncodingException {
+        HttpPost httpPost = new HttpPost("http://localhost:8080");
+
+        List<NameValuePair> nvps = new ArrayList<NameValuePair>();
+        nvps.add(new BasicNameValuePair(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD));
+        nvps.add(new BasicNameValuePair(ChangeTripleHandler.POST_BODY_TRIPLE, "<http://example.org/myconcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"somelabel\"@en"));
+
+        httpPost.setEntity(new UrlEncodedFormEntity(nvps));
+        return httpPost;
+    }
+
+
+    @Test
+    public void postMissingTriple() throws IOException {
+        DefaultHttpClient httpClient = new DefaultHttpClient();
+        HttpResponse response = httpClient.execute(createMissingTripleChangePost());
+
+        Assert.assertEquals(400, response.getStatusLine().getStatusCode());
+    }
+
+    private HttpPost createMissingTripleChangePost() throws UnsupportedEncodingException {
         HttpPost httpPost = new HttpPost("http://localhost:8080");
 
         List<NameValuePair> nvps = new ArrayList<NameValuePair>();
         nvps.add(new BasicNameValuePair(ChangeTripleHandler.POST_BODY_CHANGETYPE, "add"));
-        nvps.add(new BasicNameValuePair(ChangeTripleHandler.POST_BODY_SUBJECT, "http://example.org/myconcept"));
-        nvps.add(new BasicNameValuePair(ChangeTripleHandler.POST_BODY_PREDICATE, "http://www.w3.org/2004/02/skos/core#prefLabel"));
-        nvps.add(new BasicNameValuePair(ChangeTripleHandler.POST_BODY_OBJECT, "somelabel@en"));
 
         httpPost.setEntity(new UrlEncodedFormEntity(nvps));
-        HttpResponse response = httpclient.execute(httpPost);
+        return httpPost;
+    }
 
-        Assert.assertEquals(200, response.getStatusLine().getStatusCode());
+
+    @Test
+    public void postMissingChangeType() {
+
+    }
+
+    @Test
+    public void postInvalidName() {
+
     }
 
     @Test
@@ -58,5 +148,4 @@ public class ChangesetServiceTest {
         // TODO: post a triple and check if repository is updated
     }
 
-
-    }
+}
