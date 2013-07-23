@@ -11,6 +11,7 @@ import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.SyncBasicHttpParams;
 import org.apache.http.protocol.*;
+import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,11 +24,17 @@ public class ChangesetService {
 
     private final Logger logger = LoggerFactory.getLogger(ChangesetService.class);
 
+    private ChangeSetCreator changeSetCreator;
+    private ChangeSetStore changeSetStore;
+
     private ServerSocket serverSocket;
     private Thread requestListenerThread;
     private boolean shoudStop;
 
-    public ChangesetService(int port) throws IOException {
+    public ChangesetService(int port) throws IOException, RepositoryException {
+        changeSetCreator = new ChangeSetCreator();
+        changeSetStore = new ChangeSetStore();
+
         requestListenerThread = new RequestListenerThread(port);
         requestListenerThread.setDaemon(false);
         requestListenerThread.start();
@@ -40,13 +47,17 @@ public class ChangesetService {
         requestListenerThread.join();
     }
 
+    public ChangeSetStore getChangeSetStore() {
+        return changeSetStore;
+    }
+
     private class RequestListenerThread extends Thread {
 
         private SyncBasicHttpParams params;
         private HttpService httpService;
         private HttpRequestHandlerRegistry reqistry;
 
-        RequestListenerThread(int port) throws IOException {
+        RequestListenerThread(int port) throws IOException, RepositoryException {
             serverSocket = new ServerSocket(port);
 
             setupParams();
@@ -67,14 +78,14 @@ public class ChangesetService {
                 .setBooleanParameter(CoreConnectionPNames.STALE_CONNECTION_CHECK, false)
                 .setBooleanParameter(CoreConnectionPNames.TCP_NODELAY, true)
                 .setParameter(CoreProtocolPNames.ORIGIN_SERVER, "HttpComponents/1.1");
-
         }
 
-        private void setupRequestHandler() {
-            reqistry = new HttpRequestHandlerRegistry();
+        private void setupRequestHandler() throws RepositoryException {
             ChangeTripleHandler changeTripleHandler = new ChangeTripleHandler();
-            changeTripleHandler.setChangeSetCreator(new ChangeSetCreator());
-            changeTripleHandler.setChangeSetStore(new ChangeSetStore());
+            changeTripleHandler.setChangeSetCreator(changeSetCreator);
+            changeTripleHandler.setChangeSetStore(changeSetStore);
+
+            reqistry = new HttpRequestHandlerRegistry();
             reqistry.register("*", changeTripleHandler);
         }
 
@@ -94,9 +105,11 @@ public class ChangesetService {
                     WorkerThread t = new WorkerThread(httpService, conn);
                     t.setDaemon(true);
                     t.start();
-                } catch (InterruptedIOException ex) {
-                    break;
-                } catch (IOException e) {
+                }
+                catch (InterruptedIOException ex) {
+                    // just continue
+                }
+                catch (IOException e) {
                     logger.info("I/O error initialising connection thread: "+ e.getMessage());
                     break;
                 }

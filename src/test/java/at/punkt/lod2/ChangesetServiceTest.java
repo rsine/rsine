@@ -1,7 +1,9 @@
 package at.punkt.lod2;
 
+import eu.lod2.changesetservice.ChangeSetCreator;
 import eu.lod2.changesetservice.ChangeTripleHandler;
 import eu.lod2.changesetservice.ChangesetService;
+import info.aduna.iteration.Iterations;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -12,6 +14,12 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openrdf.model.Statement;
+import org.openrdf.model.impl.ValueFactoryImpl;
+import org.openrdf.model.vocabulary.RDF;
+import org.openrdf.repository.RepositoryConnection;
+import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.RepositoryResult;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -23,7 +31,7 @@ public class ChangesetServiceTest {
     private ChangesetService changesetService;
 
     @Before
-    public void setUp() throws IOException {
+    public void setUp() throws IOException, RepositoryException {
         changesetService = new ChangesetService(8080);
     }
 
@@ -108,7 +116,6 @@ public class ChangesetServiceTest {
         return httpPost;
     }
 
-
     @Test
     public void postMissingTriple() throws IOException {
         DefaultHttpClient httpClient = new DefaultHttpClient();
@@ -127,25 +134,40 @@ public class ChangesetServiceTest {
         return httpPost;
     }
 
-
     @Test
-    public void postMissingChangeType() {
+    public void postMissingChangeType() throws IOException {
+        DefaultHttpClient httpClient = new DefaultHttpClient();
+        HttpResponse response = httpClient.execute(createMissingChangeTypePost());
 
+        Assert.assertEquals(400, response.getStatusLine().getStatusCode());
+    }
+
+    private HttpPost createMissingChangeTypePost() throws UnsupportedEncodingException {
+        HttpPost httpPost = new HttpPost("http://localhost:8080");
+
+        List<NameValuePair> nvps = new ArrayList<NameValuePair>();
+        nvps.add(new BasicNameValuePair(
+            ChangeTripleHandler.POST_BODY_TRIPLE,
+            "<http://example.org/myconcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"somelabel\"@en ."));
+
+        httpPost.setEntity(new UrlEncodedFormEntity(nvps));
+        return httpPost;
     }
 
     @Test
-    public void postInvalidName() {
+    public void tripleChangeToRepo() throws IOException, RepositoryException {
+        DefaultHttpClient httpClient = new DefaultHttpClient();
+        httpClient.execute(createValidTripleChangePost());
 
-    }
 
-    @Test
-    public void tripleChangeToChangeset() {
-        // TODO: post a triple and check if a RDF changeset is created
-    }
+        RepositoryConnection repCon = changesetService.getChangeSetStore().getRepository().getConnection();
+        RepositoryResult<Statement> result = repCon.getStatements(
+            null,
+            RDF.TYPE,
+            ValueFactoryImpl.getInstance().createURI(ChangeSetCreator.CS_NAMESPACE.getName(), "ChangeSet"),
+            false);
 
-    @Test
-    public void tripleChangeToRepo() {
-        // TODO: post a triple and check if repository is updated
+        Assert.assertEquals(1, Iterations.asList(result).size());
     }
 
 }

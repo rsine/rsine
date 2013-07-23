@@ -9,9 +9,8 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicHttpEntityEnclosingRequest;
 import org.openrdf.model.Graph;
 import org.openrdf.model.Statement;
-import org.openrdf.rio.RDFHandlerException;
-import org.openrdf.rio.RDFParseException;
-import org.openrdf.rio.RDFParser;
+import org.openrdf.repository.RepositoryException;
+import org.openrdf.rio.*;
 import org.openrdf.rio.helpers.RDFHandlerBase;
 import org.openrdf.rio.ntriples.NTriplesParserFactory;
 
@@ -38,10 +37,13 @@ public class ChangeTripleHandler extends PostRequestHandler {
             changeSetStore.persistChangeSet(changeSet);
         }
         catch (ItemNotFoundException e) {
-            errorResponse(response, "No change triple provided");
+            errorResponse(response, "No triple or change type provided");
         }
         catch (RDFParseException e) {
             errorResponse(response, "Error parsing provided triple");
+        }
+        catch (RepositoryException e) {
+            errorResponse(response, "Error persisting changeset");
         }
         catch (IOException e) {
             errorResponse(response, e.getMessage());
