@@ -8,7 +8,9 @@ import eu.lod2.rsine.querydispatcher.QueryDispatcher;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
 import org.openrdf.repository.RepositoryException;
+import org.openrdf.rio.RDFParseException;
 
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -18,14 +20,16 @@ import java.io.IOException;
 public class Rsine {
 
     private RegistrationService registrationService;
+    private ChangeSetStore changeSetStore;
 
     public Rsine() throws IOException, RepositoryException {
         registrationService = new RegistrationService();
+        changeSetStore = new ChangeSetStore();
 
         ChangeSetService changeSetService = new ChangeSetService(8080);
         RequestHandlerFactory requestHandlerFactory = new RequestHandlerFactory();
-        requestHandlerFactory.setChangeSetStore(new ChangeSetStore());
         requestHandlerFactory.setChangeSetCreator(new ChangeSetCreator());
+        requestHandlerFactory.setChangeSetStore(changeSetStore);
 
         QueryDispatcher queryDispatcher = new QueryDispatcher();
         queryDispatcher.setRegistrationService(registrationService);
@@ -37,19 +41,26 @@ public class Rsine {
     }
 
     /**
-     * @Deprecated registration should be exposed as an HTTP service
+     * @deprecated registration should be exposed as an HTTP service
      */
-    @Deprecated
     public Subscription requestSubscription() {
         return registrationService.requestSubscription();
     }
 
     /**
-     * @Deprecated registration should be exposed as an HTTP service
+     * @deprecated registration should be exposed as an HTTP service
      */
-    @Deprecated
     public void registerSubscription(Subscription subscription) {
         registrationService.register(subscription);
+    }
+
+    /**
+     * Loads the passed rdf content into the ChangeSetStore. This is done for the proof-of-concept only. Final versions
+     * will access the managed triple store instance directly.
+     * @deprecated rsine todo: change to work with an openrdf repository
+     */
+    public void setManagedTripleStoreContent(File rdfData) throws RepositoryException, IOException, RDFParseException {
+        changeSetStore.getRepository().getConnection().add(rdfData, null, null);
     }
 
 }
