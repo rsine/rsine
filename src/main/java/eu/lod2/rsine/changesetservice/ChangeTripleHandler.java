@@ -1,6 +1,7 @@
-package eu.lod2.changesetservice;
+package eu.lod2.rsine.changesetservice;
 
-import eu.lod2.changesetstore.ChangeSetStore;
+import eu.lod2.rsine.changesetstore.ChangeSetStore;
+import eu.lod2.rsine.querydispatcher.IQueryDispatcher;
 import eu.lod2.util.ItemNotFoundException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -10,7 +11,9 @@ import org.apache.http.message.BasicHttpEntityEnclosingRequest;
 import org.openrdf.model.Graph;
 import org.openrdf.model.Statement;
 import org.openrdf.repository.RepositoryException;
-import org.openrdf.rio.*;
+import org.openrdf.rio.RDFHandlerException;
+import org.openrdf.rio.RDFParseException;
+import org.openrdf.rio.RDFParser;
 import org.openrdf.rio.helpers.RDFHandlerBase;
 import org.openrdf.rio.ntriples.NTriplesParserFactory;
 
@@ -27,6 +30,7 @@ public class ChangeTripleHandler extends PostRequestHandler {
 
     private ChangeSetCreator changeSetCreator;
     private ChangeSetStore changeSetStore;
+    private IQueryDispatcher queryDispatcher;
 
     @Override
     protected void handlePost(BasicHttpEntityEnclosingRequest request, HttpResponse response) {
@@ -35,6 +39,7 @@ public class ChangeTripleHandler extends PostRequestHandler {
             Statement st = createStatement(getValueForName(POST_BODY_TRIPLE, params));
             Graph changeSet = changeSetCreator.assembleChangeset(st, getValueForName(POST_BODY_CHANGETYPE, params));
             changeSetStore.persistChangeSet(changeSet);
+            queryDispatcher.trigger();
         }
         catch (ItemNotFoundException e) {
             errorResponse(response, "No triple or change type provided");
@@ -81,6 +86,10 @@ public class ChangeTripleHandler extends PostRequestHandler {
 
     public void setChangeSetStore(ChangeSetStore changeSetStore) {
         this.changeSetStore = changeSetStore;
+    }
+
+    public void setQueryDispatcher(IQueryDispatcher queryDispatcher) {
+        this.queryDispatcher = queryDispatcher;
     }
 
     private class SingleStatementHandler extends RDFHandlerBase {

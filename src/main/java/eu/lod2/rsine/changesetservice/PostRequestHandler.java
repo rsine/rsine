@@ -1,4 +1,4 @@
-package eu.lod2.changesetservice;
+package eu.lod2.rsine.changesetservice;
 
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;

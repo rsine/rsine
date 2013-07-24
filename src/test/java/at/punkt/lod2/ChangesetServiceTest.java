@@ -1,8 +1,12 @@
 package at.punkt.lod2;
 
-import eu.lod2.changesetservice.ChangeSetCreator;
-import eu.lod2.changesetservice.ChangeTripleHandler;
-import eu.lod2.changesetservice.ChangesetService;
+import eu.lod2.rsine.changesetservice.ChangeSetCreator;
+import eu.lod2.rsine.changesetservice.ChangeSetService;
+import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
+import eu.lod2.rsine.changesetservice.RequestHandlerFactory;
+import eu.lod2.rsine.changesetstore.ChangeSetStore;
+import eu.lod2.rsine.querydispatcher.IQueryDispatcher;
+import eu.lod2.util.Namespaces;
 import info.aduna.iteration.Iterations;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -28,16 +32,27 @@ import java.util.List;
 
 public class ChangesetServiceTest {
 
-    private ChangesetService changesetService;
+    private ChangeSetService changeSetService;
+    private ChangeSetStore changeSetStore;
 
     @Before
     public void setUp() throws IOException, RepositoryException {
-        changesetService = new ChangesetService(8080);
+        RequestHandlerFactory requestHandlerFactory = new RequestHandlerFactory();
+        requestHandlerFactory.setChangeSetCreator(new ChangeSetCreator());
+        requestHandlerFactory.setQueryDispatcher(new DummyQueryDispatcher());
+
+        changeSetStore = new ChangeSetStore();
+        requestHandlerFactory.setChangeSetStore(changeSetStore);
+
+        changeSetService = new ChangeSetService(8080);
+        changeSetService.setRequestHandlerFactory(requestHandlerFactory);
+
+        changeSetService.start();
     }
 
     @After
     public void tearDown() throws InterruptedException, IOException {
-        changesetService.stop();
+        changeSetService.stop();
     }
 
     @Test
@@ -160,14 +175,22 @@ public class ChangesetServiceTest {
         httpClient.execute(createValidTripleChangePost());
 
 
-        RepositoryConnection repCon = changesetService.getChangeSetStore().getRepository().getConnection();
+        RepositoryConnection repCon = changeSetStore.getRepository().getConnection();
         RepositoryResult<Statement> result = repCon.getStatements(
             null,
             RDF.TYPE,
-            ValueFactoryImpl.getInstance().createURI(ChangeSetCreator.CS_NAMESPACE.getName(), "ChangeSet"),
+            ValueFactoryImpl.getInstance().createURI(Namespaces.CS_NAMESPACE.getName(), "ChangeSet"),
             false);
 
         Assert.assertEquals(1, Iterations.asList(result).size());
     }
 
+    private class DummyQueryDispatcher implements IQueryDispatcher {
+
+        @Override
+        public void trigger() {
+            //don't do nothing here
+        }
+
+    }
 }

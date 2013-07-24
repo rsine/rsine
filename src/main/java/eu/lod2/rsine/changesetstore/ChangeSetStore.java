@@ -1,4 +1,4 @@
-package eu.lod2.changesetstore;
+package eu.lod2.rsine.changesetstore;
 
 import org.openrdf.model.Graph;
 import org.openrdf.repository.Repository;

@@ -1,6 +1,5 @@
-package eu.lod2.changesetservice;
+package eu.lod2.rsine.changesetservice;
 
-import eu.lod2.changesetstore.ChangeSetStore;
 import org.apache.http.ConnectionClosedException;
 import org.apache.http.HttpException;
 import org.apache.http.HttpServerConnection;
@@ -20,21 +19,21 @@ import java.io.InterruptedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class ChangesetService {
+public class ChangeSetService {
 
-    private final Logger logger = LoggerFactory.getLogger(ChangesetService.class);
+    private final Logger logger = LoggerFactory.getLogger(ChangeSetService.class);
 
-    private ChangeSetCreator changeSetCreator;
-    private ChangeSetStore changeSetStore;
-
+    private RequestHandlerFactory requestHandlerFactory;
     private ServerSocket serverSocket;
     private Thread requestListenerThread;
     private boolean shoudStop;
+    private int port;
 
-    public ChangesetService(int port) throws IOException, RepositoryException {
-        changeSetCreator = new ChangeSetCreator();
-        changeSetStore = new ChangeSetStore();
+    public ChangeSetService(int port) {
+        this.port = port;
+    }
 
+    public void start() throws IOException, RepositoryException {
         requestListenerThread = new RequestListenerThread(port);
         requestListenerThread.setDaemon(false);
         requestListenerThread.start();
@@ -47,8 +46,8 @@ public class ChangesetService {
         requestListenerThread.join();
     }
 
-    public ChangeSetStore getChangeSetStore() {
-        return changeSetStore;
+    public void setRequestHandlerFactory(RequestHandlerFactory requestHandlerFactory) {
+        this.requestHandlerFactory = requestHandlerFactory;
     }
 
     private class RequestListenerThread extends Thread {
@@ -81,12 +80,8 @@ public class ChangesetService {
         }
 
         private void setupRequestHandler() throws RepositoryException {
-            ChangeTripleHandler changeTripleHandler = new ChangeTripleHandler();
-            changeTripleHandler.setChangeSetCreator(changeSetCreator);
-            changeTripleHandler.setChangeSetStore(changeSetStore);
-
             reqistry = new HttpRequestHandlerRegistry();
-            reqistry.register("*", changeTripleHandler);
+            reqistry.register("*", requestHandlerFactory.createChangeTripleHandler());
         }
 
         @Override
