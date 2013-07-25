@@ -7,6 +7,7 @@ import org.openrdf.model.impl.ValueFactoryImpl;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 
 public class Subscription {
 
@@ -25,6 +26,10 @@ public class Subscription {
 
     public void addQuery(String query) {
         queries.add(query);
+    }
+
+    public Iterator<String> getQueryIterator() {
+        return queries.iterator();
     }
 
 }

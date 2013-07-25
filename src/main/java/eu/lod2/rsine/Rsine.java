@@ -7,6 +7,8 @@ import eu.lod2.rsine.changesetstore.ChangeSetStore;
 import eu.lod2.rsine.querydispatcher.QueryDispatcher;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
+import eu.lod2.util.Namespaces;
+import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.RDFParseException;
 
@@ -33,6 +35,7 @@ public class Rsine {
 
         QueryDispatcher queryDispatcher = new QueryDispatcher();
         queryDispatcher.setRegistrationService(registrationService);
+        queryDispatcher.setRepository(changeSetStore.getRepository());
         requestHandlerFactory.setQueryDispatcher(queryDispatcher);
 
         changeSetService.setRequestHandlerFactory(requestHandlerFactory);
@@ -60,7 +63,7 @@ public class Rsine {
      * @deprecated rsine todo: change to work with an openrdf repository
      */
     public void setManagedTripleStoreContent(File rdfData) throws RepositoryException, IOException, RDFParseException {
-        changeSetStore.getRepository().getConnection().add(rdfData, null, null);
+        changeSetStore.getRepository().getConnection().add(rdfData, null, null, new URIImpl(Namespaces.VOCAB_CONTEXT));
     }
 
 }

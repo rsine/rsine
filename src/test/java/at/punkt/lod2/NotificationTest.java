@@ -3,6 +3,7 @@ package at.punkt.lod2;
 import eu.lod2.rsine.Rsine;
 import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
 import eu.lod2.rsine.registrationservice.Subscription;
+import eu.lod2.util.Namespaces;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
@@ -48,15 +49,27 @@ public class NotificationTest {
 
     private String createQuery() {
         //TODO: preflabel changes of concepts created by the subscriber
-        return "testQuery1";
+
+        return Namespaces.SKOS_PREFIX+
+               " SELECT * " +
+                        "FROM NAMED <" +Namespaces.CHANGESET_CONTEXT+ "> " +
+//                        "FROM NAMED <" +Namespaces.VOCAB_CONTEXT+ "> " +
+                        "WHERE {" +
+                            "GRAPH ?g {" +
+                                "?s ?p ?o "+
+//                                "?concept a skos:Concept . " +
+                            "}" +
+                        "}";
     }
 
     private void postChanges() throws IOException {
         addConcept();
+        /*
         setPrefLabel();
         changePrefLabel();
         addOtherConcept();
         linkConcepts();
+        */
     }
 
     private void addConcept() throws IOException {

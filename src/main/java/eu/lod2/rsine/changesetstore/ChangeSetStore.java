@@ -13,7 +13,6 @@ import java.io.File;
 
 public class ChangeSetStore {
 
-    private final static String CS_CONTEXT = Namespaces.CS_NAMESPACE + "changesets";
     private Repository repository;
 
     public ChangeSetStore() throws RepositoryException {
@@ -28,7 +27,7 @@ public class ChangeSetStore {
 
     public void persistChangeSet(Graph changeSet) throws RepositoryException {
         ValueFactory valueFactory = new ValueFactoryImpl();
-        repository.getConnection().add(changeSet, valueFactory.createURI(CS_CONTEXT));
+        repository.getConnection().add(changeSet, valueFactory.createURI(Namespaces.CHANGESET_CONTEXT));
     }
 
     public Repository getRepository() {
