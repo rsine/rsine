@@ -66,7 +66,7 @@ public class QueryDispatcher implements IQueryDispatcher {
     }
 
     private void notifySubscriber(BindingSet bs, Subscription subscription) {
-        logger.debug("returned bindings: " +bs);
+        logger.info("notifying subscriber: " +bs);
     }
 
     public void setRegistrationService(RegistrationService registrationService) {

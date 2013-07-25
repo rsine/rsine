@@ -1,6 +1,5 @@
 package eu.lod2.rsine.changesetservice;
 
-import eu.lod2.util.ItemNotFoundException;
 import eu.lod2.util.Namespaces;
 import org.openrdf.model.*;
 import org.openrdf.model.impl.StatementImpl;
@@ -15,7 +14,7 @@ public class ChangeSetCreator {
 
     private ValueFactory valueFactory = ValueFactoryImpl.getInstance();
 
-    public Graph assembleChangeset(Statement affectedStatement, String changeType) {
+    public Graph assembleChangeset(Statement affectedStatement, Statement secondaryStatement, String changeType) {
         Graph graph = new TreeModel(new HashSet<Namespace>(Arrays.asList(Namespaces.RSINE_NAMESPACE, Namespaces.CS_NAMESPACE)));
 
         URI changeSet = valueFactory.createURI(
@@ -25,21 +24,25 @@ public class ChangeSetCreator {
         graph.add(new StatementImpl(changeSet,
             RDF.TYPE,
             valueFactory.createURI(Namespaces.CS_NAMESPACE.getName(), "ChangeSet")));
-        graph.add(new StatementImpl(changeSet,
-            createChangeTypeUri(changeType),
-            createStatementNode(affectedStatement, graph)));
+
+        if (changeType.equals(ChangeTripleHandler.CHANGETYPE_REMOVE)) {
+            addActionStatement(graph, changeSet, affectedStatement, "removal");
+        }
+        else if (changeType.equals(ChangeTripleHandler.CHANGETYPE_ADD)) {
+            addActionStatement(graph, changeSet, affectedStatement, "addition");
+        }
+        else if (changeType.equals(ChangeTripleHandler.CHANGETYPE_UPDATE)) {
+            addActionStatement(graph, changeSet, affectedStatement, "removal");
+            addActionStatement(graph, changeSet, secondaryStatement, "addition");
+        }
 
         return graph;
     }
 
-    private URI createChangeTypeUri(String changeType) {
-        if (changeType.equals(ChangeTripleHandler.CHANGETYPE_REMOVE)) {
-            return valueFactory.createURI(Namespaces.CS_NAMESPACE.getName(), "removal");
-        }
-        else if (changeType.equals(ChangeTripleHandler.CHANGETYPE_ADD)) {
-            return valueFactory.createURI(Namespaces.CS_NAMESPACE.getName(), "addition");
-        }
-        throw new ItemNotFoundException("Invalid changetype");
+    private void addActionStatement(Graph graph, Resource changeSet, Statement statement, String action) {
+        graph.add(new StatementImpl(changeSet,
+            valueFactory.createURI(Namespaces.CS_NAMESPACE.getName(), action),
+            createStatementNode(statement, graph)));
     }
 
     private BNode createStatementNode(Statement affectedStatement, Graph graph) {

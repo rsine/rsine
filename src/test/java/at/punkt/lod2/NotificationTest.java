@@ -48,34 +48,40 @@ public class NotificationTest {
     }
 
     private String createQuery() {
-        //TODO: preflabel changes of concepts created by the subscriber
-
+        //preflabel changes of concepts
         return Namespaces.SKOS_PREFIX+
+               Namespaces.CS_PREFIX+
+               Namespaces.DCTERMS_PREFIX+
                " SELECT * " +
-                        "FROM NAMED <" +Namespaces.CHANGESET_CONTEXT+ "> " +
-//                        "FROM NAMED <" +Namespaces.VOCAB_CONTEXT+ "> " +
-                        "WHERE {" +
-                            "GRAPH ?g {" +
-                                "?s ?p ?o "+
-//                                "?concept a skos:Concept . " +
-                            "}" +
-                        "}";
+                    "FROM NAMED <" +Namespaces.CHANGESET_CONTEXT+ "> " +
+                    "FROM NAMED <" +Namespaces.VOCAB_CONTEXT+ "> " +
+                    "WHERE {" +
+                        "GRAPH ?g {" +
+                            "?cs a cs:ChangeSet . " +
+                            "?cs cs:removal ?removal . " +
+                            "?cs cs:addition ?addition . " +
+                            "?removal rdf:subject ?concept . " +
+                            "?addition rdf:subject ?concept . " +
+                            "?removal rdf:predicate skos:prefLabel . " +
+                            "?removal rdf:object ?oldLabel . "+
+                            "?addition rdf:predicate skos:prefLabel . " +
+                            "?addition rdf:object ?newLabel . "+
+                        "}" +
+                    "}";
     }
 
     private void postChanges() throws IOException {
         addConcept();
-        /*
         setPrefLabel();
         changePrefLabel();
         addOtherConcept();
-        linkConcepts();
-        */
+        //linkConcepts();
     }
 
     private void addConcept() throws IOException {
         post(new BasicNameValuePair(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD),
              new BasicNameValuePair(
-                ChangeTripleHandler.POST_BODY_TRIPLE,
+                ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
                 "<http://reegle.info/glossary/1111> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2004/02/skos/core#Concept> ."));
     }
 
@@ -91,33 +97,31 @@ public class NotificationTest {
     private void setPrefLabel() throws IOException {
         post(new BasicNameValuePair(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD),
             new BasicNameValuePair(
-                ChangeTripleHandler.POST_BODY_TRIPLE,
+                ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
                 "<http://reegle.info/glossary/1111> <http://www.w3.org/2004/02/skos/core#prefLabel> \"Ottakringer Helles\"@en ."));
     }
 
     private void changePrefLabel() throws IOException {
-        post(new BasicNameValuePair(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_REMOVE),
+        post(new BasicNameValuePair(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_UPDATE),
             new BasicNameValuePair(
-                ChangeTripleHandler.POST_BODY_TRIPLE,
-                "<http://reegle.info/glossary/1111> <http://www.w3.org/2004/02/skos/core#prefLabel> \"Ottakringer Helles\"@en ."));
-
-        post(new BasicNameValuePair(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD),
+                ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
+                "<http://reegle.info/glossary/1111> <http://www.w3.org/2004/02/skos/core#prefLabel> \"Ottakringer Helles\"@en ."),
             new BasicNameValuePair(
-                ChangeTripleHandler.POST_BODY_TRIPLE,
+                ChangeTripleHandler.POST_BODY_SECONDARYTRIPLE,
                 "<http://reegle.info/glossary/1111> <http://www.w3.org/2004/02/skos/core#prefLabel> \"Schremser Edelmärzen\"@en ."));
     }
 
     private void addOtherConcept() throws IOException {
         post(new BasicNameValuePair(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD),
             new BasicNameValuePair(
-                ChangeTripleHandler.POST_BODY_TRIPLE,
+                ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
                 "<http://reegle.info/glossary/1112> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2004/02/skos/core#Concept> ."));
     }
 
     private void linkConcepts() throws IOException {
         post(new BasicNameValuePair(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD),
             new BasicNameValuePair(
-                ChangeTripleHandler.POST_BODY_TRIPLE,
+                ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
                 "<http://reegle.info/glossary/1111> <http://www.w3.org/2004/02/skos/core#related> <http://reegle.info/glossary/1112> ."));
     }
 

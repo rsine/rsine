@@ -19,6 +19,7 @@ import org.openrdf.rio.ntriples.NTriplesParserFactory;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.Arrays;
 import java.util.List;
 
 public class ChangeTripleHandler extends PostRequestHandler {
@@ -26,7 +27,9 @@ public class ChangeTripleHandler extends PostRequestHandler {
     public static String POST_BODY_CHANGETYPE = "changeType";
     public static String CHANGETYPE_ADD = "add";
     public static String CHANGETYPE_REMOVE = "remove";
-    public static String POST_BODY_TRIPLE = "affectedTriple";
+    public static String CHANGETYPE_UPDATE = "update";
+    public static String POST_BODY_AFFECTEDTRIPLE = "affectedTriple";
+    public static String POST_BODY_SECONDARYTRIPLE = "secondaryTriple";
 
     private ChangeSetCreator changeSetCreator;
     private ChangeSetStore changeSetStore;
@@ -36,9 +39,12 @@ public class ChangeTripleHandler extends PostRequestHandler {
     protected void handlePost(BasicHttpEntityEnclosingRequest request, HttpResponse response) {
         try {
             List<NameValuePair> params = URLEncodedUtils.parse(request.getEntity());
-            Statement st = createStatement(getValueForName(POST_BODY_TRIPLE, params));
-            Graph changeSet = changeSetCreator.assembleChangeset(st, getValueForName(POST_BODY_CHANGETYPE, params));
+            String changeType = getValueForName(POST_BODY_CHANGETYPE, params);
+            List<Statement> triples = extractStatements(params, changeType);
+
+            Graph changeSet = changeSetCreator.assembleChangeset(triples.get(0), triples.get(1), changeType);
             changeSetStore.persistChangeSet(changeSet);
+
             queryDispatcher.trigger();
         }
         catch (ItemNotFoundException e) {
@@ -56,6 +62,26 @@ public class ChangeTripleHandler extends PostRequestHandler {
         catch (RDFHandlerException e) {
             errorResponse(response, e.getMessage());
         }
+    }
+
+    private List<Statement> extractStatements(List<NameValuePair> params, String changeType)
+        throws RDFParseException, IOException, RDFHandlerException
+    {
+        Statement affectedTriple = null;
+        Statement secondaryTriple = null;
+
+        affectedTriple = createStatement(getValueForName(POST_BODY_AFFECTEDTRIPLE, params));
+
+        try {
+            secondaryTriple = createStatement(getValueForName(POST_BODY_SECONDARYTRIPLE, params));
+        }
+        catch (ItemNotFoundException e) {
+            if (changeType.equals(CHANGETYPE_UPDATE)) {
+                throw e;
+            }
+        }
+
+        return Arrays.asList(affectedTriple, secondaryTriple);
     }
 
     private void errorResponse(HttpResponse response, String message) {
@@ -101,7 +127,7 @@ public class ChangeTripleHandler extends PostRequestHandler {
             statement = st;
         }
 
-        Statement getStatement() throws ItemNotFoundException {
+        Statement getStatement() {
             if (statement == null) throw new ItemNotFoundException("No statement parsed");
             return statement;
         }
