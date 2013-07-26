@@ -2,11 +2,14 @@ package at.punkt.lod2;
 
 import eu.lod2.rsine.Rsine;
 import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
+import eu.lod2.rsine.dissemination.Notifier;
 import eu.lod2.rsine.querydispatcher.QueryDispatcher;
 import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.util.Namespaces;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openrdf.query.BindingSet;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParseException;
@@ -20,10 +23,13 @@ public class NotificationTest {
 
     private final int port = 8081;
     private Rsine rsine;
+    private CountingNotifier countingNotifier;
 
     @Before
     public void setUp() throws IOException, RepositoryException, RDFParseException {
         rsine = new Rsine(port);
+        countingNotifier = new CountingNotifier();
+        rsine.setNotifier(countingNotifier);
         addVocabData();
     }
 
@@ -36,6 +42,8 @@ public class NotificationTest {
     public void notificationDissemination() throws RDFParseException, IOException, RDFHandlerException {
         registerUser();
         postChanges();
+
+        Assert.assertEquals(1, countingNotifier.notificationCount);
     }
 
     private void registerUser() {
@@ -74,7 +82,7 @@ public class NotificationTest {
         setPrefLabel();
         changePrefLabel();
         addOtherConcept();
-        //linkConcepts();
+        linkConcepts();
     }
 
     private void addConcept() throws IOException {
@@ -130,4 +138,14 @@ public class NotificationTest {
         TestUtils.doPost(port, props);
     }
 
+    private class CountingNotifier extends Notifier {
+
+        private int notificationCount = 0;
+
+        @Override
+        public void queryResultsAvailable(BindingSet bs, Subscription subscription) {
+            notificationCount++;
+        }
+
+    }
 }

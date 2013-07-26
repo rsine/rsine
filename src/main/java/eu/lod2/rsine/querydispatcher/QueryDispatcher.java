@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Iterator;
 
 public class QueryDispatcher implements IQueryDispatcher {
@@ -63,8 +62,7 @@ public class QueryDispatcher implements IQueryDispatcher {
                 notifier.queryResultsAvailable(bs, subscription);
             }
 
-            System.out.println("update query: " +new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date()));
-            //query.updateLastIssued();
+            query.updateLastIssued();
 
         }
         catch (MalformedQueryException e) {
@@ -78,15 +76,14 @@ public class QueryDispatcher implements IQueryDispatcher {
         }
     }
 
+    /**
+     * Replaces the placeholder in the subscriber query with the date the query has been last issued. This way only
+     * changesets that have an creation date after the query hast been last issued are returned
+     */
     private String amendChangeSetsTimeConstraint(NotificationQuery query) {
-        //query only changesets that have an creation date after the query hast been last issued
         String sparqlQuery = query.getSparqlQuery();
-
-        String queryLastIssuedDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(query.getLastIssued());
-
-        sparqlQuery = sparqlQuery.replace(QUERY_LAST_ISSUED, queryLastIssuedDate);
-
-        return sparqlQuery;
+        String queryLastIssuedDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX").format(query.getLastIssued());
+        return sparqlQuery.replace(QUERY_LAST_ISSUED, queryLastIssuedDate);
     }
 
     public void setRegistrationService(RegistrationService registrationService) {

@@ -24,11 +24,9 @@ public class Rsine {
 
     private RegistrationService registrationService;
     private ChangeSetStore changeSetStore;
-    private int port;
+    private QueryDispatcher queryDispatcher;
 
     public Rsine(int port) throws IOException, RepositoryException {
-        this.port = port;
-
         registrationService = new RegistrationService();
         changeSetStore = new ChangeSetStore();
 
@@ -37,10 +35,12 @@ public class Rsine {
         requestHandlerFactory.setChangeSetCreator(new ChangeSetCreator());
         requestHandlerFactory.setChangeSetStore(changeSetStore);
 
-        QueryDispatcher queryDispatcher = new QueryDispatcher();
+        queryDispatcher = new QueryDispatcher();
         queryDispatcher.setRegistrationService(registrationService);
         queryDispatcher.setRepository(changeSetStore.getRepository());
+
         queryDispatcher.setNotifier(new Notifier());
+
         requestHandlerFactory.setQueryDispatcher(queryDispatcher);
 
         changeSetService.setRequestHandlerFactory(requestHandlerFactory);
@@ -48,8 +48,8 @@ public class Rsine {
         changeSetService.start();
     }
 
-    public int getPort() {
-        return port;
+    public void setNotifier(Notifier notifier) {
+        queryDispatcher.setNotifier(notifier);
     }
 
     public static void main(String[] args) throws IOException, RepositoryException {
