@@ -8,6 +8,7 @@ import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.model.vocabulary.RDF;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 
 public class ChangeSetCreator {
@@ -24,6 +25,9 @@ public class ChangeSetCreator {
         graph.add(new StatementImpl(changeSet,
             RDF.TYPE,
             valueFactory.createURI(Namespaces.CS_NAMESPACE.getName(), "ChangeSet")));
+        graph.add(new StatementImpl(changeSet,
+            valueFactory.createURI(Namespaces.CS_NAMESPACE.getName(), "createdDate"),
+            valueFactory.createLiteral(new Date())));
 
         if (changeType.equals(ChangeTripleHandler.CHANGETYPE_REMOVE)) {
             addActionStatement(graph, changeSet, affectedStatement, "removal");

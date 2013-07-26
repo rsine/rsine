@@ -9,11 +9,9 @@ import eu.lod2.rsine.querydispatcher.IQueryDispatcher;
 import eu.lod2.util.Namespaces;
 import info.aduna.iteration.Iterations;
 import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -30,12 +28,11 @@ import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.RepositoryResult;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Properties;
 
 public class ChangesetServiceTest {
 
+    private final int port = 8081;
     private ChangeSetService changeSetService;
     private ChangeSetStore changeSetStore;
 
@@ -48,7 +45,7 @@ public class ChangesetServiceTest {
         changeSetStore = new ChangeSetStore();
         requestHandlerFactory.setChangeSetStore(changeSetStore);
 
-        changeSetService = new ChangeSetService(8080);
+        changeSetService = new ChangeSetService(port);
         changeSetService.setRequestHandlerFactory(requestHandlerFactory);
 
         changeSetService.start();
@@ -61,96 +58,56 @@ public class ChangesetServiceTest {
 
     @Test
     public void postTripleChange() throws IOException {
-        DefaultHttpClient httpClient = new DefaultHttpClient();
-        HttpResponse response = httpClient.execute(createValidTripleChangePost());
+        Properties props = new Properties();
+        props.setProperty(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD);
+        props.setProperty(ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE, "<http://example.org/myconcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"somelabel\"@en .");
+
+        Assert.assertEquals(200, TestUtils.doPost(port, props));
+    }    
+
+    @Test
+    public void postManuallyAssembledProperties() throws IOException {
+        String entityContent = ChangeTripleHandler.POST_BODY_CHANGETYPE +"=add\n" +ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE+ "=<http://example.org/myconcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"somelabel\"@en .";
+        HttpPost httpPost = new HttpPost("http://localhost:" +port);
+        httpPost.setEntity(new StringEntity(entityContent));
+        HttpResponse response = new DefaultHttpClient().execute(httpPost);
 
         Assert.assertEquals(200, response.getStatusLine().getStatusCode());
     }
 
-    private HttpPost createValidTripleChangePost() throws UnsupportedEncodingException {
-        HttpPost httpPost = new HttpPost("http://localhost:8080");
-
-        List<NameValuePair> nvps = new ArrayList<NameValuePair>();
-        nvps.add(new BasicNameValuePair(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD));
-        nvps.add(new BasicNameValuePair(ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE, "<http://example.org/myconcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"somelabel\"@en ."));
-
-        httpPost.setEntity(new UrlEncodedFormEntity(nvps));
-        return httpPost;
-    }
-
     @Test
     public void postEmptyTriple() throws IOException {
-        DefaultHttpClient httpClient = new DefaultHttpClient();
-        HttpResponse response = httpClient.execute(createEmptyTripleChangePost());
+        Properties props = new Properties();
+        props.setProperty(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD);
+        props.setProperty(ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE, "");
 
-        Assert.assertEquals(400, response.getStatusLine().getStatusCode());
-    }
-
-    private HttpPost createEmptyTripleChangePost() throws UnsupportedEncodingException {
-        HttpPost httpPost = new HttpPost("http://localhost:8080");
-
-        List<NameValuePair> nvps = new ArrayList<NameValuePair>();
-        nvps.add(new BasicNameValuePair(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD));
-        nvps.add(new BasicNameValuePair(ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE, ""));
-
-        httpPost.setEntity(new UrlEncodedFormEntity(nvps));
-        return httpPost;
+        Assert.assertEquals(400, TestUtils.doPost(port, props));
     }
 
     @Test
     public void postIllegalTriple() throws IOException {
-        DefaultHttpClient httpClient = new DefaultHttpClient();
-        HttpResponse response = httpClient.execute(createIllegalTripleChangePost());
+        Properties props = new Properties();
+        props.setProperty(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD);
+        props.setProperty(ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE, "http://www.example.org/someconcept a skos:Concept .");
 
-        Assert.assertEquals(400, response.getStatusLine().getStatusCode());
-    }
-
-    private HttpPost createIllegalTripleChangePost() throws UnsupportedEncodingException {
-        HttpPost httpPost = new HttpPost("http://localhost:8080");
-
-        List<NameValuePair> nvps = new ArrayList<NameValuePair>();
-        nvps.add(new BasicNameValuePair(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD));
-        nvps.add(new BasicNameValuePair(ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE, "http://www.example.org/someconcept a skos:Concept ."));
-
-        httpPost.setEntity(new UrlEncodedFormEntity(nvps));
-        return httpPost;
+        Assert.assertEquals(400, TestUtils.doPost(port, props));
     }
 
     @Test
     public void postInvalidEofTriple() throws IOException {
-        DefaultHttpClient httpClient = new DefaultHttpClient();
-        HttpResponse response = httpClient.execute(createInvalidEofTripleChangePost());
+        Properties props = new Properties();
+        props.setProperty(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD);
+        props.setProperty(ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE, "<http://example.org/myconcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"somelabel\"@en");
 
-        Assert.assertEquals(400, response.getStatusLine().getStatusCode());
-    }
-
-    private HttpPost createInvalidEofTripleChangePost() throws UnsupportedEncodingException {
-        HttpPost httpPost = new HttpPost("http://localhost:8080");
-
-        List<NameValuePair> nvps = new ArrayList<NameValuePair>();
-        nvps.add(new BasicNameValuePair(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD));
-        nvps.add(new BasicNameValuePair(ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE, "<http://example.org/myconcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"somelabel\"@en"));
-
-        httpPost.setEntity(new UrlEncodedFormEntity(nvps));
-        return httpPost;
+        Assert.assertEquals(400, TestUtils.doPost(port, props));
     }
 
     @Test
     public void postMissingTriple() throws IOException {
-        DefaultHttpClient httpClient = new DefaultHttpClient();
-        HttpResponse response = httpClient.execute(createMissingTripleChangePost());
+        Properties props = new Properties();
+        props.setProperty(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD);
 
-        Assert.assertEquals(400, response.getStatusLine().getStatusCode());
-    }
-
-    private HttpPost createMissingTripleChangePost() throws UnsupportedEncodingException {
-        HttpPost httpPost = new HttpPost("http://localhost:8080");
-
-        List<NameValuePair> nvps = new ArrayList<NameValuePair>();
-        nvps.add(new BasicNameValuePair(ChangeTripleHandler.POST_BODY_CHANGETYPE, "add"));
-
-        httpPost.setEntity(new UrlEncodedFormEntity(nvps));
-        return httpPost;
+        Assert.assertEquals(400, TestUtils.doPost(port, props));
     }
 
     /**
@@ -160,8 +117,12 @@ public class ChangesetServiceTest {
     public void postUpdate()
         throws IOException, RepositoryException, MalformedQueryException, QueryEvaluationException
     {
-        DefaultHttpClient httpClient = new DefaultHttpClient();
-        httpClient.execute(createUpdatePost());
+        Properties props = new Properties();
+        props.setProperty(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_UPDATE);
+        props.setProperty(ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE, "<http://example.org/myconcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"somelabel\"@en .");
+        props.setProperty(ChangeTripleHandler.POST_BODY_SECONDARYTRIPLE, "<http://example.org/myconcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"updatedlabel\"@en .");
+
+        TestUtils.doPost(port, props);
 
         RepositoryConnection repCon = changeSetStore.getRepository().getConnection();
         TupleQueryResult result = repCon.prepareTupleQuery(QueryLanguage.SPARQL,
@@ -180,42 +141,21 @@ public class ChangesetServiceTest {
         Assert.assertTrue(result.hasNext());
     }
 
-    private HttpPost createUpdatePost() throws UnsupportedEncodingException {
-        HttpPost httpPost = new HttpPost("http://localhost:8080");
-
-        List<NameValuePair> nvps = new ArrayList<NameValuePair>();
-        nvps.add(new BasicNameValuePair(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_UPDATE));
-        nvps.add(new BasicNameValuePair(ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE, "<http://example.org/myconcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"somelabel\"@en ."));
-        nvps.add(new BasicNameValuePair(ChangeTripleHandler.POST_BODY_SECONDARYTRIPLE, "<http://example.org/myconcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"updatedlabel\"@en ."));
-
-        httpPost.setEntity(new UrlEncodedFormEntity(nvps));
-        return httpPost;
-    }
-
     @Test
     public void postMissingChangeType() throws IOException {
-        DefaultHttpClient httpClient = new DefaultHttpClient();
-        HttpResponse response = httpClient.execute(createMissingChangeTypePost());
+        Properties props = new Properties();
+        props.setProperty(ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE, "<http://example.org/myconcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"somelabel\"@en .");
 
-        Assert.assertEquals(400, response.getStatusLine().getStatusCode());
-    }
-
-    private HttpPost createMissingChangeTypePost() throws UnsupportedEncodingException {
-        HttpPost httpPost = new HttpPost("http://localhost:8080");
-
-        List<NameValuePair> nvps = new ArrayList<NameValuePair>();
-        nvps.add(new BasicNameValuePair(
-            ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
-            "<http://example.org/myconcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"somelabel\"@en ."));
-
-        httpPost.setEntity(new UrlEncodedFormEntity(nvps));
-        return httpPost;
+        Assert.assertEquals(400, TestUtils.doPost(port, props));
     }
 
     @Test
     public void tripleChangeToRepo() throws IOException, RepositoryException {
-        DefaultHttpClient httpClient = new DefaultHttpClient();
-        httpClient.execute(createValidTripleChangePost());
+        Properties props = new Properties();
+        props.setProperty(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD);
+        props.setProperty(ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE, "<http://example.org/myconcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"somelabel\"@en .");
+
+        TestUtils.doPost(port, props);
 
         RepositoryConnection repCon = changeSetStore.getRepository().getConnection();
         RepositoryResult<Statement> result = repCon.getStatements(

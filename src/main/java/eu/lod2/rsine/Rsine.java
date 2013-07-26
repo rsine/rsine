@@ -4,6 +4,7 @@ import eu.lod2.rsine.changesetservice.ChangeSetCreator;
 import eu.lod2.rsine.changesetservice.ChangeSetService;
 import eu.lod2.rsine.changesetservice.RequestHandlerFactory;
 import eu.lod2.rsine.changesetstore.ChangeSetStore;
+import eu.lod2.rsine.dissemination.Notifier;
 import eu.lod2.rsine.querydispatcher.QueryDispatcher;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
@@ -23,12 +24,15 @@ public class Rsine {
 
     private RegistrationService registrationService;
     private ChangeSetStore changeSetStore;
+    private int port;
 
-    public Rsine() throws IOException, RepositoryException {
+    public Rsine(int port) throws IOException, RepositoryException {
+        this.port = port;
+
         registrationService = new RegistrationService();
         changeSetStore = new ChangeSetStore();
 
-        ChangeSetService changeSetService = new ChangeSetService(8080);
+        ChangeSetService changeSetService = new ChangeSetService(port);
         RequestHandlerFactory requestHandlerFactory = new RequestHandlerFactory();
         requestHandlerFactory.setChangeSetCreator(new ChangeSetCreator());
         requestHandlerFactory.setChangeSetStore(changeSetStore);
@@ -36,11 +40,20 @@ public class Rsine {
         QueryDispatcher queryDispatcher = new QueryDispatcher();
         queryDispatcher.setRegistrationService(registrationService);
         queryDispatcher.setRepository(changeSetStore.getRepository());
+        queryDispatcher.setNotifier(new Notifier());
         requestHandlerFactory.setQueryDispatcher(queryDispatcher);
 
         changeSetService.setRequestHandlerFactory(requestHandlerFactory);
 
         changeSetService.start();
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public static void main(String[] args) throws IOException, RepositoryException {
+        new Rsine(8080);
     }
 
     /**

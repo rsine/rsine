@@ -5,8 +5,6 @@ import eu.lod2.rsine.querydispatcher.IQueryDispatcher;
 import eu.lod2.util.ItemNotFoundException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicHttpEntityEnclosingRequest;
 import org.openrdf.model.Graph;
 import org.openrdf.model.Statement;
@@ -21,6 +19,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 
 public class ChangeTripleHandler extends PostRequestHandler {
 
@@ -38,9 +37,11 @@ public class ChangeTripleHandler extends PostRequestHandler {
     @Override
     protected void handlePost(BasicHttpEntityEnclosingRequest request, HttpResponse response) {
         try {
-            List<NameValuePair> params = URLEncodedUtils.parse(request.getEntity());
-            String changeType = getValueForName(POST_BODY_CHANGETYPE, params);
-            List<Statement> triples = extractStatements(params, changeType);
+            Properties properties = new Properties();
+            properties.load(request.getEntity().getContent());
+
+            String changeType = getValueForName(POST_BODY_CHANGETYPE, properties);
+            List<Statement> triples = extractStatements(properties, changeType);
 
             Graph changeSet = changeSetCreator.assembleChangeset(triples.get(0), triples.get(1), changeType);
             changeSetStore.persistChangeSet(changeSet);
@@ -64,16 +65,24 @@ public class ChangeTripleHandler extends PostRequestHandler {
         }
     }
 
-    private List<Statement> extractStatements(List<NameValuePair> params, String changeType)
-        throws RDFParseException, IOException, RDFHandlerException
+    private String getValueForName(String key, Properties properties) {
+        String value = properties.getProperty(key);
+        if (value == null) {
+            throw new ItemNotFoundException("Key '" +key+ "' not found in request properties");
+        }
+        return value;
+    }
+
+    private List<Statement> extractStatements(Properties properties, String changeType)
+            throws RDFParseException, IOException, RDFHandlerException
     {
         Statement affectedTriple = null;
         Statement secondaryTriple = null;
 
-        affectedTriple = createStatement(getValueForName(POST_BODY_AFFECTEDTRIPLE, params));
+        affectedTriple = createStatement(getValueForName(POST_BODY_AFFECTEDTRIPLE, properties));
 
         try {
-            secondaryTriple = createStatement(getValueForName(POST_BODY_SECONDARYTRIPLE, params));
+            secondaryTriple = createStatement(getValueForName(POST_BODY_SECONDARYTRIPLE, properties));
         }
         catch (ItemNotFoundException e) {
             if (changeType.equals(CHANGETYPE_UPDATE)) {
@@ -87,15 +96,6 @@ public class ChangeTripleHandler extends PostRequestHandler {
     private void errorResponse(HttpResponse response, String message) {
         response.setStatusCode(HttpStatus.SC_BAD_REQUEST);
         response.setReasonPhrase(message);
-    }
-
-    private String getValueForName(String name, List<NameValuePair> nameValuePairs) {
-        for (NameValuePair nameValuePair : nameValuePairs) {
-            if (nameValuePair.getName().equals(name)) {
-                return nameValuePair.getValue();
-            }
-        }
-        throw new ItemNotFoundException("Name '" +name+ "' not found in name-value pairs");
     }
 
     private Statement createStatement(String triple) throws RDFParseException, IOException, RDFHandlerException {
