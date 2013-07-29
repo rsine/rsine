@@ -74,6 +74,13 @@
             <artifactId>sesame-sail-memory</artifactId>
             <version>${sesame.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.jena</groupId>
+            <artifactId>jena-fuseki</artifactId>
+            <version>0.2.7</version>
+        </dependency>
+
     </dependencies>
 
 </project>

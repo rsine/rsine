@@ -8,12 +8,8 @@ import eu.lod2.rsine.dissemination.Notifier;
 import eu.lod2.rsine.querydispatcher.QueryDispatcher;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
-import eu.lod2.util.Namespaces;
-import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
-import org.openrdf.rio.RDFParseException;
 
-import java.io.File;
 import java.io.IOException;
 
 /**
@@ -24,13 +20,15 @@ public class Rsine {
 
     private RegistrationService registrationService;
     private ChangeSetStore changeSetStore;
+    private ChangeSetService changeSetService;
     private QueryDispatcher queryDispatcher;
+    private String managedTripleStoreSparqlEndpoint;
 
     public Rsine(int port) throws IOException, RepositoryException {
         registrationService = new RegistrationService();
         changeSetStore = new ChangeSetStore();
 
-        ChangeSetService changeSetService = new ChangeSetService(port);
+        changeSetService = new ChangeSetService(port);
         RequestHandlerFactory requestHandlerFactory = new RequestHandlerFactory();
         requestHandlerFactory.setChangeSetCreator(new ChangeSetCreator());
         requestHandlerFactory.setChangeSetStore(changeSetStore);
@@ -48,12 +46,21 @@ public class Rsine {
         changeSetService.start();
     }
 
+    public void stop() throws IOException, InterruptedException {
+        changeSetService.stop();
+    }
+
     public void setNotifier(Notifier notifier) {
         queryDispatcher.setNotifier(notifier);
     }
 
+    public void setManagedTripleStore(String sparqlEndpoint) {
+        managedTripleStoreSparqlEndpoint = sparqlEndpoint;
+    }
+
     public static void main(String[] args) throws IOException, RepositoryException {
-        new Rsine(8080);
+        Rsine rsine = new Rsine(8080);
+        rsine.setManagedTripleStore("localhost");
     }
 
     /**
@@ -68,15 +75,6 @@ public class Rsine {
      */
     public void registerSubscription(Subscription subscription) {
         registrationService.register(subscription);
-    }
-
-    /**
-     * Loads the passed rdf content into the ChangeSetStore. This is done for the proof-of-concept only. Final versions
-     * will access the managed triple store instance directly.
-     * @deprecated rsine todo: change to work with an openrdf repository
-     */
-    public void setManagedTripleStoreContent(File rdfData) throws RepositoryException, IOException, RDFParseException {
-        changeSetStore.getRepository().getConnection().add(rdfData, null, null, new URIImpl(Namespaces.VOCAB_CONTEXT));
     }
 
 }

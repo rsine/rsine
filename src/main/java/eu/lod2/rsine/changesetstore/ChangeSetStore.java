@@ -1,6 +1,5 @@
 package eu.lod2.rsine.changesetstore;
 
-import eu.lod2.util.Namespaces;
 import org.openrdf.model.Graph;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
@@ -27,7 +26,7 @@ public class ChangeSetStore {
 
     public void persistChangeSet(Graph changeSet) throws RepositoryException {
         ValueFactory valueFactory = new ValueFactoryImpl();
-        repository.getConnection().add(changeSet, valueFactory.createURI(Namespaces.CHANGESET_CONTEXT));
+        repository.getConnection().add(changeSet);
     }
 
     public Repository getRepository() {

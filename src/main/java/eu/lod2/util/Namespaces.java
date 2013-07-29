@@ -11,9 +11,6 @@ public class Namespaces {
     public final static Namespace SKOS_NAMESPACE = new NamespaceImpl("skos", "http://www.w3.org/2004/02/skos/core#");
     public final static Namespace DCTERMS_NAMESPACE = new NamespaceImpl("dcterms", "http://purl.org/dc/terms/");
 
-    public final static String CHANGESET_CONTEXT = Namespaces.RSINE_NAMESPACE.getName() + "changesets";
-    public final static String VOCAB_CONTEXT = Namespaces.RSINE_NAMESPACE.getName() + "vocab";
-
     public final static String SKOS_PREFIX = "PREFIX skos:<" +SKOS_NAMESPACE.getName()+ ">";
     public final static String CS_PREFIX = "PREFIX cs:<" +CS_NAMESPACE.getName()+ ">";
     public final static String RDF_PREFIX = "PREFIX rdf:<" + RDF.NAMESPACE+ ">";

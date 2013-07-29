@@ -11,6 +11,10 @@ import java.util.Properties;
 
 public class TestUtils {
 
+    public static int getRandomPort() {
+        return (int) Math.round(Math.random() * 100) + 8000;
+    }
+
     public static int doPost(int port, Properties properties) throws IOException {
         HttpPost httpPost = new HttpPost("http://localhost:" +port);
         StringWriter sw = new StringWriter();

@@ -32,7 +32,7 @@ import java.util.Properties;
 
 public class ChangesetServiceTest {
 
-    private final int port = 8081;
+    private final int port = TestUtils.getRandomPort();
     private ChangeSetService changeSetService;
     private ChangeSetStore changeSetStore;
 
@@ -129,13 +129,10 @@ public class ChangesetServiceTest {
                 Namespaces.SKOS_PREFIX +
                         Namespaces.CS_PREFIX +
                         "SELECT * " +
-                        "FROM NAMED <" + Namespaces.CHANGESET_CONTEXT + "> " +
                         "WHERE {" +
-                        "GRAPH ?g {" +
                             "?cs a cs:ChangeSet . " +
                             "?cs cs:removal ?removal . " +
                             "?cs cs:addition ?addition . " +
-                            "}" +
                         "}").evaluate();
 
         Assert.assertTrue(result.hasNext());

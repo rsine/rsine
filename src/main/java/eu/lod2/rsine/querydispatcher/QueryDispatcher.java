@@ -26,6 +26,9 @@ public class QueryDispatcher implements IQueryDispatcher {
     @Override
     public void trigger() {
         Iterator<Subscription> subscriptionIt = registrationService.getSubscriptionIterator();
+        if (!subscriptionIt.hasNext()) {
+            logger.info("No subscribers registered");
+        }
 
         try {
             while (subscriptionIt.hasNext()) {

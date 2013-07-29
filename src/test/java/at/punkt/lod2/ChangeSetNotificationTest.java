@@ -14,14 +14,12 @@ import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParseException;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.util.Properties;
 
-public class NotificationTest {
+public class ChangeSetNotificationTest {
 
-    private final int port = 8081;
+    private final int port = TestUtils.getRandomPort();
     private Rsine rsine;
     private CountingNotifier countingNotifier;
 
@@ -30,12 +28,6 @@ public class NotificationTest {
         rsine = new Rsine(port);
         countingNotifier = new CountingNotifier();
         rsine.setNotifier(countingNotifier);
-        addVocabData();
-    }
-
-    private void addVocabData() throws RepositoryException, RDFParseException, IOException {
-        URL vocabUrl = Rsine.class.getResource("/reegle.rdf");
-        rsine.setManagedTripleStoreContent(new File(vocabUrl.getFile()));
     }
 
     @Test
@@ -58,21 +50,17 @@ public class NotificationTest {
                Namespaces.CS_PREFIX+
                Namespaces.DCTERMS_PREFIX+
                "SELECT * " +
-                    "FROM NAMED <" +Namespaces.CHANGESET_CONTEXT+ "> " +
-                    "FROM NAMED <" +Namespaces.VOCAB_CONTEXT+ "> " +
                     "WHERE {" +
-                        "GRAPH ?g {" +
-                            "?cs a cs:ChangeSet . " +
-                            "?cs cs:createdDate ?csdate . " +
-                            "?cs cs:removal ?removal . " +
-                            "?cs cs:addition ?addition . " +
-                            "?removal rdf:subject ?concept . " +
-                            "?addition rdf:subject ?concept . " +
-                            "?removal rdf:predicate skos:prefLabel . " +
-                            "?removal rdf:object ?oldLabel . "+
-                            "?addition rdf:predicate skos:prefLabel . " +
-                            "?addition rdf:object ?newLabel . "+
-                        "}" +
+                        "?cs a cs:ChangeSet . " +
+                        "?cs cs:createdDate ?csdate . " +
+                        "?cs cs:removal ?removal . " +
+                        "?cs cs:addition ?addition . " +
+                        "?removal rdf:subject ?concept . " +
+                        "?addition rdf:subject ?concept . " +
+                        "?removal rdf:predicate skos:prefLabel . " +
+                        "?removal rdf:object ?oldLabel . "+
+                        "?addition rdf:predicate skos:prefLabel . " +
+                        "?addition rdf:object ?newLabel . "+
                         "FILTER (?csdate > \"" + QueryDispatcher.QUERY_LAST_ISSUED+ "\"^^<http://www.w3.org/2001/XMLSchema#dateTime>)" +
                     "}";
     }
