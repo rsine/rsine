@@ -17,11 +17,14 @@ import java.util.Iterator;
 public class QueryDispatcher implements IQueryDispatcher {
 
     private final Logger logger = LoggerFactory.getLogger(QueryDispatcher.class);
+
     public final static String QUERY_LAST_ISSUED = "QUERY_LAST_ISSUED";
+    public final static String MANAGED_STORE_SPARQL_ENDPONT = "MANAGED_STORE_SPARQL_ENDPONT";
 
     private RegistrationService registrationService;
     private Repository repository;
     private Notifier notifier;
+    private String managedTripleStoreSparqlEndpoint = "";
 
     @Override
     public void trigger() {
@@ -58,7 +61,7 @@ public class QueryDispatcher implements IQueryDispatcher {
 
             TupleQueryResult result = repCon.prepareTupleQuery(
                 QueryLanguage.SPARQL,
-                amendChangeSetsTimeConstraint(query)).evaluate();
+                fillInPlaceholders(query)).evaluate();
 
             while (result.hasNext()) {
                 BindingSet bs = result.next();
@@ -79,6 +82,13 @@ public class QueryDispatcher implements IQueryDispatcher {
         }
     }
 
+    private String fillInPlaceholders(NotificationQuery query) {
+        String sparqlQuery;
+        sparqlQuery = amendChangeSetsTimeConstraint(query);
+        sparqlQuery = amendManagedTripleStoreURIs(sparqlQuery);
+        return sparqlQuery;
+    }
+
     /**
      * Replaces the placeholder in the subscriber query with the date the query has been last issued. This way only
      * changesets that have an creation date after the query hast been last issued are returned
@@ -87,6 +97,10 @@ public class QueryDispatcher implements IQueryDispatcher {
         String sparqlQuery = query.getSparqlQuery();
         String queryLastIssuedDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX").format(query.getLastIssued());
         return sparqlQuery.replace(QUERY_LAST_ISSUED, queryLastIssuedDate);
+    }
+
+    private String amendManagedTripleStoreURIs(String query) {
+        return query.replace(MANAGED_STORE_SPARQL_ENDPONT, managedTripleStoreSparqlEndpoint);
     }
 
     public void setRegistrationService(RegistrationService registrationService) {
@@ -99,6 +113,10 @@ public class QueryDispatcher implements IQueryDispatcher {
 
     public void setNotifier(Notifier notifier) {
         this.notifier = notifier;
+    }
+
+    public void setManagedTripleStore(String sparqlEndpoint) {
+        managedTripleStoreSparqlEndpoint = sparqlEndpoint;
     }
 
 }

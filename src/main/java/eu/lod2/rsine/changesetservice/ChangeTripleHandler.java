@@ -2,6 +2,7 @@ package eu.lod2.rsine.changesetservice;
 
 import eu.lod2.rsine.changesetstore.ChangeSetStore;
 import eu.lod2.rsine.querydispatcher.IQueryDispatcher;
+import eu.lod2.rsine.remotenotification.RemoteNotificationService;
 import eu.lod2.util.ItemNotFoundException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -33,6 +34,7 @@ public class ChangeTripleHandler extends PostRequestHandler {
     private ChangeSetCreator changeSetCreator;
     private ChangeSetStore changeSetStore;
     private IQueryDispatcher queryDispatcher;
+    private RemoteNotificationService remoteNotificationService;
 
     @Override
     protected void handlePost(BasicHttpEntityEnclosingRequest request, HttpResponse response) {
@@ -47,6 +49,7 @@ public class ChangeTripleHandler extends PostRequestHandler {
             changeSetStore.persistChangeSet(changeSet);
 
             queryDispatcher.trigger();
+            remoteNotificationService.notify(changeSet);
         }
         catch (ItemNotFoundException e) {
             errorResponse(response, "No triple or change type provided");
@@ -116,6 +119,10 @@ public class ChangeTripleHandler extends PostRequestHandler {
 
     public void setQueryDispatcher(IQueryDispatcher queryDispatcher) {
         this.queryDispatcher = queryDispatcher;
+    }
+
+    public void setRemoteNotificationService(RemoteNotificationService remoteNotificationService) {
+        this.remoteNotificationService = remoteNotificationService;
     }
 
     private class SingleStatementHandler extends RDFHandlerBase {

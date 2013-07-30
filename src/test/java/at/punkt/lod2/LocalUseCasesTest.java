@@ -33,7 +33,7 @@ public class LocalUseCasesTest {
         fusekiServer = new TestUtils().initFuseki(Rsine.class.getResource("/reegle.rdf"), "dataset");
 
         rsine = new Rsine(rsinePort);
-        rsine.setManagedTripleStore("localhost:3030/dataset");
+        rsine.setManagedTripleStore("http://localhost:3030/dataset/query");
 
         registerUser();
     }
@@ -64,7 +64,7 @@ public class LocalUseCasesTest {
                     "?addition rdf:subject ?concept . " +
                     "?addition rdf:predicate skos:scopeNote . " +
                     "?addition rdf:object ?scopeNote . "+
-                    "SERVICE <http://localhost:3030/dataset/query> { \n" +
+                    "SERVICE <" +QueryDispatcher.MANAGED_STORE_SPARQL_ENDPONT+ "> {" +
                         "?concept skos:prefLabel ?prefLabel . " +
                         "?concept dcterms:creator \"" +contributor+ "\""+
                     "}" +

@@ -3,6 +3,7 @@ package at.punkt.lod2;
 import eu.lod2.rsine.Rsine;
 import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
 import eu.lod2.rsine.dissemination.Notifier;
+import eu.lod2.rsine.querydispatcher.QueryDispatcher;
 import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.util.Namespaces;
 import org.apache.jena.fuseki.server.SPARQLServer;
@@ -33,7 +34,7 @@ public class ManagedStoreNotificationTest {
         fusekiServer = new TestUtils().initFuseki(Rsine.class.getResource("/reegle.rdf"), "dataset");
 
         rsine = new Rsine(rsinePort);
-        rsine.setManagedTripleStore("localhost:3030/dataset");
+        rsine.setManagedTripleStore("http://localhost:3030/dataset/query");
 
         scopeNoteCreatedNotifier = new ScopeNoteCreatedNotifier();
         rsine.setNotifier(scopeNoteCreatedNotifier);
@@ -64,7 +65,7 @@ public class ManagedStoreNotificationTest {
                     "?addition rdf:subject ?concept . " +
                     "?addition rdf:predicate skos:scopeNote . " +
                     "?addition rdf:object ?newScopeNote . "+
-                    "SERVICE <http://localhost:3030/dataset/query> {" +
+                    "SERVICE <" + QueryDispatcher.MANAGED_STORE_SPARQL_ENDPONT+ "> {" +
                         "?concept skos:prefLabel ?prefLabel . " +
                     "}" +
                     "FILTER(langMatches(lang(?prefLabel), \"en\"))" +

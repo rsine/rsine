@@ -6,6 +6,7 @@ import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
 import eu.lod2.rsine.changesetservice.RequestHandlerFactory;
 import eu.lod2.rsine.changesetstore.ChangeSetStore;
 import eu.lod2.rsine.querydispatcher.IQueryDispatcher;
+import eu.lod2.rsine.remotenotification.RemoteNotificationService;
 import eu.lod2.util.Namespaces;
 import info.aduna.iteration.Iterations;
 import org.apache.http.HttpResponse;
@@ -16,6 +17,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openrdf.model.Graph;
 import org.openrdf.model.Statement;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.model.vocabulary.RDF;
@@ -41,6 +43,7 @@ public class ChangesetServiceTest {
         RequestHandlerFactory requestHandlerFactory = new RequestHandlerFactory();
         requestHandlerFactory.setChangeSetCreator(new ChangeSetCreator());
         requestHandlerFactory.setQueryDispatcher(new DummyQueryDispatcher());
+        requestHandlerFactory.setRemoteNotificationService(new DummyRemoteNotificationService());
 
         changeSetStore = new ChangeSetStore();
         requestHandlerFactory.setChangeSetStore(changeSetStore);
@@ -168,6 +171,15 @@ public class ChangesetServiceTest {
 
         @Override
         public void trigger() {
+            //don't do nothing here
+        }
+
+    }
+
+    private class DummyRemoteNotificationService extends RemoteNotificationService {
+
+        @Override
+        public void notify(Graph changeSet) {
             //don't do nothing here
         }
 
