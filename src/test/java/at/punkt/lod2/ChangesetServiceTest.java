@@ -32,7 +32,7 @@ import java.util.Properties;
 
 public class ChangesetServiceTest {
 
-    private final int port = TestUtils.getRandomPort();
+    private final int port = new TestUtils().getRandomPort();
     private ChangeSetService changeSetService;
     private ChangeSetStore changeSetStore;
 
@@ -62,7 +62,7 @@ public class ChangesetServiceTest {
         props.setProperty(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD);
         props.setProperty(ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE, "<http://example.org/myconcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"somelabel\"@en .");
 
-        Assert.assertEquals(200, TestUtils.doPost(port, props));
+        Assert.assertEquals(200, new TestUtils().doPost(port, props));
     }    
 
     @Test
@@ -81,7 +81,7 @@ public class ChangesetServiceTest {
         props.setProperty(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD);
         props.setProperty(ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE, "");
 
-        Assert.assertEquals(400, TestUtils.doPost(port, props));
+        Assert.assertEquals(400, new TestUtils().doPost(port, props));
     }
 
     @Test
@@ -90,7 +90,7 @@ public class ChangesetServiceTest {
         props.setProperty(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD);
         props.setProperty(ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE, "http://www.example.org/someconcept a skos:Concept .");
 
-        Assert.assertEquals(400, TestUtils.doPost(port, props));
+        Assert.assertEquals(400, new TestUtils().doPost(port, props));
     }
 
     @Test
@@ -99,7 +99,7 @@ public class ChangesetServiceTest {
         props.setProperty(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD);
         props.setProperty(ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE, "<http://example.org/myconcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"somelabel\"@en");
 
-        Assert.assertEquals(400, TestUtils.doPost(port, props));
+        Assert.assertEquals(400, new TestUtils().doPost(port, props));
     }
 
     @Test
@@ -107,7 +107,7 @@ public class ChangesetServiceTest {
         Properties props = new Properties();
         props.setProperty(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD);
 
-        Assert.assertEquals(400, TestUtils.doPost(port, props));
+        Assert.assertEquals(400, new TestUtils().doPost(port, props));
     }
 
     /**
@@ -122,7 +122,7 @@ public class ChangesetServiceTest {
         props.setProperty(ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE, "<http://example.org/myconcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"somelabel\"@en .");
         props.setProperty(ChangeTripleHandler.POST_BODY_SECONDARYTRIPLE, "<http://example.org/myconcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"updatedlabel\"@en .");
 
-        TestUtils.doPost(port, props);
+        new TestUtils().doPost(port, props);
 
         RepositoryConnection repCon = changeSetStore.getRepository().getConnection();
         TupleQueryResult result = repCon.prepareTupleQuery(QueryLanguage.SPARQL,
@@ -143,7 +143,7 @@ public class ChangesetServiceTest {
         Properties props = new Properties();
         props.setProperty(ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE, "<http://example.org/myconcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"somelabel\"@en .");
 
-        Assert.assertEquals(400, TestUtils.doPost(port, props));
+        Assert.assertEquals(400, new TestUtils().doPost(port, props));
     }
 
     @Test
@@ -152,7 +152,7 @@ public class ChangesetServiceTest {
         props.setProperty(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD);
         props.setProperty(ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE, "<http://example.org/myconcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"somelabel\"@en .");
 
-        TestUtils.doPost(port, props);
+        new TestUtils().doPost(port, props);
 
         RepositoryConnection repCon = changeSetStore.getRepository().getConnection();
         RepositoryResult<Statement> result = repCon.getStatements(

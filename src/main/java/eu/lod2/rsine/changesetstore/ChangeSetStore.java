@@ -1,8 +1,6 @@
 package eu.lod2.rsine.changesetstore;
 
 import org.openrdf.model.Graph;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sail.SailRepository;
@@ -25,7 +23,6 @@ public class ChangeSetStore {
     }
 
     public void persistChangeSet(Graph changeSet) throws RepositoryException {
-        ValueFactory valueFactory = new ValueFactoryImpl();
         repository.getConnection().add(changeSet);
     }
 

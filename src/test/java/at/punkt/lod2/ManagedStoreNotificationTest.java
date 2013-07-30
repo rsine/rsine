@@ -1,17 +1,11 @@
 package at.punkt.lod2;
 
-import com.hp.hpl.jena.sparql.core.DatasetGraph;
-import com.hp.hpl.jena.sparql.core.DatasetGraphFactory;
 import eu.lod2.rsine.Rsine;
 import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
 import eu.lod2.rsine.dissemination.Notifier;
 import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.util.Namespaces;
-import org.apache.jena.fuseki.Fuseki;
-import org.apache.jena.fuseki.server.FusekiConfig;
 import org.apache.jena.fuseki.server.SPARQLServer;
-import org.apache.jena.fuseki.server.ServerConfig;
-import org.apache.jena.riot.RDFDataMgr;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -22,9 +16,7 @@ import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.util.Properties;
 
 public class ManagedStoreNotificationTest {
@@ -33,13 +25,12 @@ public class ManagedStoreNotificationTest {
 
     private int rsinePort = TestUtils.getRandomPort();
     private SPARQLServer fusekiServer;
-    private DatasetGraph datasetGraph;
     private Rsine rsine;
     private ScopeNoteCreatedNotifier scopeNoteCreatedNotifier;
 
     @Before
     public void setUp() throws IOException, RepositoryException {
-        initFuseki();
+        fusekiServer = new TestUtils().initFuseki(Rsine.class.getResource("/reegle.rdf"), "dataset");
 
         rsine = new Rsine(rsinePort);
         rsine.setManagedTripleStore("localhost:3030/dataset");
@@ -48,24 +39,6 @@ public class ManagedStoreNotificationTest {
         rsine.setNotifier(scopeNoteCreatedNotifier);
 
         registerUser();
-    }
-
-    private void initFuseki() {
-        startFuseki();
-        uploadData();
-    }
-
-    private void startFuseki() {
-        datasetGraph = DatasetGraphFactory.createMem();
-        ServerConfig serverConfig = FusekiConfig.defaultConfiguration("dataset", datasetGraph, true) ;
-        fusekiServer = new SPARQLServer(serverConfig) ;
-        Fuseki.setServer(fusekiServer);
-        fusekiServer.start();
-    }
-
-    private void uploadData() {
-        URL vocabUrl = Rsine.class.getResource("/reegle.rdf");
-        RDFDataMgr.read(datasetGraph, new File(vocabUrl.getFile()).toURI().toString()) ;
     }
 
     @After
@@ -91,7 +64,7 @@ public class ManagedStoreNotificationTest {
                     "?addition rdf:subject ?concept . " +
                     "?addition rdf:predicate skos:scopeNote . " +
                     "?addition rdf:object ?newScopeNote . "+
-                    "SERVICE <http://localhost:3030/dataset/query> { \n" +
+                    "SERVICE <http://localhost:3030/dataset/query> {" +
                         "?concept skos:prefLabel ?prefLabel . " +
                     "}" +
                     "FILTER(langMatches(lang(?prefLabel), \"en\"))" +
@@ -113,7 +86,7 @@ public class ManagedStoreNotificationTest {
             ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
             "<http://reegle.info/glossary/2547> <http://www.w3.org/2004/02/skos/core#scopeNote> \"some additional info\"@en .");
 
-        TestUtils.doPost(rsinePort, props);
+        new TestUtils().doPost(rsinePort, props);
 
     }
 

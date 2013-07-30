@@ -19,7 +19,7 @@ import java.util.Properties;
 
 public class ChangeSetNotificationTest {
 
-    private final int port = TestUtils.getRandomPort();
+    private final int port = new TestUtils().getRandomPort();
     private Rsine rsine;
     private CountingNotifier countingNotifier;
 
@@ -80,7 +80,7 @@ public class ChangeSetNotificationTest {
             ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
             "<http://reegle.info/glossary/1111> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2004/02/skos/core#Concept> .");
 
-        TestUtils.doPost(port, props);
+        new TestUtils().doPost(port, props);
     }
 
     private void setPrefLabel() throws IOException {
@@ -90,7 +90,7 @@ public class ChangeSetNotificationTest {
             ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
             "<http://reegle.info/glossary/1111> <http://www.w3.org/2004/02/skos/core#prefLabel> \"Ottakringer Helles\"@en .");
 
-        TestUtils.doPost(port, props);
+        new TestUtils().doPost(port, props);
     }
 
     private void changePrefLabel() throws IOException {
@@ -103,7 +103,7 @@ public class ChangeSetNotificationTest {
                 ChangeTripleHandler.POST_BODY_SECONDARYTRIPLE,
                 "<http://reegle.info/glossary/1111> <http://www.w3.org/2004/02/skos/core#prefLabel> \"Schremser Edelmärzen\"@en .");
 
-        TestUtils.doPost(port, props);
+        new TestUtils().doPost(port, props);
     }
 
     private void addOtherConcept() throws IOException {
@@ -113,7 +113,7 @@ public class ChangeSetNotificationTest {
             ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
             "<http://reegle.info/glossary/1112> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2004/02/skos/core#Concept> .");
 
-        TestUtils.doPost(port, props);
+        new TestUtils().doPost(port, props);
     }
 
     private void linkConcepts() throws IOException {
@@ -123,7 +123,7 @@ public class ChangeSetNotificationTest {
             ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
             "<http://reegle.info/glossary/1111> <http://www.w3.org/2004/02/skos/core#related> <http://reegle.info/glossary/1112> .");
 
-        TestUtils.doPost(port, props);
+        new TestUtils().doPost(port, props);
     }
 
     private class CountingNotifier extends Notifier {
