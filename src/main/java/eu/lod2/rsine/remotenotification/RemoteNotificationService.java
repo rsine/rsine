@@ -35,7 +35,7 @@ public class RemoteNotificationService extends RemoteNotificationServiceBase {
                 postChangeSet(remoteService, changeSet);
             }
             catch (IOException e) {
-                logger.error("Error posting changeset to '" +remoteService.stringValue()+ "'", e);
+                logger.error("Error posting changeset to '" +remoteService.stringValue()+ "': ", e.getMessage());
             }
         }
     }
