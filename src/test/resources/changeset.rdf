@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:cs="http://purl.org/vocab/changeset/schema#">
+
+    <cs:ChangeSet rdf:about="http://example.com/changesets#change">
+        <cs:subjectOfChange rdf:resource="http://reegle.info/glossary/1448"/>
+        <cs:createdDate>2006-01-01T00:00:00Z</cs:createdDate>
+
+        <!-- TODO: insert on changeset creation
+        <cs:creatorName>Anne Onymous</cs:creatorName>
+        <dcterms:source rdf:resource="http://reegle.info"/>
+        -->
+
+        <cs:addition>
+            <rdf:Statement>
+                <rdf:subject rdf:resource="http://reegle.info/glossary/1448"/>
+                <rdf:predicate rdf:resource="http://www.w3.org/2004/02/skos/core#relatedMatch"/>
+                <rdf:object rdf:resource="http://zbw.eu/stw/descriptor/18078-1"/>
+            </rdf:Statement>
+        </cs:addition>
+    </cs:ChangeSet>
+
+</rdf:RDF>

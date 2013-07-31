@@ -15,32 +15,32 @@ public class ChangeSetCreator {
 
     private ValueFactory valueFactory = ValueFactoryImpl.getInstance();
 
-    public Graph assembleChangeset(Statement affectedStatement, Statement secondaryStatement, String changeType) {
-        Graph graph = new TreeModel(new HashSet<Namespace>(Arrays.asList(Namespaces.RSINE_NAMESPACE, Namespaces.CS_NAMESPACE)));
+    public Model assembleChangeset(Statement affectedStatement, Statement secondaryStatement, String changeType) {
+        Model model = new TreeModel(new HashSet<Namespace>(Arrays.asList(Namespaces.RSINE_NAMESPACE, Namespaces.CS_NAMESPACE)));
 
         URI changeSet = valueFactory.createURI(
             Namespaces.RSINE_NAMESPACE.getName(),
             "cs" +System.currentTimeMillis()+"_" +Math.round(Math.random() * 1000));
 
-        graph.add(new StatementImpl(changeSet,
+        model.add(new StatementImpl(changeSet,
             RDF.TYPE,
             valueFactory.createURI(Namespaces.CS_NAMESPACE.getName(), "ChangeSet")));
-        graph.add(new StatementImpl(changeSet,
+        model.add(new StatementImpl(changeSet,
             valueFactory.createURI(Namespaces.CS_NAMESPACE.getName(), "createdDate"),
             valueFactory.createLiteral(new Date())));
 
         if (changeType.equals(ChangeTripleHandler.CHANGETYPE_REMOVE)) {
-            addActionStatement(graph, changeSet, affectedStatement, "removal");
+            addActionStatement(model, changeSet, affectedStatement, "removal");
         }
         else if (changeType.equals(ChangeTripleHandler.CHANGETYPE_ADD)) {
-            addActionStatement(graph, changeSet, affectedStatement, "addition");
+            addActionStatement(model, changeSet, affectedStatement, "addition");
         }
         else if (changeType.equals(ChangeTripleHandler.CHANGETYPE_UPDATE)) {
-            addActionStatement(graph, changeSet, affectedStatement, "removal");
-            addActionStatement(graph, changeSet, secondaryStatement, "addition");
+            addActionStatement(model, changeSet, affectedStatement, "removal");
+            addActionStatement(model, changeSet, secondaryStatement, "addition");
         }
 
-        return graph;
+        return model;
     }
 
     private void addActionStatement(Graph graph, Resource changeSet, Statement statement, String action) {

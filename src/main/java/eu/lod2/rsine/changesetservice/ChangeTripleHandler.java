@@ -2,12 +2,13 @@ package eu.lod2.rsine.changesetservice;
 
 import eu.lod2.rsine.changesetstore.ChangeSetStore;
 import eu.lod2.rsine.querydispatcher.IQueryDispatcher;
-import eu.lod2.rsine.remotenotification.RemoteNotificationService;
+import eu.lod2.rsine.remotenotification.NullRemoteNotificationService;
+import eu.lod2.rsine.remotenotification.RemoteNotificationServiceBase;
 import eu.lod2.util.ItemNotFoundException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.message.BasicHttpEntityEnclosingRequest;
-import org.openrdf.model.Graph;
+import org.openrdf.model.Model;
 import org.openrdf.model.Statement;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.RDFHandlerException;
@@ -34,7 +35,7 @@ public class ChangeTripleHandler extends PostRequestHandler {
     private ChangeSetCreator changeSetCreator;
     private ChangeSetStore changeSetStore;
     private IQueryDispatcher queryDispatcher;
-    private RemoteNotificationService remoteNotificationService;
+    private RemoteNotificationServiceBase remoteNotificationService = new NullRemoteNotificationService();
 
     @Override
     protected void handlePost(BasicHttpEntityEnclosingRequest request, HttpResponse response) {
@@ -45,11 +46,11 @@ public class ChangeTripleHandler extends PostRequestHandler {
             String changeType = getValueForName(POST_BODY_CHANGETYPE, properties);
             List<Statement> triples = extractStatements(properties, changeType);
 
-            Graph changeSet = changeSetCreator.assembleChangeset(triples.get(0), triples.get(1), changeType);
+            Model changeSet = changeSetCreator.assembleChangeset(triples.get(0), triples.get(1), changeType);
             changeSetStore.persistChangeSet(changeSet);
 
             queryDispatcher.trigger();
-            remoteNotificationService.notify(changeSet);
+            remoteNotificationService.announce(changeSet);
         }
         catch (ItemNotFoundException e) {
             errorResponse(response, "No triple or change type provided");
@@ -121,7 +122,7 @@ public class ChangeTripleHandler extends PostRequestHandler {
         this.queryDispatcher = queryDispatcher;
     }
 
-    public void setRemoteNotificationService(RemoteNotificationService remoteNotificationService) {
+    public void setRemoteNotificationService(RemoteNotificationServiceBase remoteNotificationService) {
         this.remoteNotificationService = remoteNotificationService;
     }
 

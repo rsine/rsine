@@ -8,8 +8,6 @@ import eu.lod2.rsine.dissemination.Notifier;
 import eu.lod2.rsine.querydispatcher.QueryDispatcher;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
-import eu.lod2.rsine.remotenotification.RemoteNotificationService;
-import org.openrdf.model.Graph;
 import org.openrdf.repository.RepositoryException;
 
 import java.io.IOException;
@@ -24,7 +22,6 @@ public class Rsine {
     private ChangeSetStore changeSetStore;
     private ChangeSetService changeSetService;
     private QueryDispatcher queryDispatcher;
-    private RemoteNotificationService remoteNotificationService = new DummyRemoteNotificationService();
 
     public Rsine(int port) throws IOException, RepositoryException {
         registrationService = new RegistrationService();
@@ -34,7 +31,6 @@ public class Rsine {
         RequestHandlerFactory requestHandlerFactory = new RequestHandlerFactory();
         requestHandlerFactory.setChangeSetCreator(new ChangeSetCreator());
         requestHandlerFactory.setChangeSetStore(changeSetStore);
-        requestHandlerFactory.setRemoteNotificationService(remoteNotificationService);
 
         queryDispatcher = new QueryDispatcher();
         queryDispatcher.setRegistrationService(registrationService);
@@ -80,12 +76,5 @@ public class Rsine {
         registrationService.register(subscription);
     }
 
-    private class DummyRemoteNotificationService extends RemoteNotificationService {
 
-        @Override
-        public void notify(Graph changeSet) {
-            // do nothing here
-        }
-
-    }
 }

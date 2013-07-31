@@ -2,7 +2,8 @@ package eu.lod2.rsine.changesetservice;
 
 import eu.lod2.rsine.changesetstore.ChangeSetStore;
 import eu.lod2.rsine.querydispatcher.IQueryDispatcher;
-import eu.lod2.rsine.remotenotification.RemoteNotificationService;
+import eu.lod2.rsine.remotenotification.NullRemoteNotificationService;
+import eu.lod2.rsine.remotenotification.RemoteNotificationServiceBase;
 import org.apache.http.protocol.HttpRequestHandler;
 
 public class RequestHandlerFactory {
@@ -10,7 +11,7 @@ public class RequestHandlerFactory {
     private ChangeSetCreator changeSetCreator;
     private ChangeSetStore changeSetStore;
     private IQueryDispatcher queryDispatcher;
-    private RemoteNotificationService remoteNotificationService;
+    private RemoteNotificationServiceBase remoteNotificationService = new NullRemoteNotificationService();
 
     public HttpRequestHandler createChangeTripleHandler() {
         ChangeTripleHandler changeTripleHandler = new ChangeTripleHandler();
@@ -33,7 +34,7 @@ public class RequestHandlerFactory {
         this.queryDispatcher = queryDispatcher;
     }
 
-    public void setRemoteNotificationService(RemoteNotificationService remoteNotificationService) {
+    public void setRemoteNotificationService(RemoteNotificationServiceBase remoteNotificationService) {
         this.remoteNotificationService = remoteNotificationService;
     }
 
