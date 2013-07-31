@@ -2,16 +2,24 @@ package eu.lod2.rsine.changesetservice;
 
 import eu.lod2.rsine.changesetstore.ChangeSetStore;
 import eu.lod2.rsine.querydispatcher.IQueryDispatcher;
-import eu.lod2.rsine.remotenotification.NullRemoteNotificationService;
 import eu.lod2.rsine.remotenotification.RemoteNotificationServiceBase;
 import org.apache.http.protocol.HttpRequestHandler;
 
 public class RequestHandlerFactory {
 
+    private static final RequestHandlerFactory instance = new RequestHandlerFactory();
+
     private ChangeSetCreator changeSetCreator;
     private ChangeSetStore changeSetStore;
     private IQueryDispatcher queryDispatcher;
-    private RemoteNotificationServiceBase remoteNotificationService = new NullRemoteNotificationService();
+    private RemoteNotificationServiceBase remoteNotificationService;
+
+    private RequestHandlerFactory() {
+    }
+
+    public static RequestHandlerFactory getInstance() {
+        return instance;
+    }
 
     public HttpRequestHandler createChangeTripleHandler() {
         ChangeTripleHandler changeTripleHandler = new ChangeTripleHandler();

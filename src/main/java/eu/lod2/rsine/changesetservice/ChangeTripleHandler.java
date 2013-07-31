@@ -2,7 +2,6 @@ package eu.lod2.rsine.changesetservice;
 
 import eu.lod2.rsine.changesetstore.ChangeSetStore;
 import eu.lod2.rsine.querydispatcher.IQueryDispatcher;
-import eu.lod2.rsine.remotenotification.NullRemoteNotificationService;
 import eu.lod2.rsine.remotenotification.RemoteNotificationServiceBase;
 import eu.lod2.util.ItemNotFoundException;
 import org.apache.http.HttpResponse;
@@ -35,7 +34,7 @@ public class ChangeTripleHandler extends PostRequestHandler {
     private ChangeSetCreator changeSetCreator;
     private ChangeSetStore changeSetStore;
     private IQueryDispatcher queryDispatcher;
-    private RemoteNotificationServiceBase remoteNotificationService = new NullRemoteNotificationService();
+    private RemoteNotificationServiceBase remoteNotificationService;
 
     @Override
     protected void handlePost(BasicHttpEntityEnclosingRequest request, HttpResponse response) {

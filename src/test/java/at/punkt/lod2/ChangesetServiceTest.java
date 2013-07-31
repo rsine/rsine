@@ -6,6 +6,7 @@ import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
 import eu.lod2.rsine.changesetservice.RequestHandlerFactory;
 import eu.lod2.rsine.changesetstore.ChangeSetStore;
 import eu.lod2.rsine.querydispatcher.IQueryDispatcher;
+import eu.lod2.rsine.remotenotification.NullRemoteNotificationService;
 import eu.lod2.util.Namespaces;
 import info.aduna.iteration.Iterations;
 import org.apache.http.HttpResponse;
@@ -38,15 +39,14 @@ public class ChangesetServiceTest {
 
     @Before
     public void setUp() throws IOException, RepositoryException {
-        RequestHandlerFactory requestHandlerFactory = new RequestHandlerFactory();
+        changeSetService = new ChangeSetService(port);
+        changeSetStore = new ChangeSetStore();
+
+        RequestHandlerFactory requestHandlerFactory = RequestHandlerFactory.getInstance();
         requestHandlerFactory.setChangeSetCreator(new ChangeSetCreator());
         requestHandlerFactory.setQueryDispatcher(new DummyQueryDispatcher());
-
-        changeSetStore = new ChangeSetStore();
         requestHandlerFactory.setChangeSetStore(changeSetStore);
-
-        changeSetService = new ChangeSetService(port);
-        changeSetService.setRequestHandlerFactory(requestHandlerFactory);
+        requestHandlerFactory.setRemoteNotificationService(new NullRemoteNotificationService());
 
         changeSetService.start();
     }

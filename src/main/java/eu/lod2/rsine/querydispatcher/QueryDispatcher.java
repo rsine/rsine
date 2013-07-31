@@ -1,11 +1,11 @@
 package eu.lod2.rsine.querydispatcher;
 
+import eu.lod2.rsine.changesetstore.ChangeSetStore;
 import eu.lod2.rsine.dissemination.Notifier;
 import eu.lod2.rsine.registrationservice.NotificationQuery;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
 import org.openrdf.query.*;
-import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
@@ -22,7 +22,7 @@ public class QueryDispatcher implements IQueryDispatcher {
     public final static String MANAGED_STORE_SPARQL_ENDPONT = "MANAGED_STORE_SPARQL_ENDPONT";
 
     private RegistrationService registrationService;
-    private Repository repository;
+    private ChangeSetStore changeSetStore;
     private Notifier notifier;
     private String managedTripleStoreSparqlEndpoint = "";
 
@@ -54,7 +54,7 @@ public class QueryDispatcher implements IQueryDispatcher {
 
     private void issueQueryAndNotify(NotificationQuery query, Subscription subscription) throws RepositoryException
     {
-        RepositoryConnection repCon = repository.getConnection();
+        RepositoryConnection repCon = changeSetStore.getRepository().getConnection();
 
         try {
             logger.debug("Issuing query '" +query+ "'");
@@ -107,8 +107,8 @@ public class QueryDispatcher implements IQueryDispatcher {
         this.registrationService = registrationService;
     }
 
-    public void setRepository(Repository repository) {
-        this.repository = repository;
+    public void setChangeSetStore(ChangeSetStore changeSetStore) {
+        this.changeSetStore = changeSetStore;
     }
 
     public void setNotifier(Notifier notifier) {

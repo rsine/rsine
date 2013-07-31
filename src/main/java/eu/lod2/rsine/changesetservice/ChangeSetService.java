@@ -23,7 +23,6 @@ public class ChangeSetService {
 
     private final Logger logger = LoggerFactory.getLogger(ChangeSetService.class);
 
-    private RequestHandlerFactory requestHandlerFactory;
     private ServerSocket serverSocket;
     private Thread requestListenerThread;
     private boolean shoudStop;
@@ -44,10 +43,6 @@ public class ChangeSetService {
 
         serverSocket.close();
         requestListenerThread.join();
-    }
-
-    public void setRequestHandlerFactory(RequestHandlerFactory requestHandlerFactory) {
-        this.requestHandlerFactory = requestHandlerFactory;
     }
 
     private class RequestListenerThread extends Thread {
@@ -81,7 +76,7 @@ public class ChangeSetService {
 
         private void setupRequestHandler() throws RepositoryException {
             reqistry = new HttpRequestHandlerRegistry();
-            reqistry.register("*", requestHandlerFactory.createChangeTripleHandler());
+            reqistry.register("*", RequestHandlerFactory.getInstance().createChangeTripleHandler());
         }
 
         @Override

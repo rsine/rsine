@@ -24,7 +24,7 @@ public class ManagedStoreNotificationTest {
 
     private final Logger logger = LoggerFactory.getLogger(ManagedStoreNotificationTest.class);
 
-    private int rsinePort = TestUtils.getRandomPort();
+    private int managedStoreChangesListeningPort = TestUtils.getRandomPort();
     private SPARQLServer fusekiServer;
     private Rsine rsine;
     private ScopeNoteCreatedNotifier scopeNoteCreatedNotifier;
@@ -33,13 +33,13 @@ public class ManagedStoreNotificationTest {
     public void setUp() throws IOException, RepositoryException {
         fusekiServer = new TestUtils().initFuseki(Rsine.class.getResource("/reegle.rdf"), "dataset");
 
-        rsine = new Rsine(rsinePort);
-        rsine.setManagedTripleStore("http://localhost:3030/dataset/query");
+        rsine = new Rsine(managedStoreChangesListeningPort, "http://localhost:3030/dataset/query");
 
         scopeNoteCreatedNotifier = new ScopeNoteCreatedNotifier();
         rsine.setNotifier(scopeNoteCreatedNotifier);
 
         registerUser();
+        rsine.start();
     }
 
     @After
@@ -87,7 +87,7 @@ public class ManagedStoreNotificationTest {
             ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
             "<http://reegle.info/glossary/2547> <http://www.w3.org/2004/02/skos/core#scopeNote> \"some additional info\"@en .");
 
-        new TestUtils().doPost(rsinePort, props);
+        new TestUtils().doPost(managedStoreChangesListeningPort, props);
 
     }
 

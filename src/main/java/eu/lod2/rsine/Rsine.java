@@ -8,6 +8,9 @@ import eu.lod2.rsine.dissemination.Notifier;
 import eu.lod2.rsine.querydispatcher.QueryDispatcher;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
+import eu.lod2.rsine.remotenotification.NullRemoteNotificationService;
+import org.openrdf.model.URI;
+import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
 
 import java.io.IOException;
@@ -18,30 +21,41 @@ import java.io.IOException;
  */
 public class Rsine {
 
-    private RegistrationService registrationService;
-    private ChangeSetStore changeSetStore;
     private ChangeSetService changeSetService;
+    private RegistrationService registrationService;
     private QueryDispatcher queryDispatcher;
 
-    public Rsine(int port) throws IOException, RepositoryException {
+    public Rsine(int managedStoreChangesListeningPort,
+                 String managedStoreSparqlEndpoint)
+    {
+        changeSetService = new ChangeSetService(managedStoreChangesListeningPort);
         registrationService = new RegistrationService();
-        changeSetStore = new ChangeSetStore();
-
-        changeSetService = new ChangeSetService(port);
-        RequestHandlerFactory requestHandlerFactory = new RequestHandlerFactory();
-        requestHandlerFactory.setChangeSetCreator(new ChangeSetCreator());
-        requestHandlerFactory.setChangeSetStore(changeSetStore);
-
         queryDispatcher = new QueryDispatcher();
-        queryDispatcher.setRegistrationService(registrationService);
-        queryDispatcher.setRepository(changeSetStore.getRepository());
+        ChangeSetStore changeSetStore = new ChangeSetStore();
 
         queryDispatcher.setNotifier(new Notifier());
+        queryDispatcher.setRegistrationService(registrationService);
+        queryDispatcher.setManagedTripleStore(managedStoreSparqlEndpoint);
+        queryDispatcher.setChangeSetStore(changeSetStore);
 
+        RequestHandlerFactory requestHandlerFactory = RequestHandlerFactory.getInstance();
+        requestHandlerFactory.setChangeSetCreator(new ChangeSetCreator());
+        requestHandlerFactory.setChangeSetStore(changeSetStore);
         requestHandlerFactory.setQueryDispatcher(queryDispatcher);
+        requestHandlerFactory.setRemoteNotificationService(new NullRemoteNotificationService());
+    }
 
-        changeSetService.setRequestHandlerFactory(requestHandlerFactory);
 
+    public Rsine(int managedStoreChangesListeningPort,
+                 String managedStoreSparqlEndpoint,
+                 int remoteChangeSetListeningPort,
+                 URI authoritativeUri)
+    {
+        this(managedStoreChangesListeningPort, managedStoreSparqlEndpoint);
+    }
+
+
+    public void start() throws IOException, RepositoryException {
         changeSetService.start();
     }
 
@@ -49,17 +63,35 @@ public class Rsine {
         changeSetService.stop();
     }
 
+    public static void main(String[] args) throws IOException, RepositoryException {
+        Rsine rsine = null;
+
+        try {
+            switch (args.length) {
+                case 2:
+                    new Rsine(Integer.parseInt(args[0]), args[1]);
+                    break;
+
+                case 4:
+                    new Rsine(Integer.parseInt(args[0]), args[1], Integer.parseInt(args[2]), new URIImpl(args[3]));
+                    break;
+
+                default:
+                    throw new Exception("Illegal parameter count");
+            }
+            rsine.start();
+        }
+        catch (Exception e) {
+            usage();
+        }
+    }
+
+    private static void usage() {
+        System.out.println("Parameters: managedStoreChangesListeningPort managedStoreSparqlEndpoint [remoteChangeSetListeningPort authoritativeUri]");
+    }
+
     public void setNotifier(Notifier notifier) {
         queryDispatcher.setNotifier(notifier);
-    }
-
-    public void setManagedTripleStore(String sparqlEndpoint) {
-        queryDispatcher.setManagedTripleStore(sparqlEndpoint);
-    }
-
-    public static void main(String[] args) throws IOException, RepositoryException {
-        Rsine rsine = new Rsine(8080);
-        rsine.setManagedTripleStore("http://localhost:3030/dataset/query");
     }
 
     /**
@@ -75,6 +107,5 @@ public class Rsine {
     public void registerSubscription(Subscription subscription) {
         registrationService.register(subscription);
     }
-
 
 }

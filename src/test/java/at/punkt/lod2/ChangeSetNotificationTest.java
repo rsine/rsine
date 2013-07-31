@@ -19,15 +19,17 @@ import java.util.Properties;
 
 public class ChangeSetNotificationTest {
 
-    private final int port = new TestUtils().getRandomPort();
+    private final int managedStoreChangesListeningPort = new TestUtils().getRandomPort();
     private Rsine rsine;
     private CountingNotifier countingNotifier;
 
     @Before
     public void setUp() throws IOException, RepositoryException, RDFParseException {
-        rsine = new Rsine(port);
         countingNotifier = new CountingNotifier();
+
+        rsine = new Rsine(managedStoreChangesListeningPort, "");
         rsine.setNotifier(countingNotifier);
+        rsine.start();
     }
 
     @Test
@@ -80,7 +82,7 @@ public class ChangeSetNotificationTest {
             ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
             "<http://reegle.info/glossary/1111> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2004/02/skos/core#Concept> .");
 
-        new TestUtils().doPost(port, props);
+        new TestUtils().doPost(managedStoreChangesListeningPort, props);
     }
 
     private void setPrefLabel() throws IOException {
@@ -90,7 +92,7 @@ public class ChangeSetNotificationTest {
             ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
             "<http://reegle.info/glossary/1111> <http://www.w3.org/2004/02/skos/core#prefLabel> \"Ottakringer Helles\"@en .");
 
-        new TestUtils().doPost(port, props);
+        new TestUtils().doPost(managedStoreChangesListeningPort, props);
     }
 
     private void changePrefLabel() throws IOException {
@@ -103,7 +105,7 @@ public class ChangeSetNotificationTest {
                 ChangeTripleHandler.POST_BODY_SECONDARYTRIPLE,
                 "<http://reegle.info/glossary/1111> <http://www.w3.org/2004/02/skos/core#prefLabel> \"Schremser Edelmärzen\"@en .");
 
-        new TestUtils().doPost(port, props);
+        new TestUtils().doPost(managedStoreChangesListeningPort, props);
     }
 
     private void addOtherConcept() throws IOException {
@@ -113,7 +115,7 @@ public class ChangeSetNotificationTest {
             ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
             "<http://reegle.info/glossary/1112> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2004/02/skos/core#Concept> .");
 
-        new TestUtils().doPost(port, props);
+        new TestUtils().doPost(managedStoreChangesListeningPort, props);
     }
 
     private void linkConcepts() throws IOException {
@@ -123,7 +125,7 @@ public class ChangeSetNotificationTest {
             ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
             "<http://reegle.info/glossary/1111> <http://www.w3.org/2004/02/skos/core#related> <http://reegle.info/glossary/1112> .");
 
-        new TestUtils().doPost(port, props);
+        new TestUtils().doPost(managedStoreChangesListeningPort, props);
     }
 
     private class CountingNotifier extends Notifier {

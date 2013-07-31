@@ -2,6 +2,7 @@ package eu.lod2.rsine.changesetstore;
 
 import org.openrdf.model.Graph;
 import org.openrdf.repository.Repository;
+import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.sail.memory.MemoryStore;
@@ -11,11 +12,11 @@ import java.io.File;
 public class ChangeSetStore {
 
     private Repository repository;
+    private boolean isInitialized;
 
-    public ChangeSetStore() throws RepositoryException {
+    public ChangeSetStore() {
         File tempDir = new File(createDataDirName());
         repository = new SailRepository(new MemoryStore(tempDir));
-        repository.initialize();
     }
 
     private String createDataDirName() {
@@ -23,11 +24,23 @@ public class ChangeSetStore {
     }
 
     public void persistChangeSet(Graph changeSet) throws RepositoryException {
-        repository.getConnection().add(changeSet);
+        ensureInitialized();
+
+        RepositoryConnection repCon = repository.getConnection();
+        repCon.add(changeSet);
+        repCon.close();
     }
 
-    public Repository getRepository() {
+    public Repository getRepository() throws RepositoryException {
+        ensureInitialized();
         return repository;
+    }
+
+    private void ensureInitialized() throws RepositoryException {
+        if (!isInitialized) {
+            repository.initialize();
+            isInitialized = true;
+        }
     }
 
 }
