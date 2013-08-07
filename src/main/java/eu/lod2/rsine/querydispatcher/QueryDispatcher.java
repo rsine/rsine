@@ -57,11 +57,10 @@ public class QueryDispatcher implements IQueryDispatcher {
         RepositoryConnection repCon = changeSetStore.getRepository().getConnection();
 
         try {
-            logger.debug("Issuing query '" +query+ "'");
+            String issuedQuery = fillInPlaceholders(query);
+            logger.debug("Issuing query '" +issuedQuery+ "'");
 
-            TupleQueryResult result = repCon.prepareTupleQuery(
-                QueryLanguage.SPARQL,
-                fillInPlaceholders(query)).evaluate();
+            TupleQueryResult result = repCon.prepareTupleQuery(QueryLanguage.SPARQL, issuedQuery).evaluate();
 
             while (result.hasNext()) {
                 BindingSet bs = result.next();

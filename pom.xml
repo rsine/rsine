@@ -80,7 +80,6 @@
             <artifactId>jena-fuseki</artifactId>
             <version>0.2.7</version>
         </dependency>
-
     </dependencies>
 
     <build>

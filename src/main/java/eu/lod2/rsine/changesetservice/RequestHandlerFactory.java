@@ -2,6 +2,7 @@ package eu.lod2.rsine.changesetservice;
 
 import eu.lod2.rsine.changesetstore.ChangeSetStore;
 import eu.lod2.rsine.querydispatcher.IQueryDispatcher;
+import eu.lod2.rsine.remotenotification.RemoteChangeSetHandler;
 import eu.lod2.rsine.remotenotification.RemoteNotificationServiceBase;
 import org.apache.http.protocol.HttpRequestHandler;
 
@@ -44,6 +45,13 @@ public class RequestHandlerFactory {
 
     public void setRemoteNotificationService(RemoteNotificationServiceBase remoteNotificationService) {
         this.remoteNotificationService = remoteNotificationService;
+    }
+
+    public HttpRequestHandler createRemoteChangeSetHandler() {
+        RemoteChangeSetHandler remoteChangeSetHandler = new RemoteChangeSetHandler();
+        remoteChangeSetHandler.setQueryDispatcher(queryDispatcher);
+        remoteChangeSetHandler.setChangeSetStore(changeSetStore);
+        return remoteChangeSetHandler;
     }
 
 }

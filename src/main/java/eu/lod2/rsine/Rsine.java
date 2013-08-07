@@ -9,8 +9,8 @@ import eu.lod2.rsine.querydispatcher.QueryDispatcher;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.rsine.remotenotification.NullRemoteNotificationService;
-import org.openrdf.model.URI;
-import org.openrdf.model.impl.URIImpl;
+import eu.lod2.rsine.remotenotification.RemoteNotificationService;
+import eu.lod2.rsine.remotenotification.RemoteNotificationServiceBase;
 import org.openrdf.repository.RepositoryException;
 
 import java.io.IOException;
@@ -24,13 +24,19 @@ public class Rsine {
     private ChangeSetService changeSetService;
     private RegistrationService registrationService;
     private QueryDispatcher queryDispatcher;
+    private RequestHandlerFactory requestHandlerFactory;
+    private RemoteNotificationServiceBase remoteNotificationService;
 
+    /**
+     * Creates an Rsine instance for local use only
+     */
     public Rsine(int managedStoreChangesListeningPort,
                  String managedStoreSparqlEndpoint)
     {
         changeSetService = new ChangeSetService(managedStoreChangesListeningPort);
         registrationService = new RegistrationService();
         queryDispatcher = new QueryDispatcher();
+        remoteNotificationService = new NullRemoteNotificationService();
         ChangeSetStore changeSetStore = new ChangeSetStore();
 
         queryDispatcher.setNotifier(new Notifier());
@@ -38,20 +44,25 @@ public class Rsine {
         queryDispatcher.setManagedTripleStore(managedStoreSparqlEndpoint);
         queryDispatcher.setChangeSetStore(changeSetStore);
 
-        RequestHandlerFactory requestHandlerFactory = RequestHandlerFactory.getInstance();
+        requestHandlerFactory = RequestHandlerFactory.getInstance();
         requestHandlerFactory.setChangeSetCreator(new ChangeSetCreator());
         requestHandlerFactory.setChangeSetStore(changeSetStore);
         requestHandlerFactory.setQueryDispatcher(queryDispatcher);
-        requestHandlerFactory.setRemoteNotificationService(new NullRemoteNotificationService());
+        requestHandlerFactory.setRemoteNotificationService(remoteNotificationService);
     }
 
-
+    /**
+     * Creates an Rsine instance capable of handling remote notifications
+     */
     public Rsine(int managedStoreChangesListeningPort,
                  String managedStoreSparqlEndpoint,
-                 int remoteChangeSetListeningPort,
-                 URI authoritativeUri)
+                 String authoritativeUri)
     {
         this(managedStoreChangesListeningPort, managedStoreSparqlEndpoint);
+        RemoteNotificationService remoteNotificationService = new RemoteNotificationService();
+        this.remoteNotificationService = remoteNotificationService;
+        remoteNotificationService.setAuthoritativeUri(authoritativeUri);
+        requestHandlerFactory.setRemoteNotificationService(remoteNotificationService);
     }
 
 
@@ -72,8 +83,8 @@ public class Rsine {
                     new Rsine(Integer.parseInt(args[0]), args[1]);
                     break;
 
-                case 4:
-                    new Rsine(Integer.parseInt(args[0]), args[1], Integer.parseInt(args[2]), new URIImpl(args[3]));
+                case 3:
+                    new Rsine(Integer.parseInt(args[0]), args[1], args[2]);
                     break;
 
                 default:
@@ -87,11 +98,15 @@ public class Rsine {
     }
 
     private static void usage() {
-        System.out.println("Parameters: managedStoreChangesListeningPort managedStoreSparqlEndpoint [remoteChangeSetListeningPort authoritativeUri]");
+        System.out.println("Parameters: managedStoreChangesListeningPort managedStoreSparqlEndpoint [authoritativeUri]");
     }
 
     public void setNotifier(Notifier notifier) {
         queryDispatcher.setNotifier(notifier);
+    }
+
+    public RemoteNotificationServiceBase getRemoteNotificationService() {
+        return remoteNotificationService;
     }
 
     /**

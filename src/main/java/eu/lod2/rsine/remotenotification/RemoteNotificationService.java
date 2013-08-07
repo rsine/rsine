@@ -5,16 +5,17 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.openrdf.model.Model;
-import org.openrdf.model.Resource;
-import org.openrdf.model.URI;
-import org.openrdf.model.ValueFactory;
+import org.openrdf.model.*;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.model.vocabulary.RDF;
+import org.openrdf.rio.RDFHandlerException;
+import org.openrdf.rio.RDFWriter;
+import org.openrdf.rio.ntriples.NTriplesWriterFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -32,10 +33,14 @@ public class RemoteNotificationService extends RemoteNotificationServiceBase {
             addSourceInfo(changeSet);
 
             try {
-                postChangeSet(remoteService, changeSet);
+                String ntriplesChangeSet = createNTriplesChangeSet(changeSet);
+                postChangeSet(remoteService, ntriplesChangeSet);
             }
             catch (IOException e) {
-                logger.error("Error posting changeset to '" +remoteService.stringValue()+ "': ", e.getMessage());
+                logger.error("Error posting changeset to '" +remoteService.stringValue()+ "': " +e.getMessage());
+            }
+            catch (RDFHandlerException e) {
+                logger.error("Error serializing changeset", e);
             }
         }
     }
@@ -76,9 +81,22 @@ public class RemoteNotificationService extends RemoteNotificationServiceBase {
             valueFactory.createURI(authoritativeUri)));
     }
 
-    private void postChangeSet(URI remoteService, Model changeSet) throws IOException {
+    private String createNTriplesChangeSet(Model changeSet) throws RDFHandlerException {
+        StringWriter sw = new StringWriter();
+        RDFWriter writer = new NTriplesWriterFactory().getWriter(sw);
+
+        writer.startRDF();
+        for (Statement st : changeSet) {
+            writer.handleStatement(st);
+        }
+        writer.endRDF();
+
+        return sw.toString();
+    }
+
+    private void postChangeSet(URI remoteService, String changeSet) throws IOException, RDFHandlerException {
         HttpPost httpPost = new HttpPost(remoteService.stringValue());
-        httpPost.setEntity(new StringEntity(changeSet.toString()));
+        httpPost.setEntity(new StringEntity(changeSet));
         HttpResponse response = new DefaultHttpClient().execute(httpPost);
 
         logger.info("Posted changeset to '" +remoteService+ "', response: " +response.getStatusLine().getStatusCode());

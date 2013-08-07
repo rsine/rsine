@@ -17,7 +17,7 @@ import org.openrdf.rio.RDFParseException;
 import java.io.IOException;
 import java.util.Properties;
 
-public class ChangeSetNotificationTest {
+public class LocalNotificationTest {
 
     private final int managedStoreChangesListeningPort = new TestUtils().getRandomPort();
     private Rsine rsine;
