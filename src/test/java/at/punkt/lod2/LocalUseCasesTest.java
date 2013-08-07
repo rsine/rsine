@@ -1,8 +1,11 @@
 package at.punkt.lod2;
 
+import at.punkt.lod2.util.CountingNotifier;
+import at.punkt.lod2.util.TestUtils;
 import eu.lod2.rsine.Rsine;
 import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
-import eu.lod2.rsine.dissemination.Notifier;
+import eu.lod2.rsine.dissemination.messageformatting.BindingSetFormatter;
+import eu.lod2.rsine.dissemination.notifier.LoggingNotifier;
 import eu.lod2.rsine.querydispatcher.QueryDispatcher;
 import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.util.Namespaces;
@@ -14,22 +17,20 @@ import org.junit.Test;
 import org.openrdf.model.Literal;
 import org.openrdf.query.BindingSet;
 import org.openrdf.repository.RepositoryException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Properties;
 
 public class LocalUseCasesTest {
 
-    private final Logger logger = LoggerFactory.getLogger(LocalUseCasesTest.class);
-
     private SPARQLServer fusekiServer;
     private Rsine rsine;
     private int managedStoreChangesListeningPort = TestUtils.getRandomPort();
+    private CountingNotifier countingNotifier;
 
     @Before
     public void setUp() throws IOException, RepositoryException {
+        countingNotifier = new CountingNotifier();
         fusekiServer = new TestUtils().initFuseki(Rsine.class.getResource("/reegle.rdf"), "dataset");
 
         rsine = new Rsine(managedStoreChangesListeningPort, "http://localhost:3030/dataset/query");
@@ -46,8 +47,10 @@ public class LocalUseCasesTest {
 
     private void registerUser() {
         Subscription subscription = rsine.requestSubscription();
-        subscription.addQuery(createScopeNoteChangesQuery());
-        subscription.addQuery(createConceptLinkingQuery());
+        subscription.addQuery(createScopeNoteChangesQuery(), new ScopeNoteChangeFormatter());
+        subscription.addQuery(createConceptLinkingQuery(), new ConceptLinkingFormatter());
+        subscription.addNotifier(new LoggingNotifier());
+        subscription.addNotifier(countingNotifier);
         rsine.registerSubscription(subscription);
     }
 
@@ -100,14 +103,11 @@ public class LocalUseCasesTest {
 
     @Test
     public void scopeNoteChanges() throws IOException {
-        ScopeNoteChangeNotifier scopeNoteChangeNotifier = new ScopeNoteChangeNotifier();
-        rsine.setNotifier(scopeNoteChangeNotifier);
-
         scopeNoteDefinition();
         scopeNoteChange();
         scopeNoteChangeOfConceptCreatedByOtherUser();
 
-        Assert.assertEquals(2, scopeNoteChangeNotifier.notificationsCount);
+        Assert.assertEquals(2, countingNotifier.getNotificationCount());
     }
 
     private void scopeNoteDefinition() throws IOException {
@@ -146,11 +146,9 @@ public class LocalUseCasesTest {
 
     @Test
     public void conceptLinking() throws IOException {
-        ConceptLinkingNotifier conceptLinkingNotifier = new ConceptLinkingNotifier();
-        rsine.setNotifier(conceptLinkingNotifier);
         addLink();
 
-        Assert.assertEquals(1, conceptLinkingNotifier.notificationsCount);
+        Assert.assertEquals(1, countingNotifier.getNotificationCount());
     }
 
     private void addLink() throws IOException {
@@ -162,41 +160,31 @@ public class LocalUseCasesTest {
         new TestUtils().doPost(managedStoreChangesListeningPort, props);
     }
 
-    private class ScopeNoteChangeNotifier extends Notifier {
-
-        private String conceptLabel, conceptUri, newScopeNote;
-        private int notificationsCount = 0;
+    private class ScopeNoteChangeFormatter implements BindingSetFormatter {
 
         @Override
-        public void queryResultsAvailable(BindingSet bs, Subscription subscription) {
-            conceptUri = bs.getValue("concept").stringValue();
-            conceptLabel = ((Literal) bs.getValue("prefLabel")).getLabel();
-            newScopeNote = ((Literal) bs.getValue("scopeNote")).getLabel();
+        public String toMessage(BindingSet bindingSet) {
+            String conceptUri = bindingSet.getValue("concept").stringValue();
+            String conceptLabel = ((Literal) bindingSet.getValue("prefLabel")).getLabel();
+            String newScopeNote = ((Literal) bindingSet.getValue("scopeNote")).getLabel();
 
-            logger.info("The scope note of concept '" + conceptLabel + "'(" + conceptUri +
-                    ") has been defined as/changed to '" + newScopeNote + "'");
-            notificationsCount++;
+            return "The scope note of concept '" + conceptLabel + "'(" + conceptUri +") has been defined as/changed to '" + newScopeNote + "'";
         }
 
     }
 
-    private class ConceptLinkingNotifier extends Notifier {
-
-        private String conceptLabel, conceptUri, otherConceptLabel, otherConceptUri;
-        private int notificationsCount = 0;
+    private class ConceptLinkingFormatter implements BindingSetFormatter {
 
         @Override
-        public void queryResultsAvailable(BindingSet bs, Subscription subscription) {
-            conceptUri = bs.getValue("concept").stringValue();
-            otherConceptUri = bs.getValue("otherConcept").stringValue();
-            conceptLabel = ((Literal) bs.getValue("conceptLabel")).getLabel();
-            otherConceptLabel = ((Literal) bs.getValue("otherConceptLabel")).getLabel();
+        public String toMessage(BindingSet bindingSet) {
+            String conceptUri = bindingSet.getValue("concept").stringValue();
+            String otherConceptUri = bindingSet.getValue("otherConcept").stringValue();
+            String conceptLabel = ((Literal) bindingSet.getValue("conceptLabel")).getLabel();
+            String otherConceptLabel = ((Literal) bindingSet.getValue("otherConceptLabel")).getLabel();
 
-            logger.info("A new hierarchical link for concept '" +conceptLabel+ "'(" +conceptUri+ ") to concept '"
-                +otherConceptLabel+ "'(" +otherConceptUri+ ") has been established");
-            notificationsCount++;
+            return "A new hierarchical link for concept '" +conceptLabel+ "'(" +conceptUri+ ") to concept '"
+                +otherConceptLabel+ "'(" +otherConceptUri+ ") has been established";
         }
-
     }
 
 }

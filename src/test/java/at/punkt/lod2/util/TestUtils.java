@@ -1,4 +1,4 @@
-package at.punkt.lod2;
+package at.punkt.lod2.util;
 
 import com.hp.hpl.jena.sparql.core.DatasetGraph;
 import com.hp.hpl.jena.sparql.core.DatasetGraphFactory;

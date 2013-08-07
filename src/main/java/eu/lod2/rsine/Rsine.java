@@ -4,7 +4,6 @@ import eu.lod2.rsine.changesetservice.ChangeSetCreator;
 import eu.lod2.rsine.changesetservice.ChangeSetService;
 import eu.lod2.rsine.changesetservice.RequestHandlerFactory;
 import eu.lod2.rsine.changesetstore.ChangeSetStore;
-import eu.lod2.rsine.dissemination.Notifier;
 import eu.lod2.rsine.querydispatcher.QueryDispatcher;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
@@ -39,7 +38,6 @@ public class Rsine {
         remoteNotificationService = new NullRemoteNotificationService();
         ChangeSetStore changeSetStore = new ChangeSetStore();
 
-        queryDispatcher.setNotifier(new Notifier());
         queryDispatcher.setRegistrationService(registrationService);
         queryDispatcher.setManagedTripleStore(managedStoreSparqlEndpoint);
         queryDispatcher.setChangeSetStore(changeSetStore);
@@ -99,10 +97,6 @@ public class Rsine {
 
     private static void usage() {
         System.out.println("Parameters: managedStoreChangesListeningPort managedStoreSparqlEndpoint [authoritativeUri]");
-    }
-
-    public void setNotifier(Notifier notifier) {
-        queryDispatcher.setNotifier(notifier);
     }
 
     public RemoteNotificationServiceBase getRemoteNotificationService() {

@@ -1,8 +1,11 @@
 package at.punkt.lod2;
 
+import at.punkt.lod2.util.CountingNotifier;
+import at.punkt.lod2.util.TestUtils;
 import eu.lod2.rsine.Rsine;
 import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
-import eu.lod2.rsine.dissemination.Notifier;
+import eu.lod2.rsine.dissemination.messageformatting.BindingSetFormatter;
+import eu.lod2.rsine.dissemination.notifier.LoggingNotifier;
 import eu.lod2.rsine.querydispatcher.QueryDispatcher;
 import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.util.Namespaces;
@@ -27,7 +30,8 @@ public class ManagedStoreNotificationTest {
     private int managedStoreChangesListeningPort = TestUtils.getRandomPort();
     private SPARQLServer fusekiServer;
     private Rsine rsine;
-    private ScopeNoteCreatedNotifier scopeNoteCreatedNotifier;
+    private ScopeNoteCreationFormatter scopeNoteCreationFormatter;
+    private CountingNotifier countingNotifier;
 
     @Before
     public void setUp() throws IOException, RepositoryException {
@@ -35,8 +39,8 @@ public class ManagedStoreNotificationTest {
 
         rsine = new Rsine(managedStoreChangesListeningPort, "http://localhost:3030/dataset/query");
 
-        scopeNoteCreatedNotifier = new ScopeNoteCreatedNotifier();
-        rsine.setNotifier(scopeNoteCreatedNotifier);
+        scopeNoteCreationFormatter = new ScopeNoteCreationFormatter();
+        countingNotifier = new CountingNotifier();
 
         registerUser();
         rsine.start();
@@ -50,7 +54,9 @@ public class ManagedStoreNotificationTest {
 
     private void registerUser() {
         Subscription subscription = rsine.requestSubscription();
-        subscription.addQuery(createScopeNoteCreatedQuery());
+        subscription.addQuery(createScopeNoteCreatedQuery(), scopeNoteCreationFormatter);
+        subscription.addNotifier(new LoggingNotifier());
+        subscription.addNotifier(countingNotifier);
         rsine.registerSubscription(subscription);
     }
 
@@ -76,8 +82,8 @@ public class ManagedStoreNotificationTest {
     public void notificationDissemination() throws IOException {
         triggerQueryExecution();
 
-        Assert.assertEquals("blanching", scopeNoteCreatedNotifier.prefLabel);
-        Assert.assertEquals(1, scopeNoteCreatedNotifier.resultCount);
+        Assert.assertEquals("blanching", scopeNoteCreationFormatter.prefLabel);
+        Assert.assertEquals(1, countingNotifier.getNotificationCount());
     }
 
     private void triggerQueryExecution() throws IOException {
@@ -91,20 +97,17 @@ public class ManagedStoreNotificationTest {
 
     }
 
-    private class ScopeNoteCreatedNotifier extends Notifier {
+    private class ScopeNoteCreationFormatter implements BindingSetFormatter {
 
         private String prefLabel;
-        private int resultCount = 0;
 
         @Override
-        public void queryResultsAvailable(BindingSet bs, Subscription subscription) {
-            String newScopeNote = ((Literal) bs.getValue("newScopeNote")).getLabel();
-            prefLabel = ((Literal) bs.getValue("prefLabel")).getLabel();
-            resultCount++;
+        public String toMessage(BindingSet bindingSet) {
+            String newScopeNote = ((Literal) bindingSet.getValue("newScopeNote")).getLabel();
+            prefLabel = ((Literal) bindingSet.getValue("prefLabel")).getLabel();
 
-            logger.info("Scope note '" +newScopeNote+ "' has been created for concept '" +prefLabel+ "'");
+            return "Scope note '" +newScopeNote+ "' has been created for concept '" +prefLabel+ "'";
         }
 
     }
-
 }

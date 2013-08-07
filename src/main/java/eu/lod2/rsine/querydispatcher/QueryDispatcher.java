@@ -1,7 +1,7 @@
 package eu.lod2.rsine.querydispatcher;
 
 import eu.lod2.rsine.changesetstore.ChangeSetStore;
-import eu.lod2.rsine.dissemination.Notifier;
+import eu.lod2.rsine.dissemination.notifier.INotifier;
 import eu.lod2.rsine.registrationservice.NotificationQuery;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
@@ -12,7 +12,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 public class QueryDispatcher implements IQueryDispatcher {
 
@@ -23,7 +26,6 @@ public class QueryDispatcher implements IQueryDispatcher {
 
     private RegistrationService registrationService;
     private ChangeSetStore changeSetStore;
-    private Notifier notifier;
     private String managedTripleStoreSparqlEndpoint = "";
 
     @Override
@@ -62,13 +64,14 @@ public class QueryDispatcher implements IQueryDispatcher {
 
             TupleQueryResult result = repCon.prepareTupleQuery(QueryLanguage.SPARQL, issuedQuery).evaluate();
 
+            List<String> messages = new ArrayList<>();
             while (result.hasNext()) {
                 BindingSet bs = result.next();
-                notifier.queryResultsAvailable(bs, subscription);
+                messages.add(query.getBindingSetFormatter().toMessage(bs));
             }
-
             query.updateLastIssued();
 
+            sendNotifications(messages, subscription);
         }
         catch (MalformedQueryException e) {
             logger.error("NotificationQuery malformed", e);
@@ -78,6 +81,13 @@ public class QueryDispatcher implements IQueryDispatcher {
         }
         finally {
             repCon.close();
+        }
+    }
+
+    private void sendNotifications(Collection<String> messages, Subscription subscription) {
+        Iterator<INotifier> notifierIt = subscription.getNotifierIterator();
+        while (!messages.isEmpty() && notifierIt.hasNext()) {
+            notifierIt.next().notify(messages);
         }
     }
 
@@ -108,10 +118,6 @@ public class QueryDispatcher implements IQueryDispatcher {
 
     public void setChangeSetStore(ChangeSetStore changeSetStore) {
         this.changeSetStore = changeSetStore;
-    }
-
-    public void setNotifier(Notifier notifier) {
-        this.notifier = notifier;
     }
 
     public void setManagedTripleStore(String sparqlEndpoint) {

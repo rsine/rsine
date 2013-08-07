@@ -1,15 +1,16 @@
 package at.punkt.lod2;
 
+import at.punkt.lod2.util.CountingNotifier;
+import at.punkt.lod2.util.TestUtils;
 import eu.lod2.rsine.Rsine;
 import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
-import eu.lod2.rsine.dissemination.Notifier;
+import eu.lod2.rsine.dissemination.messageformatting.DummyBindingSetFormatter;
 import eu.lod2.rsine.querydispatcher.QueryDispatcher;
 import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.util.Namespaces;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openrdf.query.BindingSet;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParseException;
@@ -28,7 +29,6 @@ public class LocalNotificationTest {
         countingNotifier = new CountingNotifier();
 
         rsine = new Rsine(managedStoreChangesListeningPort, "");
-        rsine.setNotifier(countingNotifier);
         rsine.start();
     }
 
@@ -37,12 +37,13 @@ public class LocalNotificationTest {
         registerUser();
         postChanges();
 
-        Assert.assertEquals(1, countingNotifier.notificationCount);
+        Assert.assertEquals(1, countingNotifier.getNotificationCount());
     }
 
     private void registerUser() {
         Subscription subscription = rsine.requestSubscription();
-        subscription.addQuery(createQuery());
+        subscription.addQuery(createQuery(), new DummyBindingSetFormatter());
+        subscription.addNotifier(countingNotifier);
         rsine.registerSubscription(subscription);
     }
 
@@ -128,14 +129,4 @@ public class LocalNotificationTest {
         new TestUtils().doPost(managedStoreChangesListeningPort, props);
     }
 
-    private class CountingNotifier extends Notifier {
-
-        private int notificationCount = 0;
-
-        @Override
-        public void queryResultsAvailable(BindingSet bs, Subscription subscription) {
-            notificationCount++;
-        }
-
-    }
 }

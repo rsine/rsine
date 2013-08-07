@@ -1,5 +1,6 @@
 package at.punkt.lod2;
 
+import at.punkt.lod2.util.TestUtils;
 import eu.lod2.rsine.changesetservice.ChangeSetCreator;
 import eu.lod2.rsine.changesetservice.ChangeSetService;
 import eu.lod2.rsine.changesetservice.ChangeTripleHandler;

@@ -1,7 +1,9 @@
 package at.punkt.lod2;
 
+import at.punkt.lod2.util.CountingNotifier;
+import at.punkt.lod2.util.TestUtils;
 import eu.lod2.rsine.Rsine;
-import eu.lod2.rsine.dissemination.Notifier;
+import eu.lod2.rsine.dissemination.messageformatting.BindingSetFormatter;
 import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.rsine.remotenotification.IRemoteServiceDetector;
 import eu.lod2.util.Namespaces;
@@ -17,23 +19,21 @@ import org.openrdf.query.BindingSet;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.*;
 import org.openrdf.rio.helpers.StatementCollector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
 public class RemoteNotificationTest {
 
-    private final Logger logger = LoggerFactory.getLogger(RemoteNotificationTest.class);
-
     private final int localInstanceListeningPort = new TestUtils().getRandomPort(),
                       remoteInstanceListeningPort = new TestUtils().getRandomPort();
     private Model changeSet;
     private Rsine localRsineInstance;
-    private ResultDetectionNotifier resultDetectionNotifier;
+    private CountingNotifier countingNotifier;
 
     @Before
     public void setUp() throws RDFParseException, IOException, RDFHandlerException, RepositoryException {
+        countingNotifier = new CountingNotifier();
+
         initServices();
         readChangeSet();
     }
@@ -44,14 +44,14 @@ public class RemoteNotificationTest {
         localRsineInstance.start();
 
         Rsine remoteRsineInstance = new Rsine(remoteInstanceListeningPort, "", "http://zbw.eu");
-        remoteRsineInstance.setNotifier(resultDetectionNotifier = new ResultDetectionNotifier());
         registerRemoteChangeSubscriber(remoteRsineInstance);
         remoteRsineInstance.start();
     }
 
     private void registerRemoteChangeSubscriber(Rsine rsine) {
         Subscription subscription = rsine.requestSubscription();
-        subscription.addQuery(createRemoteReferencesDetectionQuery());
+        subscription.addQuery(createRemoteReferencesDetectionQuery(), new RemoteReferencesFormatter());
+        subscription.addNotifier(countingNotifier);
         rsine.registerSubscription(subscription);
     }
 
@@ -83,7 +83,7 @@ public class RemoteNotificationTest {
     @Test
     public void changeSetDissemination() throws RDFParseException, IOException, RDFHandlerException {
         localRsineInstance.getRemoteNotificationService().announce(changeSet);
-        Assert.assertTrue(resultDetectionNotifier.resultDetected);
+        Assert.assertTrue(countingNotifier.getNotificationCount() >= 1);
     }
 
     private class TestRemoteServiceDetector implements IRemoteServiceDetector {
@@ -95,21 +95,17 @@ public class RemoteNotificationTest {
 
     }
 
-    private class ResultDetectionNotifier extends Notifier {
-
-        private boolean resultDetected;
+    private class RemoteReferencesFormatter implements BindingSetFormatter {
 
         @Override
-        public void queryResultsAvailable(BindingSet bs, Subscription subscription) {
-            String source = bs.getValue("source").stringValue();
-            String subj = bs.getValue("subject").stringValue();
-            String pred = bs.getValue("predicate").stringValue();
-            String obj = bs.getValue("object").stringValue();
+        public String toMessage(BindingSet bindingSet) {
+            String source = bindingSet.getValue("source").stringValue();
+            String subj = bindingSet.getValue("subject").stringValue();
+            String pred = bindingSet.getValue("predicate").stringValue();
+            String obj = bindingSet.getValue("object").stringValue();
 
-            logger.info("The remote entity '" +source+ "' has stated the following information about a local concept: " +
-                        "'" +subj +" "+ pred +" "+ obj +"'");
-
-            resultDetected = true;
+            return "The remote entity '" +source+ "' has stated the following information about a local concept: " +
+                    "'" +subj +" "+ pred +" "+ obj +"'";
         }
 
     }
