@@ -1,6 +1,7 @@
 package eu.lod2.rsine.registrationservice;
 
 import eu.lod2.rsine.dissemination.messageformatting.BindingSetFormatter;
+import eu.lod2.rsine.dissemination.messageformatting.ToStringBindingSetFormatter;
 import eu.lod2.rsine.dissemination.notifier.INotifier;
 import eu.lod2.util.Namespaces;
 import org.openrdf.model.URI;
@@ -27,6 +28,10 @@ public class Subscription {
 
     public URI getSubscriber() {
         return subscriber;
+    }
+
+    public void addQuery(String sparqlQuery) {
+        queries.add(new NotificationQuery(sparqlQuery, new ToStringBindingSetFormatter()));
     }
 
     public void addQuery(String sparqlQuery, BindingSetFormatter bindingSetFormatter) {

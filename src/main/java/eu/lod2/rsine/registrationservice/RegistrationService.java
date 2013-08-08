@@ -1,7 +1,6 @@
 package eu.lod2.rsine.registrationservice;
 
-import eu.lod2.util.ItemNotFoundException;
-import org.openrdf.model.URI;
+import org.openrdf.model.Model;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -19,11 +18,8 @@ public class RegistrationService {
         subscriptions.add(subscription);
     }
 
-    public Subscription getSubscription(URI subscriber) {
-        for (Subscription subscription : subscriptions) {
-            if (subscription.getSubscriber().equals(subscriber)) return subscription;
-        }
-        throw new ItemNotFoundException("No subscription of subscriber '" +subscriber.stringValue()+ "' found");
+    public void register(Model subscription) {
+        subscriptions.add(new SubscriptionParser(subscription).createSubscription());
     }
 
     public Iterator<Subscription> getSubscriptionIterator() {
