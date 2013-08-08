@@ -3,17 +3,13 @@ package eu.lod2.rsine.registrationservice;
 import eu.lod2.rsine.dissemination.notifier.INotifier;
 import eu.lod2.rsine.dissemination.notifier.NotifierDescriptor;
 import eu.lod2.rsine.dissemination.notifier.NotifierParameters;
+import eu.lod2.util.ItemNotFoundException;
 import eu.lod2.util.Namespaces;
-import org.openrdf.model.Model;
-import org.openrdf.model.Resource;
-import org.openrdf.model.Value;
-import org.openrdf.model.ValueFactory;
+import org.openrdf.model.*;
 import org.openrdf.model.impl.ValueFactoryImpl;
+import org.openrdf.model.vocabulary.RDF;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
+import java.util.*;
 
 public class SubscriptionParser {
 
@@ -45,19 +41,43 @@ public class SubscriptionParser {
             null,
             valueFactory.createURI(Namespaces.RSINE_NAMESPACE.getName(), "notifier"),
             null).objects();
+
         for (Value notifier : allNotifiers) {
-            NotifierDescriptor notifierDescriptor = getDescriptorByType();
-            notifiers.add(notifierDescriptor.create(notifierDescriptor.getParameters()));
+            URI type = rdfSubscription.filter((Resource) notifier, RDF.TYPE, null).objectURI();
+
+            NotifierDescriptor notifierDescriptor = getDescriptorByType(type);
+            NotifierParameters notifierParameters = setParameterValues((Resource) notifier, notifierDescriptor.getParameters());
+            notifiers.add(notifierDescriptor.create(notifierParameters));
         }
 
         return notifiers;
     }
 
-    private NotifierDescriptor getDescriptorByType() {
-        return null;
+    private NotifierDescriptor getDescriptorByType(URI type) {
+        ServiceLoader<NotifierDescriptor> loader = ServiceLoader.load(NotifierDescriptor.class);
+        Iterator<NotifierDescriptor> it = loader.iterator();
+        while (it.hasNext()) {
+            NotifierDescriptor notifierDescriptor = it.next();
+            if (notifierDescriptor.getType().equals(type)) return notifierDescriptor;
+        }
+
+        throw  new ItemNotFoundException("No notifier descriptor with type '" +type+ "' registered");
     }
 
-    private void setParameterValues(Resource notifier, NotifierParameters notifierParameters) {
+    private NotifierParameters setParameterValues(Resource notifier, NotifierParameters notifierParameters) {
+        Iterator<NotifierParameters.NotifierParameter> parameterIterator = notifierParameters.getParameterIterator();
+
+        while (parameterIterator.hasNext()) {
+            NotifierParameters.NotifierParameter notifierParameter = parameterIterator.next();
+            Value value = getValueOfPredicate(notifierParameter.getId(), notifier);
+            notifierParameter.setValue(value);
+        }
+
+        return notifierParameters;
+    }
+
+    private Value getValueOfPredicate(URI predicate, Resource notifier) {
+        return rdfSubscription.filter(notifier, predicate, null).objectValue();
     }
 
     private Collection<String> getSparqlQueries() {

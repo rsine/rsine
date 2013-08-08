@@ -6,6 +6,7 @@ import org.openrdf.model.Value;
 import org.openrdf.model.vocabulary.XMLSchema;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class NotifierParameters {
@@ -24,7 +25,11 @@ public class NotifierParameters {
         throw new ItemNotFoundException("No parameter with id '" +id+ "' available");
     }
 
-    private class NotifierParameter {
+    public Iterator<NotifierParameter> getParameterIterator() {
+        return parameters.iterator();
+    }
+
+    public class NotifierParameter {
 
         private URI id, range;
         private Value value;
@@ -42,6 +47,18 @@ public class NotifierParameters {
             this.id = id;
             this.range = range;
             this.required = required;
+        }
+
+        public boolean isRequired() {
+            return required;
+        }
+
+        public URI getId() {
+            return id;
+        }
+
+        public void setValue(Value value) {
+            this.value = value;
         }
 
     }
