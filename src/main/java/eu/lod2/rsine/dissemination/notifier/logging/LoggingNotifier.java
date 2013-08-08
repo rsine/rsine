@@ -1,5 +1,6 @@
-package eu.lod2.rsine.dissemination.notifier;
+package eu.lod2.rsine.dissemination.notifier.logging;
 
+import eu.lod2.rsine.dissemination.notifier.INotifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

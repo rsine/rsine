@@ -5,7 +5,7 @@ import at.punkt.lod2.util.TestUtils;
 import eu.lod2.rsine.Rsine;
 import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
 import eu.lod2.rsine.dissemination.messageformatting.BindingSetFormatter;
-import eu.lod2.rsine.dissemination.notifier.LoggingNotifier;
+import eu.lod2.rsine.dissemination.notifier.logging.LoggingNotifier;
 import eu.lod2.rsine.querydispatcher.QueryDispatcher;
 import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.util.Namespaces;

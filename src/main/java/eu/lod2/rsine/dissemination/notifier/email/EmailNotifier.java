@@ -1,4 +1,6 @@
-package eu.lod2.rsine.dissemination.notifier;
+package eu.lod2.rsine.dissemination.notifier.email;
+
+import eu.lod2.rsine.dissemination.notifier.INotifier;
 
 import java.util.Collection;
 
