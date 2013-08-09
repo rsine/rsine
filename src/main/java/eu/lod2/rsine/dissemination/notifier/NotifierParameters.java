@@ -20,9 +20,9 @@ public class NotifierParameters {
 
     public Value getValueById(URI id) {
         for (NotifierParameter notifierParameter : parameters) {
-            if (notifierParameter.getId().equals(id)) return notifierParameter.value;
+            if (notifierParameter.getPredicate().equals(id)) return notifierParameter.value;
         }
-        throw new ItemNotFoundException("No parameter with id '" +id+ "' available");
+        throw new ItemNotFoundException("No parameter with predicate '" +id+ "' available");
     }
 
     public Iterator<NotifierParameter> getParameterIterator() {
@@ -31,20 +31,20 @@ public class NotifierParameters {
 
     public class NotifierParameter {
 
-        private URI id, range;
+        private URI predicate, range;
         private Value value;
         private boolean required;
 
-        NotifierParameter(URI id) {
-            this(id, XMLSchema.STRING);
+        NotifierParameter(URI predicate) {
+            this(predicate, XMLSchema.STRING);
         }
 
-        NotifierParameter(URI id, URI range) {
-            this(id, range, true);
+        NotifierParameter(URI predicate, URI range) {
+            this(predicate, range, true);
         }
 
-        NotifierParameter(URI id, URI range, boolean required) {
-            this.id = id;
+        NotifierParameter(URI predicate, URI range, boolean required) {
+            this.predicate = predicate;
             this.range = range;
             this.required = required;
         }
@@ -53,8 +53,8 @@ public class NotifierParameters {
             return required;
         }
 
-        public URI getId() {
-            return id;
+        public URI getPredicate() {
+            return predicate;
         }
 
         public void setValue(Value value) {

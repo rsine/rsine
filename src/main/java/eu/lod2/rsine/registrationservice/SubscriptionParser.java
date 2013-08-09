@@ -69,7 +69,7 @@ public class SubscriptionParser {
 
         while (parameterIterator.hasNext()) {
             NotifierParameters.NotifierParameter notifierParameter = parameterIterator.next();
-            Value value = getValueOfPredicate(notifierParameter.getId(), notifier);
+            Value value = getValueOfPredicate(notifierParameter.getPredicate(), notifier);
             notifierParameter.setValue(value);
         }
 
