@@ -1,4 +1,4 @@
-@prefix spin: <http://spinrdf.org/sp> .
+@prefix spin: <http://spinrdf.org/sp/> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix rsine: <http://lod2.eu/rsine/> .
 

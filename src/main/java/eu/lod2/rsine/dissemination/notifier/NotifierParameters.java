@@ -20,7 +20,7 @@ public class NotifierParameters {
 
     public Value getValueById(URI id) {
         for (NotifierParameter notifierParameter : parameters) {
-            if (notifierParameter.equals(id)) return notifierParameter.value;
+            if (notifierParameter.getId().equals(id)) return notifierParameter.value;
         }
         throw new ItemNotFoundException("No parameter with id '" +id+ "' available");
     }

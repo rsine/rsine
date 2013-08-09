@@ -10,6 +10,7 @@ public class Namespaces {
     public final static Namespace CS_NAMESPACE = new NamespaceImpl("cs", "http://purl.org/vocab/changeset/schema#");
     public final static Namespace SKOS_NAMESPACE = new NamespaceImpl("skos", "http://www.w3.org/2004/02/skos/core#");
     public final static Namespace DCTERMS_NAMESPACE = new NamespaceImpl("dcterms", "http://purl.org/dc/terms/");
+    public final static Namespace SPIN = new NamespaceImpl("spin", "http://spinrdf.org/sp/");
 
     public final static String SKOS_PREFIX = "PREFIX skos:<" +SKOS_NAMESPACE.getName()+ ">";
     public final static String CS_PREFIX = "PREFIX cs:<" +CS_NAMESPACE.getName()+ ">";

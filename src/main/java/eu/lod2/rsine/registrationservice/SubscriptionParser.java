@@ -61,7 +61,7 @@ public class SubscriptionParser {
             if (notifierDescriptor.getType().equals(type)) return notifierDescriptor;
         }
 
-        throw  new ItemNotFoundException("No notifier descriptor with type '" +type+ "' registered");
+        throw  new ItemNotFoundException("No notifier descriptor covering type '" +type+ "' registered");
     }
 
     private NotifierParameters setParameterValues(Resource notifier, NotifierParameters notifierParameters) {
@@ -81,7 +81,18 @@ public class SubscriptionParser {
     }
 
     private Collection<String> getSparqlQueries() {
-        return Collections.EMPTY_LIST;
+        Collection<String> registeredQueries = new ArrayList<>();
+
+        Set<Value> queries = rdfSubscription.filter(
+            null,
+            valueFactory.createURI(Namespaces.SPIN.getName(), "text"),
+            null).objects();
+
+        for (Value query : queries) {
+            registeredQueries.add(query.stringValue());
+        }
+
+        return registeredQueries;
     }
 
 }
