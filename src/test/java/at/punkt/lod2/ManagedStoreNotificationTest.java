@@ -53,7 +53,7 @@ public class ManagedStoreNotificationTest {
     }
 
     private void registerUser() {
-        Subscription subscription = rsine.requestSubscription();
+        Subscription subscription = new Subscription();
         subscription.addQuery(createScopeNoteCreatedQuery(), scopeNoteCreationFormatter);
         subscription.addNotifier(new LoggingNotifier());
         subscription.addNotifier(countingNotifier);

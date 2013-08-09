@@ -49,7 +49,7 @@ public class RemoteNotificationTest {
     }
 
     private void registerRemoteChangeSubscriber(Rsine rsine) {
-        Subscription subscription = rsine.requestSubscription();
+        Subscription subscription = new Subscription();
         subscription.addQuery(createRemoteReferencesDetectionQuery(), new RemoteReferencesFormatter());
         subscription.addNotifier(countingNotifier);
         rsine.registerSubscription(subscription);

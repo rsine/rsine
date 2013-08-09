@@ -12,10 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 public class QueryDispatcher implements IQueryDispatcher {
 
@@ -46,12 +43,21 @@ public class QueryDispatcher implements IQueryDispatcher {
     }
 
     public void dispatchForSubscriber(Subscription subscription) throws RepositoryException {
-        logger.info("Dispatching queries for subscriber '" +subscription.getSubscriber()+ "'");
+        logger.debug("Dispatching queries for subscriber '" + subscription.getSubscriber() + "'");
 
         Iterator<NotificationQuery> queryIt = subscription.getQueryIterator();
         while (queryIt.hasNext()) {
-            issueQueryAndNotify(queryIt.next(), subscription);
+            NotificationQuery notificationQuery = queryIt.next();
+            if (minQueryIntervalPassed(notificationQuery)) {
+                issueQueryAndNotify(notificationQuery, subscription);
+            }
         }
+    }
+
+    private boolean minQueryIntervalPassed(NotificationQuery notificationQuery) {
+        long millisSinceLastIssued = new Date().getTime() - notificationQuery.getLastIssued().getTime();
+        //return millisSinceLastIssued > 2000;
+        return true;
     }
 
     private void issueQueryAndNotify(NotificationQuery query, Subscription subscription) throws RepositoryException

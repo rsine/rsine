@@ -23,7 +23,7 @@ import java.util.Properties;
 
 public class LocalUseCasesTest {
 
-    private SPARQLServer fusekiServer;
+    private SPARQLServer managedServer;
     private Rsine rsine;
     private int managedStoreChangesListeningPort = TestUtils.getRandomPort();
     private CountingNotifier countingNotifier;
@@ -31,7 +31,7 @@ public class LocalUseCasesTest {
     @Before
     public void setUp() throws IOException, RepositoryException {
         countingNotifier = new CountingNotifier();
-        fusekiServer = new TestUtils().initFuseki(Rsine.class.getResource("/reegle.rdf"), "dataset");
+        managedServer = new TestUtils().initFuseki(Rsine.class.getResource("/reegle.rdf"), "dataset");
 
         rsine = new Rsine(managedStoreChangesListeningPort, "http://localhost:3030/dataset/query");
         registerUser();
@@ -41,12 +41,12 @@ public class LocalUseCasesTest {
 
     @After
     public void tearDown() throws IOException, InterruptedException {
-        fusekiServer.stop();
+        managedServer.stop();
         rsine.stop();
     }
 
     private void registerUser() {
-        Subscription subscription = rsine.requestSubscription();
+        Subscription subscription = new Subscription();
         subscription.addQuery(createScopeNoteChangesQuery(), new ScopeNoteChangeFormatter());
         subscription.addQuery(createConceptLinkingQuery(), new ConceptLinkingFormatter());
         subscription.addNotifier(new LoggingNotifier());

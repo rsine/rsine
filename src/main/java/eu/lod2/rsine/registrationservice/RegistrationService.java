@@ -10,10 +10,6 @@ public class RegistrationService {
 
     private Collection<Subscription> subscriptions = new HashSet<Subscription>();
 
-    public Subscription requestSubscription() {
-        return new Subscription();
-    }
-
     public void register(Subscription subscription) {
         subscriptions.add(subscription);
     }

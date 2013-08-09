@@ -19,7 +19,7 @@ public class Subscription {
     private Collection<NotificationQuery> queries;
     private Collection<INotifier> notifiers;
 
-    Subscription() {
+    public Subscription() {
         ValueFactory valueFactory = new ValueFactoryImpl();
         subscriber = valueFactory.createURI(Namespaces.RSINE_NAMESPACE.getName(), "subscriber_" +System.currentTimeMillis());
         queries = new HashSet<>();

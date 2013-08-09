@@ -41,7 +41,7 @@ public class LocalNotificationTest {
     }
 
     private void registerUser() {
-        Subscription subscription = rsine.requestSubscription();
+        Subscription subscription = new Subscription();
         subscription.addQuery(createQuery(), new DummyBindingSetFormatter());
         subscription.addNotifier(countingNotifier);
         rsine.registerSubscription(subscription);
