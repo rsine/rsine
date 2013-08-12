@@ -82,8 +82,8 @@ public class ManagedStoreNotificationTest {
     public void notificationDissemination() throws IOException {
         triggerQueryExecution();
 
+        Assert.assertEquals(1, countingNotifier.waitForNotification());
         Assert.assertEquals("blanching", scopeNoteCreationFormatter.prefLabel);
-        Assert.assertEquals(1, countingNotifier.getNotificationCount());
     }
 
     private void triggerQueryExecution() throws IOException {

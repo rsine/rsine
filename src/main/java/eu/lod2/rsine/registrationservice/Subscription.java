@@ -15,15 +15,20 @@ import java.util.Iterator;
 
 public class Subscription {
 
+    private static int id = 0;
+
     private URI subscriber;
     private Collection<NotificationQuery> queries;
     private Collection<INotifier> notifiers;
 
     public Subscription() {
         ValueFactory valueFactory = new ValueFactoryImpl();
-        subscriber = valueFactory.createURI(Namespaces.RSINE_NAMESPACE.getName(), "subscriber_" +System.currentTimeMillis());
+        subscriber = valueFactory.createURI(
+            Namespaces.RSINE_NAMESPACE.getName(),
+            "subscriber_" +id);
         queries = new HashSet<>();
         notifiers = new ArrayList<>();
+        id++;
     }
 
     public URI getSubscriber() {

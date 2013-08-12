@@ -8,7 +8,6 @@ import eu.lod2.rsine.dissemination.messageformatting.DummyBindingSetFormatter;
 import eu.lod2.rsine.querydispatcher.QueryDispatcher;
 import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.util.Namespaces;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openrdf.repository.RepositoryException;
@@ -32,12 +31,11 @@ public class LocalNotificationTest {
         rsine.start();
     }
 
-    @Test
+    @Test(timeout = 2000)
     public void notificationDissemination() throws RDFParseException, IOException, RDFHandlerException {
         registerUser();
         postChanges();
-
-        Assert.assertEquals(1, countingNotifier.getNotificationCount());
+        countingNotifier.waitForNotification();
     }
 
     private void registerUser() {
@@ -103,8 +101,8 @@ public class LocalNotificationTest {
             ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
             "<http://reegle.info/glossary/1111> <http://www.w3.org/2004/02/skos/core#prefLabel> \"Ottakringer Helles\"@en .");
         props.setProperty(
-                ChangeTripleHandler.POST_BODY_SECONDARYTRIPLE,
-                "<http://reegle.info/glossary/1111> <http://www.w3.org/2004/02/skos/core#prefLabel> \"Schremser Edelmärzen\"@en .");
+            ChangeTripleHandler.POST_BODY_SECONDARYTRIPLE,
+            "<http://reegle.info/glossary/1111> <http://www.w3.org/2004/02/skos/core#prefLabel> \"Schremser Edelmärzen\"@en .");
 
         new TestUtils().doPost(managedStoreChangesListeningPort, props);
     }

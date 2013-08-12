@@ -107,7 +107,7 @@ public class LocalUseCasesTest {
         scopeNoteChange();
         scopeNoteChangeOfConceptCreatedByOtherUser();
 
-        Assert.assertEquals(2, countingNotifier.getNotificationCount());
+        Assert.assertEquals(2, countingNotifier.waitForNotification());
     }
 
     private void scopeNoteDefinition() throws IOException {
@@ -148,7 +148,7 @@ public class LocalUseCasesTest {
     public void conceptLinking() throws IOException {
         addLink();
 
-        Assert.assertEquals(1, countingNotifier.getNotificationCount());
+        Assert.assertEquals(1, countingNotifier.waitForNotification());
     }
 
     private void addLink() throws IOException {

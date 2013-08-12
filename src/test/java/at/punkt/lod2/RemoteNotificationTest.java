@@ -83,7 +83,7 @@ public class RemoteNotificationTest {
     @Test
     public void changeSetDissemination() throws RDFParseException, IOException, RDFHandlerException {
         localRsineInstance.getRemoteNotificationService().announce(changeSet);
-        Assert.assertTrue(countingNotifier.getNotificationCount() >= 1);
+        Assert.assertTrue(countingNotifier.waitForNotification() >= 1);
     }
 
     private class TestRemoteServiceDetector implements IRemoteServiceDetector {

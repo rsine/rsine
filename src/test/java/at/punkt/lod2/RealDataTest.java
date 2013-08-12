@@ -41,8 +41,8 @@ public class RealDataTest {
 
     private enum ChangeType {addition, removal};
 
-    private final int SUBSCRIBER_COUNT = 10;
-    private final int POST_COUNT = 100;
+    private final int SUBSCRIBER_COUNT = 20;
+    private final int POST_COUNT = 50;
     private final String VOCAB_FILENAME = "/stw.rdf";
 
     private SPARQLServer managedServer;

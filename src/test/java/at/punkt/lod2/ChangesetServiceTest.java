@@ -4,7 +4,7 @@ import at.punkt.lod2.util.TestUtils;
 import eu.lod2.rsine.changesetservice.ChangeSetCreator;
 import eu.lod2.rsine.changesetservice.ChangeSetService;
 import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
-import eu.lod2.rsine.changesetservice.RequestHandlerFactory;
+import eu.lod2.rsine.changesetservice.ChangeTripleWorker;
 import eu.lod2.rsine.changesetstore.ChangeSetStore;
 import eu.lod2.rsine.querydispatcher.IQueryDispatcher;
 import eu.lod2.rsine.remotenotification.NullRemoteNotificationService;
@@ -21,15 +21,14 @@ import org.junit.Test;
 import org.openrdf.model.Statement;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.model.vocabulary.RDF;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.TupleQueryResult;
+import org.openrdf.query.*;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.RepositoryResult;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Properties;
 
 public class ChangesetServiceTest {
@@ -43,12 +42,12 @@ public class ChangesetServiceTest {
         changeSetService = new ChangeSetService(port);
         changeSetStore = new ChangeSetStore();
 
-        RequestHandlerFactory requestHandlerFactory = RequestHandlerFactory.getInstance();
-        requestHandlerFactory.setChangeSetCreator(new ChangeSetCreator());
-        requestHandlerFactory.setQueryDispatcher(new DummyQueryDispatcher());
-        requestHandlerFactory.setChangeSetStore(changeSetStore);
-        requestHandlerFactory.setRemoteNotificationService(new NullRemoteNotificationService());
-
+        ChangeTripleWorker changeTripleWorker = ChangeTripleWorker.getInstance();
+        changeTripleWorker.setChangeSetCreator(new ChangeSetCreator());
+        changeTripleWorker.setChangeSetStore(changeSetStore);
+        changeTripleWorker.setQueryDispatcher(new DummyQueryDispatcher());
+        changeTripleWorker.setRemoteNotificationService(new NullRemoteNotificationService());
+        
         changeSetService.start();
     }
 
@@ -114,7 +113,7 @@ public class ChangesetServiceTest {
     /**
      * Posting an update results in creation of a changeset with both removal and addition statements
      */
-    @Test
+    @Test(timeout = 2000)
     public void postUpdate()
         throws IOException, RepositoryException, MalformedQueryException, QueryEvaluationException
     {
@@ -124,19 +123,28 @@ public class ChangesetServiceTest {
         props.setProperty(ChangeTripleHandler.POST_BODY_SECONDARYTRIPLE, "<http://example.org/myconcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"updatedlabel\"@en .");
 
         new TestUtils().doPost(port, props);
+        waitForChangeSetWritten();
+    }
 
+    private void waitForChangeSetWritten()
+        throws RepositoryException, MalformedQueryException, QueryEvaluationException
+    {
         RepositoryConnection repCon = changeSetStore.getRepository().getConnection();
-        TupleQueryResult result = repCon.prepareTupleQuery(QueryLanguage.SPARQL,
+        TupleQuery query = repCon.prepareTupleQuery(QueryLanguage.SPARQL,
                 Namespaces.SKOS_PREFIX +
                         Namespaces.CS_PREFIX +
                         "SELECT * " +
                         "WHERE {" +
-                            "?cs a cs:ChangeSet . " +
-                            "?cs cs:removal ?removal . " +
-                            "?cs cs:addition ?addition . " +
-                        "}").evaluate();
+                        "?cs a cs:ChangeSet . " +
+                        "?cs cs:removal ?removal . " +
+                        "?cs cs:addition ?addition . " +
+                        "}");
 
-        Assert.assertTrue(result.hasNext());
+        boolean resultAvailable = false;
+        while (!resultAvailable) {
+            TupleQueryResult result = query.evaluate();
+            resultAvailable = result.hasNext();
+        }
     }
 
     @Test
@@ -147,22 +155,30 @@ public class ChangesetServiceTest {
         Assert.assertEquals(400, new TestUtils().doPost(port, props));
     }
 
-    @Test
+    @Test(timeout = 2000)
     public void tripleChangeToRepo() throws IOException, RepositoryException {
         Properties props = new Properties();
         props.setProperty(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD);
         props.setProperty(ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE, "<http://example.org/myconcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"somelabel\"@en .");
 
         new TestUtils().doPost(port, props);
+        Assert.assertEquals(1, waitForChangeSetCreated());
+    }
 
+    private int waitForChangeSetCreated() throws RepositoryException {
         RepositoryConnection repCon = changeSetStore.getRepository().getConnection();
-        RepositoryResult<Statement> result = repCon.getStatements(
-            null,
-            RDF.TYPE,
-            ValueFactoryImpl.getInstance().createURI(Namespaces.CS_NAMESPACE.getName(), "ChangeSet"),
-            false);
 
-        Assert.assertEquals(1, Iterations.asList(result).size());
+        Collection<Statement> statements = Collections.EMPTY_LIST;
+        while (statements.isEmpty()) {
+            RepositoryResult<Statement> result = repCon.getStatements(
+                null,
+                RDF.TYPE,
+                ValueFactoryImpl.getInstance().createURI(Namespaces.CS_NAMESPACE.getName(), "ChangeSet"),
+                false);
+            statements = Iterations.asList(result);
+        }
+
+        return statements.size();
     }
 
     private class DummyQueryDispatcher implements IQueryDispatcher {

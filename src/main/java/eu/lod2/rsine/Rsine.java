@@ -2,12 +2,13 @@ package eu.lod2.rsine;
 
 import eu.lod2.rsine.changesetservice.ChangeSetCreator;
 import eu.lod2.rsine.changesetservice.ChangeSetService;
-import eu.lod2.rsine.changesetservice.RequestHandlerFactory;
+import eu.lod2.rsine.changesetservice.ChangeTripleWorker;
 import eu.lod2.rsine.changesetstore.ChangeSetStore;
 import eu.lod2.rsine.querydispatcher.QueryDispatcher;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.rsine.remotenotification.NullRemoteNotificationService;
+import eu.lod2.rsine.remotenotification.RemoteChangeSetWorker;
 import eu.lod2.rsine.remotenotification.RemoteNotificationService;
 import eu.lod2.rsine.remotenotification.RemoteNotificationServiceBase;
 import org.openrdf.repository.RepositoryException;
@@ -23,8 +24,29 @@ public class Rsine {
     private ChangeSetService changeSetService;
     private RegistrationService registrationService;
     private QueryDispatcher queryDispatcher;
-    private RequestHandlerFactory requestHandlerFactory;
     private RemoteNotificationServiceBase remoteNotificationService;
+    private ChangeSetStore changeSetStore;
+
+    private Rsine(int managedStoreChangesListeningPort,
+                  String managedStoreSparqlEndpoint,
+                  RemoteNotificationServiceBase remoteNotificationService)
+    {
+        changeSetService = new ChangeSetService(managedStoreChangesListeningPort);
+        registrationService = new RegistrationService();
+        queryDispatcher = new QueryDispatcher();
+        this.remoteNotificationService = remoteNotificationService;
+        changeSetStore = new ChangeSetStore();
+
+        queryDispatcher.setRegistrationService(registrationService);
+        queryDispatcher.setManagedTripleStore(managedStoreSparqlEndpoint);
+        queryDispatcher.setChangeSetStore(changeSetStore);
+
+        ChangeTripleWorker changeTripleWorker = ChangeTripleWorker.getInstance();
+        changeTripleWorker.setChangeSetCreator(new ChangeSetCreator());
+        changeTripleWorker.setChangeSetStore(changeSetStore);
+        changeTripleWorker.setQueryDispatcher(queryDispatcher);
+        changeTripleWorker.setRemoteNotificationService(remoteNotificationService);
+    }
 
     /**
      * Creates an Rsine instance for local use only
@@ -32,21 +54,7 @@ public class Rsine {
     public Rsine(int managedStoreChangesListeningPort,
                  String managedStoreSparqlEndpoint)
     {
-        changeSetService = new ChangeSetService(managedStoreChangesListeningPort);
-        registrationService = new RegistrationService();
-        queryDispatcher = new QueryDispatcher();
-        remoteNotificationService = new NullRemoteNotificationService();
-        ChangeSetStore changeSetStore = new ChangeSetStore();
-
-        queryDispatcher.setRegistrationService(registrationService);
-        queryDispatcher.setManagedTripleStore(managedStoreSparqlEndpoint);
-        queryDispatcher.setChangeSetStore(changeSetStore);
-
-        requestHandlerFactory = RequestHandlerFactory.getInstance();
-        requestHandlerFactory.setChangeSetCreator(new ChangeSetCreator());
-        requestHandlerFactory.setChangeSetStore(changeSetStore);
-        requestHandlerFactory.setQueryDispatcher(queryDispatcher);
-        requestHandlerFactory.setRemoteNotificationService(remoteNotificationService);
+        this(managedStoreChangesListeningPort, managedStoreSparqlEndpoint, new NullRemoteNotificationService());
     }
 
     /**
@@ -56,11 +64,13 @@ public class Rsine {
                  String managedStoreSparqlEndpoint,
                  String authoritativeUri)
     {
-        this(managedStoreChangesListeningPort, managedStoreSparqlEndpoint);
-        RemoteNotificationService remoteNotificationService = new RemoteNotificationService();
-        this.remoteNotificationService = remoteNotificationService;
+        this(managedStoreChangesListeningPort, managedStoreSparqlEndpoint, new RemoteNotificationService());
+
+        RemoteNotificationService remoteNotificationService = (RemoteNotificationService) getRemoteNotificationService();
         remoteNotificationService.setAuthoritativeUri(authoritativeUri);
-        requestHandlerFactory.setRemoteNotificationService(remoteNotificationService);
+
+        RemoteChangeSetWorker.getInstance().setChangeSetStore(changeSetStore);
+        RemoteChangeSetWorker.getInstance().setQueryDispatcher(queryDispatcher);
     }
 
 

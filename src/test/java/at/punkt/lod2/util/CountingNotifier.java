@@ -17,4 +17,16 @@ public class CountingNotifier implements INotifier {
         return notificationCount;
     }
 
+    public int waitForNotification() {
+        while (notificationCount == 0) {
+            try {
+                Thread.sleep(200);
+            }
+            catch (InterruptedException e) {
+            }
+            Thread.yield();
+        }
+        return notificationCount;
+    }
+
 }
