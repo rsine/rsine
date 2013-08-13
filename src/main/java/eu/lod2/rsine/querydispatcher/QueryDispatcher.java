@@ -33,20 +33,13 @@ public class QueryDispatcher implements IQueryDispatcher {
         }
 
         try {
-            long notificationStartTime = System.currentTimeMillis();
             while (subscriptionIt.hasNext()) {
                 dispatchForSubscriber(subscriptionIt.next());
             }
-            logFullNotificationTime(notificationStartTime);
         }
         catch (RepositoryException e) {
             logger.error("Error issuing query", e);
         }
-    }
-
-    private void logFullNotificationTime(long start) {
-        long duration = System.currentTimeMillis() - start;
-        logger.info("Notification of all subscribers completed in " +duration+ " milliseconds");
     }
 
     public void dispatchForSubscriber(Subscription subscription) throws RepositoryException {
@@ -54,17 +47,8 @@ public class QueryDispatcher implements IQueryDispatcher {
 
         Iterator<NotificationQuery> queryIt = subscription.getQueryIterator();
         while (queryIt.hasNext()) {
-            NotificationQuery notificationQuery = queryIt.next();
-            if (minQueryIntervalPassed(notificationQuery)) {
-                issueQueryAndNotify(notificationQuery, subscription);
-            }
+            issueQueryAndNotify(queryIt.next(), subscription);
         }
-    }
-
-    private boolean minQueryIntervalPassed(NotificationQuery notificationQuery) {
-        long millisSinceLastIssued = new Date().getTime() - notificationQuery.getLastIssued().getTime();
-        //return millisSinceLastIssued > 2000;
-        return true;
     }
 
     private void issueQueryAndNotify(NotificationQuery query, Subscription subscription) throws RepositoryException

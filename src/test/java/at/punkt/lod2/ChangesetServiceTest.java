@@ -4,7 +4,7 @@ import at.punkt.lod2.util.TestUtils;
 import eu.lod2.rsine.changesetservice.ChangeSetCreator;
 import eu.lod2.rsine.changesetservice.ChangeSetService;
 import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
-import eu.lod2.rsine.changesetservice.ChangeTripleWorker;
+import eu.lod2.rsine.changesetservice.PostRequestHandlerFactory;
 import eu.lod2.rsine.changesetstore.ChangeSetStore;
 import eu.lod2.rsine.querydispatcher.IQueryDispatcher;
 import eu.lod2.rsine.remotenotification.NullRemoteNotificationService;
@@ -42,12 +42,12 @@ public class ChangesetServiceTest {
         changeSetService = new ChangeSetService(port);
         changeSetStore = new ChangeSetStore();
 
-        ChangeTripleWorker changeTripleWorker = ChangeTripleWorker.getInstance();
-        changeTripleWorker.setChangeSetCreator(new ChangeSetCreator());
-        changeTripleWorker.setChangeSetStore(changeSetStore);
-        changeTripleWorker.setQueryDispatcher(new DummyQueryDispatcher());
-        changeTripleWorker.setRemoteNotificationService(new NullRemoteNotificationService());
-        
+        PostRequestHandlerFactory handlerFactory = PostRequestHandlerFactory.getInstance();
+        handlerFactory.setChangeSetCreator(new ChangeSetCreator());
+        handlerFactory.setChangeSetStore(changeSetStore);
+        handlerFactory.setQueryDispatcher(new DummyQueryDispatcher());
+        handlerFactory.setRemoteNotificationService(new NullRemoteNotificationService());
+
         changeSetService.start();
     }
 

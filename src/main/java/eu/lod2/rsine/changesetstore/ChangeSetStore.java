@@ -23,7 +23,7 @@ public class ChangeSetStore {
         return System.getProperty("java.io.tmpdir") + File.separator + System.currentTimeMillis();
     }
 
-    public void persistChangeSet(Graph changeSet) throws RepositoryException {
+    public synchronized void persistChangeSet(Graph changeSet) throws RepositoryException {
         ensureInitialized();
 
         RepositoryConnection repCon = repository.getConnection();
@@ -36,7 +36,7 @@ public class ChangeSetStore {
         return repository;
     }
 
-    private void ensureInitialized() throws RepositoryException {
+    private synchronized void ensureInitialized() throws RepositoryException {
         if (!isInitialized) {
             repository.initialize();
             isInitialized = true;

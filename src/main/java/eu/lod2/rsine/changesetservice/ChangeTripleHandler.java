@@ -4,6 +4,7 @@ import eu.lod2.util.ItemNotFoundException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.message.BasicHttpEntityEnclosingRequest;
+import org.openrdf.model.Model;
 import org.openrdf.model.Statement;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParseException;
@@ -26,6 +27,9 @@ public class ChangeTripleHandler extends PostRequestHandler {
     public static String CHANGETYPE_REMOVE = "remove";
     public static String CHANGETYPE_UPDATE = "update";
 
+    private ChangeSetCreator changeSetCreator;
+    private PersistAndNotifyProvider persistAndNotifyProvider;
+
     @Override
     protected void handlePost(BasicHttpEntityEnclosingRequest request, HttpResponse response) {
 
@@ -36,7 +40,8 @@ public class ChangeTripleHandler extends PostRequestHandler {
             String changeType = getValueForName(POST_BODY_CHANGETYPE, properties);
             List<Statement> triples = extractStatements(properties, changeType);
 
-            ChangeTripleWorker.getInstance().handleChangeTripleRequest(triples.get(0), triples.get(1), changeType);
+            Model changeSet = changeSetCreator.assembleChangeset(triples.get(0), triples.get(1), changeType);
+            persistAndNotifyProvider.persistAndNotify(changeSet, false);
         }
         catch (ItemNotFoundException e) {
             errorResponse(response, "No triple or change type provided");
@@ -89,6 +94,14 @@ public class ChangeTripleHandler extends PostRequestHandler {
     private void errorResponse(HttpResponse response, String message) {
         response.setStatusCode(HttpStatus.SC_BAD_REQUEST);
         response.setReasonPhrase(message);
+    }
+
+    public void setChangeSetCreator(ChangeSetCreator changeSetCreator) {
+        this.changeSetCreator = changeSetCreator;
+    }
+
+    public void setPersistAndNotifyProvider(PersistAndNotifyProvider persistAndNotifyProvider) {
+        this.persistAndNotifyProvider = persistAndNotifyProvider;
     }
 
     private class SingleStatementHandler extends RDFHandlerBase {

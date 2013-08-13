@@ -31,7 +31,7 @@ public class LocalNotificationTest {
         rsine.start();
     }
 
-    @Test(timeout = 2000)
+    @Test
     public void notificationDissemination() throws RDFParseException, IOException, RDFHandlerException {
         registerUser();
         postChanges();

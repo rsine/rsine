@@ -1,33 +1,53 @@
 package eu.lod2.rsine.remotenotification;
 
+import eu.lod2.rsine.changesetservice.PersistAndNotifyProvider;
 import eu.lod2.rsine.changesetservice.PostRequestHandler;
 import org.apache.http.HttpResponse;
 import org.apache.http.message.BasicHttpEntityEnclosingRequest;
 import org.openrdf.OpenRDFException;
-import org.openrdf.repository.RepositoryException;
+import org.openrdf.model.Model;
+import org.openrdf.model.impl.TreeModel;
+import org.openrdf.rio.RDFFormat;
+import org.openrdf.rio.RDFParser;
+import org.openrdf.rio.Rio;
+import org.openrdf.rio.helpers.StatementCollector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 public class RemoteChangeSetHandler extends PostRequestHandler {
 
     private final Logger logger = LoggerFactory.getLogger(RemoteChangeSetHandler.class);
 
+    private PersistAndNotifyProvider persistAndNotifyProvider;
+
     @Override
     protected void handlePost(BasicHttpEntityEnclosingRequest request, HttpResponse response) {
         try {
-            RemoteChangeSetWorker.getInstance().handleRemoteChangeSet(request.getEntity().getContent());
+            Model changeSet = parseChangeSet(request.getEntity().getContent());
+            persistAndNotifyProvider.persistAndNotify(changeSet, true);
         }
         catch (IOException e) {
             logger.error("Error reading remote changeset", e);
         }
-        catch (RepositoryException e) {
-            logger.error("Error persisting remote changeset", e);
-        }
         catch (OpenRDFException e) {
             logger.error("Error parsing remote changeset", e);
         }
+    }
+
+    private Model parseChangeSet(InputStream remoteChangeSetContent) throws OpenRDFException, IOException {
+        RDFParser rdfParser = Rio.createParser(RDFFormat.NTRIPLES);
+        Model changeSet = new TreeModel();
+        StatementCollector collector = new StatementCollector(changeSet);
+        rdfParser.setRDFHandler(collector);
+        rdfParser.parse(remoteChangeSetContent, "");
+        return changeSet;
+    }
+
+    public void setPersistAndNotifyProvider(PersistAndNotifyProvider persistAndNotifyProvider) {
+        this.persistAndNotifyProvider = persistAndNotifyProvider;
     }
 
 }

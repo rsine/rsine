@@ -1,6 +1,5 @@
 package eu.lod2.rsine.changesetservice;
 
-import eu.lod2.rsine.remotenotification.RemoteChangeSetHandler;
 import org.apache.http.ConnectionClosedException;
 import org.apache.http.HttpException;
 import org.apache.http.HttpServerConnection;
@@ -77,8 +76,8 @@ public class ChangeSetService {
 
         private void setupRequestHandler() throws RepositoryException {
             reqistry = new HttpRequestHandlerRegistry();
-            reqistry.register("*", new ChangeTripleHandler());
-            reqistry.register("/remote", new RemoteChangeSetHandler());
+            reqistry.register("*", PostRequestHandlerFactory.getInstance().createChangeTripleHandler());
+            reqistry.register("/remote", PostRequestHandlerFactory.getInstance().createRemoteChangeSetHandler());
         }
 
         @Override

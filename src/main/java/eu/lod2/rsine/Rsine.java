@@ -2,13 +2,12 @@ package eu.lod2.rsine;
 
 import eu.lod2.rsine.changesetservice.ChangeSetCreator;
 import eu.lod2.rsine.changesetservice.ChangeSetService;
-import eu.lod2.rsine.changesetservice.ChangeTripleWorker;
+import eu.lod2.rsine.changesetservice.PostRequestHandlerFactory;
 import eu.lod2.rsine.changesetstore.ChangeSetStore;
 import eu.lod2.rsine.querydispatcher.QueryDispatcher;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.rsine.remotenotification.NullRemoteNotificationService;
-import eu.lod2.rsine.remotenotification.RemoteChangeSetWorker;
 import eu.lod2.rsine.remotenotification.RemoteNotificationService;
 import eu.lod2.rsine.remotenotification.RemoteNotificationServiceBase;
 import org.openrdf.repository.RepositoryException;
@@ -41,11 +40,11 @@ public class Rsine {
         queryDispatcher.setManagedTripleStore(managedStoreSparqlEndpoint);
         queryDispatcher.setChangeSetStore(changeSetStore);
 
-        ChangeTripleWorker changeTripleWorker = ChangeTripleWorker.getInstance();
-        changeTripleWorker.setChangeSetCreator(new ChangeSetCreator());
-        changeTripleWorker.setChangeSetStore(changeSetStore);
-        changeTripleWorker.setQueryDispatcher(queryDispatcher);
-        changeTripleWorker.setRemoteNotificationService(remoteNotificationService);
+        PostRequestHandlerFactory handlerFactory = PostRequestHandlerFactory.getInstance();
+        handlerFactory.setChangeSetCreator(new ChangeSetCreator());
+        handlerFactory.setChangeSetStore(changeSetStore);
+        handlerFactory.setQueryDispatcher(queryDispatcher);
+        handlerFactory.setRemoteNotificationService(remoteNotificationService);
     }
 
     /**
@@ -68,9 +67,6 @@ public class Rsine {
 
         RemoteNotificationService remoteNotificationService = (RemoteNotificationService) getRemoteNotificationService();
         remoteNotificationService.setAuthoritativeUri(authoritativeUri);
-
-        RemoteChangeSetWorker.getInstance().setChangeSetStore(changeSetStore);
-        RemoteChangeSetWorker.getInstance().setQueryDispatcher(queryDispatcher);
     }
 
 
