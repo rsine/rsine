@@ -13,10 +13,13 @@ import org.slf4j.LoggerFactory;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class QueryDispatcher implements IQueryDispatcher {
 
     private final Logger logger = LoggerFactory.getLogger(QueryDispatcher.class);
+    private final int NUM_NOTIFY_THREADS = 10;
 
     public final static String QUERY_LAST_ISSUED = "QUERY_LAST_ISSUED";
     public final static String MANAGED_STORE_SPARQL_ENDPONT = "MANAGED_STORE_SPARQL_ENDPONT";
@@ -24,6 +27,11 @@ public class QueryDispatcher implements IQueryDispatcher {
     private RegistrationService registrationService;
     private ChangeSetStore changeSetStore;
     private String managedTripleStoreSparqlEndpoint = "";
+    private ExecutorService notificationExecutor;
+
+    public QueryDispatcher() {
+        notificationExecutor = Executors.newFixedThreadPool(NUM_NOTIFY_THREADS);
+    }
 
     @Override
     public void trigger() {
@@ -84,8 +92,7 @@ public class QueryDispatcher implements IQueryDispatcher {
     private void sendNotifications(Collection<String> messages, Subscription subscription) {
         Iterator<INotifier> notifierIt = subscription.getNotifierIterator();
         while (!messages.isEmpty() && notifierIt.hasNext()) {
-            INotifier notifier = notifierIt.next();
-            notifier.notify(messages);
+            notificationExecutor.execute(new Notification(notifierIt.next(), messages));
         }
     }
 
@@ -120,6 +127,23 @@ public class QueryDispatcher implements IQueryDispatcher {
 
     public void setManagedTripleStore(String sparqlEndpoint) {
         managedTripleStoreSparqlEndpoint = sparqlEndpoint;
+    }
+
+    private class Notification implements Runnable {
+
+        private INotifier notifier;
+        private Collection<String> messages;
+
+        private Notification(INotifier notifier, Collection<String> messages) {
+            this.notifier = notifier;
+            this.messages = messages;
+        }
+
+        @Override
+        public void run() {
+            notifier.notify(messages);
+        }
+
     }
 
 }

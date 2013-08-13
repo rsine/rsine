@@ -20,12 +20,16 @@ import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.*;
 import org.openrdf.rio.helpers.StatementCollector;
 import org.openrdf.rio.ntriples.NTriplesWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.*;
 
 public class RealDataTest {
+
+    private final Logger logger = LoggerFactory.getLogger(RealDataTest.class);
 
     private String[] predicates = {Namespaces.DCTERMS_NAMESPACE.getName() + "title",
             Namespaces.DCTERMS_NAMESPACE.getName() + "creator",
@@ -49,6 +53,7 @@ public class RealDataTest {
     private Rsine rsine;
     private List<Statement> vocabStatements;
     private int managedStoreChangesListeningPort = TestUtils.getRandomPort();
+    private long accumulatedPostDurations = 0;
 
     @Before
     public void setUp() throws IOException, RepositoryException, RDFParseException, RDFHandlerException
@@ -83,6 +88,10 @@ public class RealDataTest {
         for (int i = 0; i < POST_COUNT; i++) {
             postChanges();
         }
+
+        double avgInsertNotifyTimeMillis = accumulatedPostDurations / POST_COUNT;
+        logger.info("Average insert/notification time: " +avgInsertNotifyTimeMillis+ "ms = " +
+            Math.floor(1000 / avgInsertNotifyTimeMillis)+ " triple changes per second");
     }
 
     private void registerUsers(int subscriberCount) {
@@ -154,7 +163,10 @@ public class RealDataTest {
             ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
             toNtriplesFormat(randomStatement)
             );
+
+        long startTimeMillis = System.currentTimeMillis();
         new TestUtils().doPost(managedStoreChangesListeningPort, props);
+        accumulatedPostDurations += System.currentTimeMillis() - startTimeMillis;
     }
 
     private String toNtriplesFormat(Statement statement) throws RDFHandlerException {

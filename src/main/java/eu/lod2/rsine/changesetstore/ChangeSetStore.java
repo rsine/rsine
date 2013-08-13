@@ -28,6 +28,7 @@ public class ChangeSetStore {
 
         RepositoryConnection repCon = repository.getConnection();
         repCon.add(changeSet);
+
         repCon.close();
     }
 
