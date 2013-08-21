@@ -45,6 +45,7 @@ public class Rsine {
         handlerFactory.setChangeSetStore(changeSetStore);
         handlerFactory.setQueryDispatcher(queryDispatcher);
         handlerFactory.setRemoteNotificationService(remoteNotificationService);
+        handlerFactory.setRegistrationService(registrationService);
     }
 
     /**
@@ -84,11 +85,11 @@ public class Rsine {
         try {
             switch (args.length) {
                 case 2:
-                    new Rsine(Integer.parseInt(args[0]), args[1]);
+                    rsine = new Rsine(Integer.parseInt(args[0]), args[1]);
                     break;
 
                 case 3:
-                    new Rsine(Integer.parseInt(args[0]), args[1], args[2]);
+                    rsine = new Rsine(Integer.parseInt(args[0]), args[1], args[2]);
                     break;
 
                 default:
@@ -97,6 +98,7 @@ public class Rsine {
             rsine.start();
         }
         catch (Exception e) {
+            e.printStackTrace();
             usage();
         }
     }

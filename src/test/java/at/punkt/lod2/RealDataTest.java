@@ -67,12 +67,12 @@ public class RealDataTest {
 
     private void createVocabModel() throws RDFParseException, IOException, RDFHandlerException {
         RDFParser rdfParser = Rio.createParser(RDFFormat.RDFXML);
-        Set<Statement> vocabStatementsSet = new HashSet<>();
+        Set<Statement> vocabStatementsSet = new HashSet<Statement>();
         StatementCollector collector = new StatementCollector(vocabStatementsSet);
         rdfParser.setRDFHandler(collector);
         rdfParser.parse(Rsine.class.getResourceAsStream(VOCAB_FILENAME), "");
 
-        vocabStatements = new ArrayList<>(vocabStatementsSet.size());
+        vocabStatements = new ArrayList<Statement>(vocabStatementsSet.size());
         vocabStatements.addAll(vocabStatementsSet);
     }
 
@@ -104,7 +104,7 @@ public class RealDataTest {
     }
 
     private void addRandomQueries(Subscription subscription, int maxQueryCount) {
-        Set<String> usedPredicates = new HashSet<>();
+        Set<String> usedPredicates = new HashSet<String>();
         for (int i = 0; i < maxQueryCount; i++) {
             String predicate = predicates[(int) (Math.random() * predicates.length)];
             if (!usedPredicates.contains(predicate)) {

@@ -26,8 +26,8 @@ public class Subscription {
         subscriber = valueFactory.createURI(
             Namespaces.RSINE_NAMESPACE.getName(),
             "subscriber_" +id);
-        queries = new HashSet<>();
-        notifiers = new ArrayList<>();
+        queries = new HashSet<NotificationQuery>();
+        notifiers = new ArrayList<INotifier>();
         id++;
     }
 

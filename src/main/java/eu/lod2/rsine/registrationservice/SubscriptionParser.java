@@ -35,7 +35,7 @@ public class SubscriptionParser {
     }
 
     private Collection<INotifier> createNotifiers() {
-        Collection<INotifier> notifiers = new ArrayList<>();
+        Collection<INotifier> notifiers = new ArrayList<INotifier>();
 
         Set<Value> allNotifiers = rdfSubscription.filter(
             null,
@@ -81,7 +81,7 @@ public class SubscriptionParser {
     }
 
     private Collection<String> getSparqlQueries() {
-        Collection<String> registeredQueries = new ArrayList<>();
+        Collection<String> registeredQueries = new ArrayList<String>();
 
         Set<Value> queries = rdfSubscription.filter(
             null,

@@ -11,7 +11,7 @@ import java.util.List;
 
 public class NotifierParameters {
 
-    private List<NotifierParameter> parameters = new ArrayList<>();
+    private List<NotifierParameter> parameters = new ArrayList<NotifierParameter>();
 
     public NotifierParameters add(URI id, URI range, boolean required) {
         parameters.add(new NotifierParameter(id, range, required));

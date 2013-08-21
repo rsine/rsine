@@ -59,7 +59,7 @@ public class RemoteNotificationService extends RemoteNotificationServiceBase {
     }
 
     private Collection<Resource> filterExternalResources(Resource... resources) {
-        Collection<Resource> externalResources = new ArrayList<>();
+        Collection<Resource> externalResources = new ArrayList<Resource>();
         for (Resource resource : resources) {
             if (!resource.stringValue().toUpperCase().contains(authoritativeUri.toUpperCase())) {
                 externalResources.add(resource);

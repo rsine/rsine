@@ -69,7 +69,7 @@ public class QueryDispatcher implements IQueryDispatcher {
 
             TupleQueryResult result = repCon.prepareTupleQuery(QueryLanguage.SPARQL, issuedQuery).evaluate();
 
-            List<String> messages = new ArrayList<>();
+            List<String> messages = new ArrayList<String>();
             while (result.hasNext()) {
                 BindingSet bs = result.next();
                 messages.add(query.getBindingSetFormatter().toMessage(bs));
@@ -109,7 +109,7 @@ public class QueryDispatcher implements IQueryDispatcher {
      */
     private String amendChangeSetsTimeConstraint(NotificationQuery query) {
         String sparqlQuery = query.getSparqlQuery();
-        String queryLastIssuedDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX").format(query.getLastIssued());
+        String queryLastIssuedDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(query.getLastIssued());
         return sparqlQuery.replace(QUERY_LAST_ISSUED, queryLastIssuedDate);
     }
 

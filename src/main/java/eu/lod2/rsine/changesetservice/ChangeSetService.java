@@ -77,7 +77,8 @@ public class ChangeSetService {
         private void setupRequestHandler() throws RepositoryException {
             reqistry = new HttpRequestHandlerRegistry();
             reqistry.register("*", PostRequestHandlerFactory.getInstance().createChangeTripleHandler());
-            reqistry.register("/remote", PostRequestHandlerFactory.getInstance().createRemoteChangeSetHandler());
+            reqistry.register("/register", PostRequestHandlerFactory.getInstance().createRegistrationHandler());
+            reqistry.register("/remote", PostRequestHandlerFactory.getInstance().createRemoteChangeSetHandler());                        
         }
 
         @Override
