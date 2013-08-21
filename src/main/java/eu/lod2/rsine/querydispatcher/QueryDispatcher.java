@@ -39,21 +39,19 @@ public class QueryDispatcher implements IQueryDispatcher {
         if (!subscriptionIt.hasNext()) {
             logger.info("No subscribers registered");
         }
-
         try {
             while (subscriptionIt.hasNext()) {
-                dispatchForSubscriber(subscriptionIt.next());
+                dispatchForSubscriber(subscriptionIt.next());                
             }
         }
-        catch (RepositoryException e) {
+        catch (RepositoryException e) {            
             logger.error("Error issuing query", e);
         }
     }
 
     public void dispatchForSubscriber(Subscription subscription) throws RepositoryException {
         logger.debug("Dispatching queries for subscriber '" + subscription.getSubscriber() + "'");
-
-        Iterator<NotificationQuery> queryIt = subscription.getQueryIterator();
+        Iterator<NotificationQuery> queryIt = subscription.getQueryIterator();        
         while (queryIt.hasNext()) {
             issueQueryAndNotify(queryIt.next(), subscription);
         }
@@ -62,13 +60,9 @@ public class QueryDispatcher implements IQueryDispatcher {
     private void issueQueryAndNotify(NotificationQuery query, Subscription subscription) throws RepositoryException
     {
         RepositoryConnection repCon = changeSetStore.getRepository().getConnection();
-
         try {
-            String issuedQuery = fillInPlaceholders(query);
-            logger.debug("Issuing query '" +issuedQuery+ "'");
-
+            String issuedQuery = fillInPlaceholders(query);            
             TupleQueryResult result = repCon.prepareTupleQuery(QueryLanguage.SPARQL, issuedQuery).evaluate();
-
             List<String> messages = new ArrayList<String>();
             while (result.hasNext()) {
                 BindingSet bs = result.next();
@@ -78,10 +72,10 @@ public class QueryDispatcher implements IQueryDispatcher {
 
             sendNotifications(messages, subscription);
         }
-        catch (MalformedQueryException e) {
+        catch (MalformedQueryException e) {            
             logger.error("NotificationQuery malformed", e);
         }
-        catch (QueryEvaluationException e) {
+        catch (QueryEvaluationException e) {            
             logger.error("Could not evaluate query", e);
         }
         finally {
@@ -90,10 +84,10 @@ public class QueryDispatcher implements IQueryDispatcher {
     }
 
     private void sendNotifications(Collection<String> messages, Subscription subscription) {
-        Iterator<INotifier> notifierIt = subscription.getNotifierIterator();
-        while (!messages.isEmpty() && notifierIt.hasNext()) {
+        Iterator<INotifier> notifierIt = subscription.getNotifierIterator();                
+        while (!messages.isEmpty() && notifierIt.hasNext()) {            
             notificationExecutor.execute(new Notification(notifierIt.next(), messages));
-        }
+        }        
     }
 
     private String fillInPlaceholders(NotificationQuery query) {

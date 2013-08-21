@@ -6,7 +6,7 @@
 
     <groupId>rsine</groupId>
     <artifactId>rsine</artifactId>
-    <version>1.0.0-rc2</version>
+    <version>1.0.0-rc1</version>
 
     <name>rsine</name>
 
@@ -87,6 +87,12 @@
             <artifactId>jena-fuseki</artifactId>
             <version>0.2.7</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.mail</groupId>
+            <artifactId>javax.mail</artifactId>
+            <version>1.4.4</version>
+            <type>jar</type>            
         </dependency>
     </dependencies>
 
