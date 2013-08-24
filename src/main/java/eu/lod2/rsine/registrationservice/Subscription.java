@@ -22,7 +22,7 @@ public class Subscription {
     private Collection<INotifier> notifiers;
 
     public Subscription() {
-        ValueFactory valueFactory = new ValueFactoryImpl();
+        ValueFactory valueFactory = ValueFactoryImpl.getInstance();
         subscriber = valueFactory.createURI(
             Namespaces.RSINE_NAMESPACE.getName(),
             "subscriber_" +id);
@@ -31,6 +31,12 @@ public class Subscription {
         id++;
     }
 
+    public Subscription(URI subscriber) {        
+        this.subscriber = subscriber;
+        queries = new HashSet<NotificationQuery>();
+        notifiers = new ArrayList<INotifier>();        
+    }
+    
     public URI getSubscriber() {
         return subscriber;
     }

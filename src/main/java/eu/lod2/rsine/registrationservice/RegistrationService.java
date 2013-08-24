@@ -6,7 +6,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import org.openrdf.model.Resource;
+import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
+import org.openrdf.model.vocabulary.RDF;
 
 public class RegistrationService {
 
@@ -17,7 +19,21 @@ public class RegistrationService {
     }
 
     public void register(Model subscription) {
-        subscriptions.add(new SubscriptionParser(subscription).createSubscription());
+        Statement s = null;
+        boolean foundSubscriptionURI = false;
+        for(Iterator<Statement> i = subscription.iterator(); i.hasNext(); ){
+            s = i.next();
+            if(s.getPredicate().equals(RDF.TYPE)){
+                if(s.getSubject() instanceof URI){
+                    subscriptions.add(new SubscriptionParser(subscription).createSubscription((URI)s.getSubject()));            
+                    foundSubscriptionURI = true;
+                }
+            }
+        }
+        if(!foundSubscriptionURI){
+            subscriptions.add(new SubscriptionParser(subscription).createSubscription());
+        }
+        
     }
 
     public void unregister(URI subscription) throws NoSuchRegistrationError {

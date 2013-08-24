@@ -11,7 +11,7 @@ xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assemb
 <fileSets>
     <fileSet>
         <directory>src/main/bin</directory>
-        <outputDirectory>/</outputDirectory>
+        <outputDirectory>/rsine</outputDirectory>
         <useDefaultExcludes>true</useDefaultExcludes>
         <filtered>true</filtered>
         <includes>
@@ -20,7 +20,7 @@ xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assemb
     </fileSet>
     <fileSet>
         <directory>target/provided-lib</directory>
-        <outputDirectory>/lib</outputDirectory>
+        <outputDirectory>/rsine/lib</outputDirectory>
         <useDefaultExcludes>true</useDefaultExcludes>
         <filtered>false</filtered>
         <includes>
@@ -29,7 +29,7 @@ xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assemb
     </fileSet>
     <fileSet>
         <directory>target/</directory>
-        <outputDirectory>/</outputDirectory>
+        <outputDirectory>/rsine</outputDirectory>
         <useDefaultExcludes>true</useDefaultExcludes>
         <filtered>false</filtered>
         <includes>

@@ -19,9 +19,9 @@ public class SubscriptionParser {
     public SubscriptionParser(Model rdfSubscription) {
         this.rdfSubscription = rdfSubscription;
     }
-
-    public Subscription createSubscription() {
-        Subscription subscription = new Subscription();
+    
+    public Subscription createSubscription(URI subject) {
+        Subscription subscription = subject==null?new Subscription():new Subscription(subject);
 
         for (INotifier notifier : createNotifiers()) {
             subscription.addNotifier(notifier);
@@ -32,6 +32,10 @@ public class SubscriptionParser {
         }
 
         return subscription;
+    }
+    
+    public Subscription createSubscription() {
+        return createSubscription(null);
     }
 
     private Collection<INotifier> createNotifiers() {
