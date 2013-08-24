@@ -78,6 +78,7 @@ public class ChangeSetService {
             reqistry = new HttpRequestHandlerRegistry();
             reqistry.register("*", PostRequestHandlerFactory.getInstance().createChangeTripleHandler());
             reqistry.register("/register", PostRequestHandlerFactory.getInstance().createRegistrationHandler());
+            reqistry.register("/unregister", PostRequestHandlerFactory.getInstance().createUnRegistrationHandler());
             reqistry.register("/remote", PostRequestHandlerFactory.getInstance().createRemoteChangeSetHandler());                        
         }
 

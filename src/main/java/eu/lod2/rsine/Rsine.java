@@ -45,7 +45,7 @@ public class Rsine {
         handlerFactory.setChangeSetStore(changeSetStore);
         handlerFactory.setQueryDispatcher(queryDispatcher);
         handlerFactory.setRemoteNotificationService(remoteNotificationService);
-        handlerFactory.setRegistrationService(registrationService);
+        handlerFactory.setRegistrationService(registrationService);                
     }
 
     /**

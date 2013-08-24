@@ -40,6 +40,11 @@ public class PostRequestHandlerFactory {
         return registrationHandler;
     }
     
+    public HttpRequestHandler createUnRegistrationHandler() {
+        UnRegistrationHandler registrationHandler = new UnRegistrationHandler(this.registrationService);        
+        return registrationHandler;
+    }
+    
     public void setChangeSetCreator(ChangeSetCreator changeSetCreator) {
         this.changeSetCreator = changeSetCreator;
     }
