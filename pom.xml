@@ -129,7 +129,50 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>             
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.6</version>
+                <executions>
+                    <execution>
+                        <id>copy-resources</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>   
+                            <outputDirectory>${basedir}/target/</outputDirectory>  
+                            <resources>
+                                <resource>
+                                    <directory>src/main/bin</directory>
+                                    <filtering>true</filtering>                                                  
+                                </resource>
+                            </resources>    
+                            <encoding>UTF-8</encoding>          
+                        </configuration>                        
+                    </execution>
+                </executions>
+            </plugin>        
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.4</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>assembly</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <descriptors>
+                        <descriptor>src/assembly/zip.xml</descriptor>
+                    </descriptors>
+                </configuration>
+            </plugin>                                          
         </plugins>
     </build>
 

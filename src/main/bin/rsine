@@ -1,0 +1,7 @@
+#!/bin/bash
+PORT=${1:-"8787"}
+MANAGEDSTORE=${2:-"http://localhost/sparql"}
+echo "Starting RSine"
+echo "@port $PORT"
+echo "@managedStore $MANAGEDSTORE"
+java -cp rsine-${project.version}.jar:$( echo lib/*.jar . | sed 's/ /:/g') eu.lod2.rsine.Rsine $PORT $MANAGEDSTORE >> rsine.log &
