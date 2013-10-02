@@ -107,7 +107,6 @@
                         <target>1.6</target>
                     </configuration>
                 </plugin>
-               
             </plugins>
         </pluginManagement>
         <plugins>

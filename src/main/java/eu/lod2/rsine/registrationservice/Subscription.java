@@ -4,7 +4,7 @@ import eu.lod2.rsine.dissemination.messageformatting.BindingSetFormatter;
 import eu.lod2.rsine.dissemination.messageformatting.ToStringBindingSetFormatter;
 import eu.lod2.rsine.dissemination.notifier.INotifier;
 import eu.lod2.util.Namespaces;
-import org.openrdf.model.URI;
+import org.openrdf.model.Resource;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 
@@ -17,13 +17,13 @@ public class Subscription {
 
     private static int id = 0;
 
-    private URI subscriber;
+    private Resource subscriptionId;
     private Collection<NotificationQuery> queries;
     private Collection<INotifier> notifiers;
 
     public Subscription() {
         ValueFactory valueFactory = ValueFactoryImpl.getInstance();
-        subscriber = valueFactory.createURI(
+        subscriptionId = valueFactory.createURI(
             Namespaces.RSINE_NAMESPACE.getName(),
             "subscriber_" +id);
         queries = new HashSet<NotificationQuery>();
@@ -31,14 +31,12 @@ public class Subscription {
         id++;
     }
 
-    public Subscription(URI subscriber) {        
-        this.subscriber = subscriber;
-        queries = new HashSet<NotificationQuery>();
-        notifiers = new ArrayList<INotifier>();        
+    public Resource getSubscriptionId() {
+        return subscriptionId;
     }
-    
-    public URI getSubscriber() {
-        return subscriber;
+
+    public void setSubscriptionId(Resource subscriptionId) {
+        this.subscriptionId = subscriptionId;
     }
 
     public void addQuery(String sparqlQuery) {
@@ -61,4 +59,13 @@ public class Subscription {
         return notifiers.iterator();
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof Subscription && subscriptionId.equals(((Subscription) obj).subscriptionId);
+    }
+
+    @Override
+    public int hashCode() {
+        return subscriptionId.hashCode();
+    }
 }

@@ -1,13 +1,14 @@
 package eu.lod2.rsine.changesetservice;
 
-import eu.lod2.rsine.registrationservice.NoSuchRegistrationError;
 import eu.lod2.rsine.registrationservice.RegistrationService;
-import java.io.IOException;
+import eu.lod2.rsine.registrationservice.SubscriptionNotFoundException;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.message.BasicHttpEntityEnclosingRequest;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
+
+import java.io.IOException;
 
 /**
  *
@@ -29,7 +30,7 @@ public class UnRegistrationHandler extends PostRequestHandler  {
                 subscription = new URIImpl(content.split("=")[1]);
                 try {
                     this.registrationService.unregister(subscription);
-                } catch (NoSuchRegistrationError ex) {
+                } catch (SubscriptionNotFoundException ex) {
                     response.setStatusCode(404);
                     response.setReasonPhrase(ex.getMessage());                    
                 }

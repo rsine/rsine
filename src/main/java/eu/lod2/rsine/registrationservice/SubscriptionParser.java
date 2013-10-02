@@ -20,8 +20,10 @@ public class SubscriptionParser {
         this.rdfSubscription = rdfSubscription;
     }
     
-    public Subscription createSubscription(URI subject) {
-        Subscription subscription = subject==null?new Subscription():new Subscription(subject);
+    public Subscription createSubscription() {
+        Subscription subscription = new Subscription();
+
+        setSubscriptionId(subscription);
 
         for (INotifier notifier : createNotifiers()) {
             subscription.addNotifier(notifier);
@@ -33,9 +35,16 @@ public class SubscriptionParser {
 
         return subscription;
     }
-    
-    public Subscription createSubscription() {
-        return createSubscription(null);
+
+    public void setSubscriptionId(Subscription subscription) {
+        Set<Resource> subscriptionResources = rdfSubscription.filter(
+            null,
+            RDF.TYPE,
+            valueFactory.createURI(Namespaces.RSINE_NAMESPACE.getName(), "Subscription")).subjects();
+
+        for (Resource subscriptionResource : subscriptionResources) {
+            subscription.setSubscriptionId(subscriptionResource);
+        }
     }
 
     private Collection<INotifier> createNotifiers() {

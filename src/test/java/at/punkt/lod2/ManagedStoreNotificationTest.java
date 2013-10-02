@@ -1,7 +1,7 @@
 package at.punkt.lod2;
 
 import at.punkt.lod2.util.CountingNotifier;
-import at.punkt.lod2.util.TestUtils;
+import at.punkt.lod2.util.Helper;
 import eu.lod2.rsine.Rsine;
 import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
 import eu.lod2.rsine.dissemination.messageformatting.BindingSetFormatter;
@@ -27,7 +27,6 @@ public class ManagedStoreNotificationTest {
 
     private final Logger logger = LoggerFactory.getLogger(ManagedStoreNotificationTest.class);
 
-    private int managedStoreChangesListeningPort = TestUtils.getRandomPort();
     private SPARQLServer fusekiServer;
     private Rsine rsine;
     private ScopeNoteCreationFormatter scopeNoteCreationFormatter;
@@ -35,9 +34,9 @@ public class ManagedStoreNotificationTest {
 
     @Before
     public void setUp() throws IOException, RepositoryException {
-        fusekiServer = new TestUtils().initFuseki(Rsine.class.getResource("/reegle.rdf"), "dataset");
+        fusekiServer = new Helper().initFuseki(Rsine.class.getResource("/reegle.rdf"), "dataset");
 
-        rsine = new Rsine(managedStoreChangesListeningPort, "http://localhost:3030/dataset/query");
+        rsine = new Rsine(Helper.MANAGED_STORE_LISTENING_PORT, "http://localhost:3030/dataset/query");
 
         scopeNoteCreationFormatter = new ScopeNoteCreationFormatter();
         countingNotifier = new CountingNotifier();
@@ -93,7 +92,7 @@ public class ManagedStoreNotificationTest {
             ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
             "<http://reegle.info/glossary/2547> <http://www.w3.org/2004/02/skos/core#scopeNote> \"some additional info\"@en .");
 
-        new TestUtils().doPost(managedStoreChangesListeningPort, props);
+        new Helper().doPost(Helper.MANAGED_STORE_LISTENING_PORT, props);
 
     }
 

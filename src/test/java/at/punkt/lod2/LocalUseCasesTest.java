@@ -1,7 +1,7 @@
 package at.punkt.lod2;
 
 import at.punkt.lod2.util.CountingNotifier;
-import at.punkt.lod2.util.TestUtils;
+import at.punkt.lod2.util.Helper;
 import eu.lod2.rsine.Rsine;
 import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
 import eu.lod2.rsine.dissemination.messageformatting.BindingSetFormatter;
@@ -25,15 +25,14 @@ public class LocalUseCasesTest {
 
     private SPARQLServer managedServer;
     private Rsine rsine;
-    private int managedStoreChangesListeningPort = TestUtils.getRandomPort();
     private CountingNotifier countingNotifier;
 
     @Before
     public void setUp() throws IOException, RepositoryException {
         countingNotifier = new CountingNotifier();
-        managedServer = new TestUtils().initFuseki(Rsine.class.getResource("/reegle.rdf"), "dataset");
+        managedServer = new Helper().initFuseki(Rsine.class.getResource("/reegle.rdf"), "dataset");
 
-        rsine = new Rsine(managedStoreChangesListeningPort, "http://localhost:3030/dataset/query");
+        rsine = new Rsine(Helper.MANAGED_STORE_LISTENING_PORT, "http://localhost:3030/dataset/query");
         registerUser();
 
         rsine.start();
@@ -117,7 +116,7 @@ public class LocalUseCasesTest {
             ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
             "<http://reegle.info/glossary/2547> <http://www.w3.org/2004/02/skos/core#scopeNote> \"some scope note\"@en .");
 
-        new TestUtils().doPost(managedStoreChangesListeningPort, props);
+        new Helper().doPost(Helper.MANAGED_STORE_LISTENING_PORT, props);
     }
 
     private void scopeNoteChange() throws IOException {
@@ -130,7 +129,7 @@ public class LocalUseCasesTest {
             ChangeTripleHandler.POST_BODY_SECONDARYTRIPLE,
             "<http://reegle.info/glossary/2547> <http://www.w3.org/2004/02/skos/core#scopeNote> \"updated scope note\"@en .");
 
-        new TestUtils().doPost(managedStoreChangesListeningPort, props);
+        new Helper().doPost(Helper.MANAGED_STORE_LISTENING_PORT, props);
 
     }
 
@@ -141,7 +140,7 @@ public class LocalUseCasesTest {
             ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
             "<http://reegle.info/glossary/1> <http://www.w3.org/2004/02/skos/core#scopeNote> \"some scope note\"@en .");
 
-        new TestUtils().doPost(managedStoreChangesListeningPort, props);
+        new Helper().doPost(Helper.MANAGED_STORE_LISTENING_PORT, props);
     }
 
     @Test
@@ -157,7 +156,7 @@ public class LocalUseCasesTest {
         props.setProperty(
             ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
             "<http://reegle.info/glossary/443> <http://www.w3.org/2004/02/skos/core#narrower> <http://reegle.info/glossary/442> .");
-        new TestUtils().doPost(managedStoreChangesListeningPort, props);
+        new Helper().doPost(Helper.MANAGED_STORE_LISTENING_PORT, props);
     }
 
     private class ScopeNoteChangeFormatter implements BindingSetFormatter {

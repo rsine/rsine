@@ -1,12 +1,13 @@
 package at.punkt.lod2;
 
 import at.punkt.lod2.util.CountingNotifier;
-import at.punkt.lod2.util.TestUtils;
+import at.punkt.lod2.util.Helper;
 import eu.lod2.rsine.Rsine;
 import eu.lod2.rsine.dissemination.messageformatting.BindingSetFormatter;
 import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.rsine.remotenotification.IRemoteServiceDetector;
 import eu.lod2.util.Namespaces;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,18 +25,25 @@ import java.io.IOException;
 
 public class RemoteNotificationTest {
 
-    private final int localInstanceListeningPort = new TestUtils().getRandomPort(),
-                      remoteInstanceListeningPort = new TestUtils().getRandomPort();
+    private int localInstanceListeningPort, remoteInstanceListeningPort;
     private Model changeSet;
-    private Rsine localRsineInstance;
+    private Rsine localRsineInstance, remoteRsineInstance;
     private CountingNotifier countingNotifier;
 
     @Before
     public void setUp() throws RDFParseException, IOException, RDFHandlerException, RepositoryException {
+        localInstanceListeningPort = Helper.MANAGED_STORE_LISTENING_PORT;
+        remoteInstanceListeningPort = Helper.MANAGED_STORE_LISTENING_PORT + 1;
         countingNotifier = new CountingNotifier();
 
         initServices();
         readChangeSet();
+    }
+
+    @After
+    public void tearDown() throws IOException, InterruptedException {
+        localRsineInstance.stop();
+        remoteRsineInstance.stop();
     }
 
     private void initServices() throws IOException, RepositoryException {
@@ -43,7 +51,7 @@ public class RemoteNotificationTest {
         localRsineInstance.getRemoteNotificationService().setRemoteServiceDetector(new TestRemoteServiceDetector());
         localRsineInstance.start();
 
-        Rsine remoteRsineInstance = new Rsine(remoteInstanceListeningPort, "", "http://zbw.eu");
+        remoteRsineInstance = new Rsine(remoteInstanceListeningPort, "", "http://zbw.eu");
         registerRemoteChangeSubscriber(remoteRsineInstance);
         remoteRsineInstance.start();
     }

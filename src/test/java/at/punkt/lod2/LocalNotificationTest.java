@@ -1,13 +1,14 @@
 package at.punkt.lod2;
 
 import at.punkt.lod2.util.CountingNotifier;
-import at.punkt.lod2.util.TestUtils;
+import at.punkt.lod2.util.Helper;
 import eu.lod2.rsine.Rsine;
 import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
 import eu.lod2.rsine.dissemination.messageformatting.DummyBindingSetFormatter;
 import eu.lod2.rsine.querydispatcher.QueryDispatcher;
 import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.util.Namespaces;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.openrdf.repository.RepositoryException;
@@ -19,7 +20,6 @@ import java.util.Properties;
 
 public class LocalNotificationTest {
 
-    private final int managedStoreChangesListeningPort = new TestUtils().getRandomPort();
     private Rsine rsine;
     private CountingNotifier countingNotifier;
 
@@ -27,8 +27,13 @@ public class LocalNotificationTest {
     public void setUp() throws IOException, RepositoryException, RDFParseException {
         countingNotifier = new CountingNotifier();
 
-        rsine = new Rsine(managedStoreChangesListeningPort, "");
+        rsine = new Rsine(Helper.MANAGED_STORE_LISTENING_PORT, "");
         rsine.start();
+    }
+
+    @After
+    public void tearDown() throws IOException, InterruptedException {
+        rsine.stop();
     }
 
     @Test
@@ -81,7 +86,7 @@ public class LocalNotificationTest {
             ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
             "<http://reegle.info/glossary/1111> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2004/02/skos/core#Concept> .");
 
-        new TestUtils().doPost(managedStoreChangesListeningPort, props);
+        new Helper().doPost(Helper.MANAGED_STORE_LISTENING_PORT, props);
     }
 
     private void setPrefLabel() throws IOException {
@@ -91,7 +96,7 @@ public class LocalNotificationTest {
             ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
             "<http://reegle.info/glossary/1111> <http://www.w3.org/2004/02/skos/core#prefLabel> \"Ottakringer Helles\"@en .");
 
-        new TestUtils().doPost(managedStoreChangesListeningPort, props);
+        new Helper().doPost(Helper.MANAGED_STORE_LISTENING_PORT, props);
     }
 
     private void changePrefLabel() throws IOException {
@@ -104,7 +109,7 @@ public class LocalNotificationTest {
             ChangeTripleHandler.POST_BODY_SECONDARYTRIPLE,
             "<http://reegle.info/glossary/1111> <http://www.w3.org/2004/02/skos/core#prefLabel> \"Schremser Edelmärzen\"@en .");
 
-        new TestUtils().doPost(managedStoreChangesListeningPort, props);
+        new Helper().doPost(Helper.MANAGED_STORE_LISTENING_PORT, props);
     }
 
     private void addOtherConcept() throws IOException {
@@ -114,7 +119,7 @@ public class LocalNotificationTest {
             ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
             "<http://reegle.info/glossary/1112> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2004/02/skos/core#Concept> .");
 
-        new TestUtils().doPost(managedStoreChangesListeningPort, props);
+        new Helper().doPost(Helper.MANAGED_STORE_LISTENING_PORT, props);
     }
 
     private void linkConcepts() throws IOException {
@@ -124,7 +129,7 @@ public class LocalNotificationTest {
             ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
             "<http://reegle.info/glossary/1111> <http://www.w3.org/2004/02/skos/core#related> <http://reegle.info/glossary/1112> .");
 
-        new TestUtils().doPost(managedStoreChangesListeningPort, props);
+        new Helper().doPost(Helper.MANAGED_STORE_LISTENING_PORT, props);
     }
 
 }

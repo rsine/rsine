@@ -1,6 +1,6 @@
 package at.punkt.lod2;
 
-import at.punkt.lod2.util.TestUtils;
+import at.punkt.lod2.util.Helper;
 import eu.lod2.rsine.Rsine;
 import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
 import eu.lod2.rsine.dissemination.messageformatting.BindingSetFormatter;
@@ -43,7 +43,7 @@ public class RealDataTest {
             Namespaces.SKOS_NAMESPACE.getName() + "notation",
     };
 
-    private enum ChangeType {addition, removal};
+    private enum ChangeType {addition, removal}
 
     private final int SUBSCRIBER_COUNT = 20;
     private final int POST_COUNT = 50;
@@ -52,14 +52,13 @@ public class RealDataTest {
     private SPARQLServer managedServer;
     private Rsine rsine;
     private List<Statement> vocabStatements;
-    private int managedStoreChangesListeningPort = TestUtils.getRandomPort();
     private long accumulatedPostDurations = 0;
 
     @Before
     public void setUp() throws IOException, RepositoryException, RDFParseException, RDFHandlerException
     {
-        managedServer = new TestUtils().initFuseki(Rsine.class.getResource(VOCAB_FILENAME), "dataset");
-        rsine = new Rsine(managedStoreChangesListeningPort, "http://localhost:3030/dataset/query");
+        managedServer = new Helper().initFuseki(Rsine.class.getResource(VOCAB_FILENAME), "dataset");
+        rsine = new Rsine(Helper.MANAGED_STORE_LISTENING_PORT, "http://localhost:3030/dataset/query");
         rsine.start();
 
         createVocabModel();
@@ -110,7 +109,7 @@ public class RealDataTest {
             if (!usedPredicates.contains(predicate)) {
                 ChangeType changeType = getRandomChangeType();
                 subscription.addQuery(changeSetPredicateQuery(predicate, changeType),
-                                      new PredicateQueryFormatter(subscription.getSubscriber(), predicate, changeType));
+                                      new PredicateQueryFormatter((URI) subscription.getSubscriptionId(), predicate, changeType));
                 usedPredicates.add(predicate);
             }
         }
@@ -165,7 +164,7 @@ public class RealDataTest {
             );
 
         long startTimeMillis = System.currentTimeMillis();
-        new TestUtils().doPost(managedStoreChangesListeningPort, props);
+        new Helper().doPost(Helper.MANAGED_STORE_LISTENING_PORT, props);
         accumulatedPostDurations += System.currentTimeMillis() - startTimeMillis;
     }
 

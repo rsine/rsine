@@ -1,6 +1,6 @@
 package at.punkt.lod2;
 
-import at.punkt.lod2.util.TestUtils;
+import at.punkt.lod2.util.Helper;
 import eu.lod2.rsine.changesetservice.ChangeSetCreator;
 import eu.lod2.rsine.changesetservice.ChangeSetService;
 import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
@@ -15,10 +15,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.openrdf.model.Statement;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.model.vocabulary.RDF;
@@ -34,13 +31,15 @@ import java.util.Properties;
 
 public class ChangesetServiceTest {
 
-    private final int port = new TestUtils().getRandomPort();
+    private int port;
     private ChangeSetService changeSetService;
     private ChangeSetStore changeSetStore;
 
     @Before
     public void setUp() throws IOException, RepositoryException {
+        port = Helper.MANAGED_STORE_LISTENING_PORT;
         changeSetService = new ChangeSetService(port);
+
         changeSetStore = new ChangeSetStore();
 
         PostRequestHandlerFactory handlerFactory = PostRequestHandlerFactory.getInstance();
@@ -53,7 +52,7 @@ public class ChangesetServiceTest {
     }
 
     @After
-    public void tearDown() throws InterruptedException, IOException {
+    public void after() throws IOException, InterruptedException {
         changeSetService.stop();
     }
 
@@ -63,7 +62,7 @@ public class ChangesetServiceTest {
         props.setProperty(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD);
         props.setProperty(ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE, "<http://example.org/myconcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"somelabel\"@en .");
 
-        Assert.assertEquals(200, new TestUtils().doPost(port, props));
+        Assert.assertEquals(200, new Helper().doPost(port, props));
     }    
 
     @Test
@@ -82,7 +81,7 @@ public class ChangesetServiceTest {
         props.setProperty(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD);
         props.setProperty(ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE, "");
 
-        Assert.assertEquals(400, new TestUtils().doPost(port, props));
+        Assert.assertEquals(400, new Helper().doPost(port, props));
     }
 
     @Test
@@ -91,7 +90,7 @@ public class ChangesetServiceTest {
         props.setProperty(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD);
         props.setProperty(ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE, "http://www.example.org/someconcept a skos:Concept .");
 
-        Assert.assertEquals(400, new TestUtils().doPost(port, props));
+        Assert.assertEquals(400, new Helper().doPost(port, props));
     }
 
     @Test
@@ -100,7 +99,7 @@ public class ChangesetServiceTest {
         props.setProperty(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD);
         props.setProperty(ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE, "<http://example.org/myconcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"somelabel\"@en");
 
-        Assert.assertEquals(400, new TestUtils().doPost(port, props));
+        Assert.assertEquals(400, new Helper().doPost(port, props));
     }
 
     @Test
@@ -108,7 +107,7 @@ public class ChangesetServiceTest {
         Properties props = new Properties();
         props.setProperty(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD);
 
-        Assert.assertEquals(400, new TestUtils().doPost(port, props));
+        Assert.assertEquals(400, new Helper().doPost(port, props));
     }
 
     /**
@@ -123,7 +122,7 @@ public class ChangesetServiceTest {
         props.setProperty(ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE, "<http://example.org/myconcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"somelabel\"@en .");
         props.setProperty(ChangeTripleHandler.POST_BODY_SECONDARYTRIPLE, "<http://example.org/myconcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"updatedlabel\"@en .");
 
-        new TestUtils().doPost(port, props);
+        new Helper().doPost(port, props);
         waitForChangeSetWritten();
     }
 
@@ -153,7 +152,7 @@ public class ChangesetServiceTest {
         Properties props = new Properties();
         props.setProperty(ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE, "<http://example.org/myconcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"somelabel\"@en .");
 
-        Assert.assertEquals(400, new TestUtils().doPost(port, props));
+        Assert.assertEquals(400, new Helper().doPost(port, props));
     }
 
     @Test(timeout = 2000)
@@ -162,7 +161,7 @@ public class ChangesetServiceTest {
         props.setProperty(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD);
         props.setProperty(ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE, "<http://example.org/myconcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"somelabel\"@en .");
 
-        new TestUtils().doPost(port, props);
+        new Helper().doPost(port, props);
         Assert.assertEquals(1, waitForChangeSetCreated());
     }
 

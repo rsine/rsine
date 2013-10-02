@@ -12,7 +12,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -50,7 +53,7 @@ public class QueryDispatcher implements IQueryDispatcher {
     }
 
     public void dispatchForSubscriber(Subscription subscription) throws RepositoryException {
-        logger.debug("Dispatching queries for subscriber '" + subscription.getSubscriber() + "'");
+        logger.debug("Dispatching queries for subscription with id '" + subscription.getSubscriptionId() + "'");
         Iterator<NotificationQuery> queryIt = subscription.getQueryIterator();        
         while (queryIt.hasNext()) {
             issueQueryAndNotify(queryIt.next(), subscription);
@@ -103,7 +106,11 @@ public class QueryDispatcher implements IQueryDispatcher {
      */
     private String amendChangeSetsTimeConstraint(NotificationQuery query) {
         String sparqlQuery = query.getSparqlQuery();
-        String queryLastIssuedDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(query.getLastIssued());
+        String queryLastIssuedDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSZ").format(query.getLastIssued());
+
+        // fix timezone format
+        queryLastIssuedDate = new StringBuffer(queryLastIssuedDate).insert(queryLastIssuedDate.length() - 2, ":").toString();
+
         return sparqlQuery.replace(QUERY_LAST_ISSUED, queryLastIssuedDate);
     }
 

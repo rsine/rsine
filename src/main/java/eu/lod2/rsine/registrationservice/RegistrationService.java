@@ -1,14 +1,11 @@
 package eu.lod2.rsine.registrationservice;
 
 import org.openrdf.model.Model;
+import org.openrdf.model.Resource;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
-import org.openrdf.model.Resource;
-import org.openrdf.model.Statement;
-import org.openrdf.model.URI;
-import org.openrdf.model.vocabulary.RDF;
 
 public class RegistrationService {
 
@@ -18,40 +15,28 @@ public class RegistrationService {
         subscriptions.add(subscription);
     }
 
-    public void register(Model subscription) {
-        Statement s = null;
-        boolean foundSubscriptionURI = false;
-        for(Iterator<Statement> i = subscription.iterator(); i.hasNext(); ){
-            s = i.next();
-            if(s.getPredicate().equals(RDF.TYPE)){
-                if(s.getSubject() instanceof URI){
-                    subscriptions.add(new SubscriptionParser(subscription).createSubscription((URI)s.getSubject()));            
-                    foundSubscriptionURI = true;
-                }
-            }
+    public void register(Model subscriptionData) {
+        Subscription subscription = new SubscriptionParser(subscriptionData).createSubscription();
+
+        if (subscriptions.contains(subscription)) {
+            throw new SubscriptionExistsException();
         }
-        if(!foundSubscriptionURI){
-            subscriptions.add(new SubscriptionParser(subscription).createSubscription());
-        }
-        
+        subscriptions.add(subscription);
     }
 
-    public void unregister(URI subscription) throws NoSuchRegistrationError {
-        Subscription s = this.getSubscriptionByURI(subscription);        
-        if(s!=null){
-            this.subscriptions.remove(s);
-        } else {
-            throw new NoSuchRegistrationError();
-        }
+    public void unregister(Resource subscriptionId) {
+        subscriptions.remove(getSubscriptionById(subscriptionId));
     }
-    private Subscription getSubscriptionByURI(URI subscription){
-        for(Subscription s : this.subscriptions){
-            if(s.getSubscriber().equals(subscription)){
-                return s;
+
+    private Subscription getSubscriptionById(Resource subscriptionId){
+        for (Subscription subscription : subscriptions){
+            if(subscription.getSubscriptionId().equals(subscriptionId)){
+                return subscription;
             }
         }        
-        return null;
+        throw new SubscriptionNotFoundException();
     }
+
     public Iterator<Subscription> getSubscriptionIterator() {
         return subscriptions.iterator();
     }
