@@ -4,14 +4,13 @@ import eu.lod2.rsine.dissemination.notifier.INotifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
-import java.util.Properties;
 import javax.mail.Message;
-import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import java.util.Collection;
+import java.util.Properties;
 
 public class EmailNotifier implements INotifier {
 
@@ -41,7 +40,6 @@ public class EmailNotifier implements INotifier {
     @Override
     public void notify(Collection<String> messages) {
         logger.info("sending email to '" +emailAddress+ "'");
-        System.out.println("sending mail to " + emailAddress);
         Session session = Session.getDefaultInstance(properties);
         try{         
            MimeMessage message = new MimeMessage(session);

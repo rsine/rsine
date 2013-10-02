@@ -36,13 +36,13 @@ public class PostRequestHandlerFactory {
     }
 
     public HttpRequestHandler createRegistrationHandler() {
-        RegistrationHandler registrationHandler = new RegistrationHandler(this.registrationService);        
+        RegistrationHandler registrationHandler = new RegistrationHandler(registrationService);
         return registrationHandler;
     }
     
     public HttpRequestHandler createUnRegistrationHandler() {
-        UnRegistrationHandler registrationHandler = new UnRegistrationHandler(this.registrationService);        
-        return registrationHandler;
+        UnRegistrationHandler unregistrationHandler = new UnRegistrationHandler(registrationService);
+        return unregistrationHandler;
     }
     
     public void setChangeSetCreator(ChangeSetCreator changeSetCreator) {

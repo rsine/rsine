@@ -15,6 +15,7 @@ import java.io.IOException;
  * @author http://www.turnguard.com/turnguard
  */
 public class UnRegistrationHandler extends PostRequestHandler  {
+
     private RegistrationService registrationService;
 
     public UnRegistrationHandler(RegistrationService registrationService) {
@@ -25,9 +26,8 @@ public class UnRegistrationHandler extends PostRequestHandler  {
     protected void handlePost(BasicHttpEntityEnclosingRequest request, HttpResponse response) {        
         try {
             String content = IOUtils.toString(request.getEntity().getContent());
-            URI subscription = null;
-            if(content!=null && !content.trim().isEmpty()){
-                subscription = new URIImpl(content.split("=")[1]);
+            if(content != null && !content.trim().isEmpty()) {
+                URI subscription = new URIImpl(content.split("=")[1]);
                 try {
                     this.registrationService.unregister(subscription);
                 } catch (SubscriptionNotFoundException ex) {

@@ -21,6 +21,7 @@ public class RegistrationService {
         if (subscriptions.contains(subscription)) {
             throw new SubscriptionExistsException();
         }
+
         subscriptions.add(subscription);
     }
 

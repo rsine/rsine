@@ -6,7 +6,7 @@
 
     <groupId>rsine</groupId>
     <artifactId>rsine</artifactId>
-    <version>1.0.0-rc1</version>
+    <version>1.0.0-rc2</version>
 
     <name>rsine</name>
 
@@ -112,67 +112,55 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>eu.lod2.rsine.Rsine</mainClass>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.dstovall</groupId>
+                <artifactId>onejar-maven-plugin</artifactId>
+                <version>1.4.4</version>
+                <configuration>
+                    <filename>rsine-cmd-${project.version}.jar</filename>
+                </configuration>
+
                 <executions>
                     <execution>
-                        <id>copy-dependencies</id>
-                        <phase>install</phase>
                         <goals>
-                            <goal>copy-dependencies</goal>
+                            <goal>one-jar</goal>
                         </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/provided-lib</outputDirectory>
-                            <overWriteReleases>false</overWriteReleases>
-                            <overWriteSnapshots>true</overWriteSnapshots>
-                            <includeScope>compile</includeScope>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>2.6</version>
-                <executions>
-                    <execution>
-                        <id>copy-resources</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>   
-                            <outputDirectory>${basedir}/target/</outputDirectory>  
-                            <resources>
-                                <resource>
-                                    <directory>src/main/bin</directory>
-                                    <filtering>true</filtering>                                                  
-                                </resource>
-                            </resources>    
-                            <encoding>UTF-8</encoding>          
-                        </configuration>                        
-                    </execution>
-                </executions>
-            </plugin>        
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.4</version>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.1.2</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
                         <goals>
-                            <goal>assembly</goal>
+                            <goal>jar</goal>
                         </goals>
                     </execution>
                 </executions>
-                <configuration>
-                    <descriptors>
-                        <descriptor>src/assembly/zip.xml</descriptor>
-                    </descriptors>
-                </configuration>
-            </plugin>                                          
+            </plugin>
         </plugins>
     </build>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>onejar-maven-plugin.googlecode.com</id>
+            <url>http://onejar-maven-plugin.googlecode.com/svn/mavenrepo</url>
+        </pluginRepository>
+    </pluginRepositories>
 
 </project>
