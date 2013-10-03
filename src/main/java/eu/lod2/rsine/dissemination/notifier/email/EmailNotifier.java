@@ -27,26 +27,13 @@ public class EmailNotifier implements INotifier {
     
     public EmailNotifier(String emailAddress) {
         this.emailAddress = emailAddress.replaceFirst("mailto:", "");
-
         readSettingsFromProperties();
-
-        /*
-        properties = System.getProperties();
-        from = properties.containsKey(PROP_KEY_FROM)?properties.getProperty(PROP_KEY_FROM):"wp5emailnotifier@lod2.eu";
-        if(!properties.containsKey(PROP_KEY_SMTP_HOST)){
-            if(properties.containsKey(PROP_KEY_HOST)){
-                properties.setProperty(PROP_KEY_SMTP_HOST, properties.getProperty(PROP_KEY_HOST));
-            } else {
-                properties.setProperty(PROP_KEY_SMTP_HOST, "localhost");
-            }
-        }
-        */
     }
 
     private void readSettingsFromProperties() {
         Properties properties = new Properties();
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        InputStream stream = loader.getResourceAsStream("notifiers.properties");
+        InputStream stream = loader.getResourceAsStream("application.properties");
 
         try {
             properties.load(stream);
@@ -68,7 +55,7 @@ public class EmailNotifier implements INotifier {
         try{         
            MimeMessage message = new MimeMessage(session);
            message.setFrom(new InternetAddress(from));
-           message.addRecipient(Message.RecipientType.TO, new InternetAddress(this.emailAddress));
+           message.addRecipient(Message.RecipientType.TO, new InternetAddress(emailAddress));
            message.setSubject(subject);
            StringBuilder m = new StringBuilder();
            for(String s : messages){
