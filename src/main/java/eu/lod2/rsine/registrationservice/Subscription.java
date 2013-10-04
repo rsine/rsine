@@ -3,6 +3,7 @@ package eu.lod2.rsine.registrationservice;
 import eu.lod2.rsine.dissemination.messageformatting.BindingSetFormatter;
 import eu.lod2.rsine.dissemination.messageformatting.ToStringBindingSetFormatter;
 import eu.lod2.rsine.dissemination.notifier.INotifier;
+import eu.lod2.rsine.dissemination.notifier.logging.LoggingNotifier;
 import eu.lod2.util.Namespaces;
 import org.openrdf.model.Resource;
 import org.openrdf.model.ValueFactory;
@@ -28,6 +29,7 @@ public class Subscription {
             "subscriber_" +id);
         queries = new HashSet<NotificationQuery>();
         notifiers = new ArrayList<INotifier>();
+        notifiers.add(new LoggingNotifier());
         id++;
     }
 

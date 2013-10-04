@@ -1,5 +1,6 @@
 package eu.lod2.rsine.dissemination.notifier.email;
 
+import eu.lod2.rsine.Rsine;
 import eu.lod2.rsine.dissemination.notifier.INotifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +34,7 @@ public class EmailNotifier implements INotifier {
     private void readSettingsFromProperties() {
         Properties properties = new Properties();
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        InputStream stream = loader.getResourceAsStream("application.properties");
+        InputStream stream = loader.getResourceAsStream(Rsine.propertiesFileName);
 
         try {
             properties.load(stream);

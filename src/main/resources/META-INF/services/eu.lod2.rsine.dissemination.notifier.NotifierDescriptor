@@ -1,1 +1,2 @@
 eu.lod2.rsine.dissemination.notifier.email.EmailNotifierDescriptor
+eu.lod2.rsine.dissemination.notifier.logging.LoggingNotifierDescriptor
