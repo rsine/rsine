@@ -31,7 +31,7 @@ public class RegistrationHandler extends PostRequestHandler  {
             RDFParser parser = Rio.createParser(format);
             Model model = new TreeModel();
             StatementCollector handler = new StatementCollector(model);
-            parser.setRDFHandler(handler); 
+            parser.setRDFHandler(handler);
             parser.parse(request.getEntity().getContent(), "");            
             registrationService.register(model);
             response.setStatusCode(201);

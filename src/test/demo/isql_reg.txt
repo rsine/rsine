@@ -1,0 +1,2 @@
+SPARQL INSERT IN GRAPH <http://mygraph.com> { <http://company.semantic-web.at/person/christian_mader> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/sioc/ns#User> . <http://company.semantic-web.at/person/christian_mader> <http://rdfs.org/sioc/ns#id> "CMader"@en . };
+SPARQL DELETE DATA FROM <http://mygraph.com> { <http://company.semantic-web.at/person/christian_mader>  <http://rdfs.org/sioc/ns#id>  "CMader"@en . };

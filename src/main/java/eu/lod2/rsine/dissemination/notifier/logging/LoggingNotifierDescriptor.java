@@ -16,7 +16,7 @@ public class LoggingNotifierDescriptor implements NotifierDescriptor {
 
     @Override
     public NotifierParameters getParameters() {
-        return null;
+        return new NotifierParameters();
     }
 
     @Override
