@@ -87,8 +87,8 @@ public class QueryDispatcher implements IQueryDispatcher {
     }
 
     private void sendNotifications(Collection<String> messages, Subscription subscription) {
-        Iterator<INotifier> notifierIt = subscription.getNotifierIterator();                
-        while (!messages.isEmpty() && notifierIt.hasNext()) {            
+        Iterator<INotifier> notifierIt = subscription.getNotifierIterator();
+        while (!messages.isEmpty() && notifierIt.hasNext()) {
             notificationExecutor.execute(new Notification(notifierIt.next(), messages));
         }        
     }

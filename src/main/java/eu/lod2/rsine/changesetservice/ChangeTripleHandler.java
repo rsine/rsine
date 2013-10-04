@@ -11,6 +11,8 @@ import org.openrdf.rio.RDFParseException;
 import org.openrdf.rio.RDFParser;
 import org.openrdf.rio.helpers.RDFHandlerBase;
 import org.openrdf.rio.ntriples.NTriplesParserFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -19,6 +21,8 @@ import java.util.List;
 import java.util.Properties;
 
 public class ChangeTripleHandler extends PostRequestHandler {
+
+    private final Logger logger = LoggerFactory.getLogger(ChangeTripleHandler.class);
 
     public static String POST_BODY_AFFECTEDTRIPLE = "affectedTriple";
     public static String POST_BODY_SECONDARYTRIPLE = "secondaryTriple";
@@ -32,6 +36,7 @@ public class ChangeTripleHandler extends PostRequestHandler {
 
     @Override
     protected void handlePost(BasicHttpEntityEnclosingRequest request, HttpResponse response) {
+        logger.info("Handling change triple request");
 
         try {
             Properties properties = new Properties();
