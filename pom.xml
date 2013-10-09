@@ -101,6 +101,12 @@
             <artifactId>jcommander</artifactId>
             <version>1.23</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.velocity</groupId>
+            <artifactId>velocity</artifactId>
+            <version>1.7</version>
+        </dependency>
     </dependencies>
 
     <build>

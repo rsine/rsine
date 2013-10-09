@@ -49,9 +49,10 @@ public class Helper {
         return fusekiServer;
     }
 
-    public Model createModelFromResourceFile(String fileName) throws RDFParseException, IOException, RDFHandlerException
+    public Model createModelFromResourceFile(String fileName, RDFFormat format)
+        throws RDFParseException, IOException, RDFHandlerException
     {
-        RDFParser rdfParser = Rio.createParser(RDFFormat.TURTLE);
+        RDFParser rdfParser = Rio.createParser(format);
         Model model = new TreeModel();
         StatementCollector collector = new StatementCollector(model);
         rdfParser.setRDFHandler(collector);

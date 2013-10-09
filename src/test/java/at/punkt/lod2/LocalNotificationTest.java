@@ -27,7 +27,7 @@ public class LocalNotificationTest {
     public void setUp() throws IOException, RepositoryException, RDFParseException {
         countingNotifier = new CountingNotifier();
 
-        rsine = new Rsine(Helper.MANAGED_STORE_LISTENING_PORT, "");
+        rsine = new Rsine(Helper.MANAGED_STORE_LISTENING_PORT);
         rsine.start();
     }
 

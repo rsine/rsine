@@ -70,20 +70,20 @@ public class Rsine {
     }
 
     /**
-     * Convenience constructor for testing
+     * Convenience constructors for testing
      */
-    public Rsine(int changesListeningPort,
-                 String managedStoreSparqlEndpoint)
-    {
-        this();
+    public Rsine(int changesListeningPort) {
         this.changesListeningPort = changesListeningPort;
-        this.managedStoreSparqlEndpoint = managedStoreSparqlEndpoint;
         init();
     }
 
-    /**
-     * Convenience constructor for testing
-     */
+    public Rsine(int changesListeningPort,
+                 String managedStoreSparqlEndpoint)
+    {
+        this(changesListeningPort);
+        this.managedStoreSparqlEndpoint = managedStoreSparqlEndpoint;
+    }
+
     public Rsine(int changesListeningPort,
                  String managedStoreSparqlEndpoint,
                  String authoritativeUri)
@@ -93,6 +93,7 @@ public class Rsine {
         createRemoteNotificationService();
         init();
     }
+    // ---
 
     public void start() throws IOException, RepositoryException {
         changeSetService.start();
