@@ -1,6 +1,8 @@
 package at.punkt.lod2;
 
 import at.punkt.lod2.util.Helper;
+import eu.lod2.rsine.dissemination.messageformatting.VelocityBindingSetFormatter;
+import eu.lod2.rsine.registrationservice.NotificationQuery;
 import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.rsine.registrationservice.SubscriptionParser;
 import org.junit.Assert;
@@ -23,4 +25,13 @@ public class SubscriptionParserTest {
         Assert.assertTrue(subscription.getQueryIterator().hasNext());
     }
 
+    @Test
+    public void customFormatterTest() throws RDFParseException, IOException, RDFHandlerException {
+        Model rdfSubscription = new Helper().createModelFromResourceFile("/labelChangeSubscriptionFormatted.ttl", RDFFormat.TURTLE);
+        Subscription subscription = new SubscriptionParser(rdfSubscription).createSubscription();
+
+        NotificationQuery notificationQuery = subscription.getQueryIterator().next();
+        Assert.assertNotNull(notificationQuery);
+        Assert.assertTrue(notificationQuery.getBindingSetFormatter() instanceof VelocityBindingSetFormatter);
+    }
 }

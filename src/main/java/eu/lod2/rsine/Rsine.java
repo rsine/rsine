@@ -43,7 +43,7 @@ public class Rsine {
     private boolean help = false;
 
     @Parameter(names = {"-s", "--sparql-endpoint"}, description = "URI of managed store SPARQL endpoint")
-    private String managedStoreSparqlEndpoint;
+    private String managedStoreSparqlEndpoint = "";
 
     @Parameter(names = {"-c", "--changes-port"}, description = "Port where rsine listens for incoming triple store changes")
     private Integer changesListeningPort;
@@ -82,6 +82,7 @@ public class Rsine {
     {
         this(changesListeningPort);
         this.managedStoreSparqlEndpoint = managedStoreSparqlEndpoint;
+        init();
     }
 
     public Rsine(int changesListeningPort,

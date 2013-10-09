@@ -20,7 +20,7 @@
             a rsine:vtlFormatter;
             rsine:message "The preferred label of the concept '$bindingSet.getValue('to_concept')'
                            has been changed to $bindingSet.getValue('added_label')";
-        ].
+        ]
     ];
 
     rsine:notifier [
