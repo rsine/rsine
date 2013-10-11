@@ -13,12 +13,14 @@ import org.apache.http.protocol.*;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+@Component
 public class ChangeSetService {
 
     private final Logger logger = LoggerFactory.getLogger(ChangeSetService.class);

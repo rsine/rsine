@@ -36,13 +36,12 @@ public class QueryDispatcher implements IQueryDispatcher {
     @Autowired
     private ChangeSetStore changeSetStore;
 
-    @Autowired
-    private String managedTripleStoreSparqlEndpoint = "";
-
     private ExecutorService notificationExecutor;
+    private String managedTripleStoreSparqlEndpoint;
 
-    public QueryDispatcher() {
+    public QueryDispatcher(String managedTripleStoreSparqlEndpoint) {
         notificationExecutor = Executors.newFixedThreadPool(NUM_NOTIFY_THREADS);
+        this.managedTripleStoreSparqlEndpoint = managedTripleStoreSparqlEndpoint;
     }
 
     @Override

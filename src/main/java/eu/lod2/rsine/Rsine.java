@@ -11,23 +11,29 @@ import eu.lod2.rsine.remotenotification.RemoteNotificationServiceBase;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-/**
- * Assembles an Rsine instance from its components
- * TODO: use spring ioc for this
- */
+@Component
 public class Rsine {
 
     public final static String propertiesFileName = "application.properties";
     private final Logger logger = LoggerFactory.getLogger(Rsine.class);
 
     private static JCommander jc;
+
+    @Autowired
     private ChangeSetService changeSetService;
+
+    @Autowired
     private RegistrationService registrationService;
+
     private RemoteNotificationServiceBase remoteNotificationService = new NullRemoteNotificationService();
 
     @Parameter(names = {"-a", "--authoritative-uri"}, description = "URI scheme of local resources")
@@ -42,11 +48,7 @@ public class Rsine {
     @Parameter(names = {"-c", "--changes-port"}, description = "Port where rsine listens for incoming triple store changes")
     private Integer changesListeningPort;
 
-    private Rsine() {
-    }
-
-    private void init() {
-        changeSetService = new ChangeSetService(changesListeningPort);
+    public Rsine() {
     }
 
     /**
@@ -54,7 +56,6 @@ public class Rsine {
      */
     public Rsine(int changesListeningPort) {
         this.changesListeningPort = changesListeningPort;
-        init();
     }
 
     public Rsine(int changesListeningPort,
@@ -62,7 +63,6 @@ public class Rsine {
     {
         this(changesListeningPort);
         this.managedStoreSparqlEndpoint = managedStoreSparqlEndpoint;
-        init();
     }
 
     public Rsine(int changesListeningPort,
@@ -72,7 +72,6 @@ public class Rsine {
         this(changesListeningPort, managedStoreSparqlEndpoint);
         this.authoritativeUri = authoritativeUri;
         createRemoteNotificationService();
-        init();
     }
     // ---
 
@@ -85,7 +84,8 @@ public class Rsine {
     }
 
     public static void main(String[] args) throws IOException, RepositoryException {
-        Rsine rsine = new Rsine();
+        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("application-context.xml");
+        Rsine rsine = (Rsine) applicationContext.getBean("rsine");
         rsine.parseParams(args);
 
         if (rsine.help) {
@@ -95,7 +95,6 @@ public class Rsine {
             if (rsine.checkParams()) {
                 rsine.logParamValues();
                 rsine.createRemoteNotificationService();
-                rsine.init();
                 rsine.start();
             }
         }
