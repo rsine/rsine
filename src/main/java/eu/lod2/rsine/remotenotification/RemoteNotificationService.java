@@ -24,6 +24,10 @@ public class RemoteNotificationService extends RemoteNotificationServiceBase {
     private final Logger logger = LoggerFactory.getLogger(RemoteNotificationService.class);
     private String authoritativeUri;
 
+    public RemoteNotificationService(String authoritativeUri) {
+        this.authoritativeUri = authoritativeUri;
+    }
+
     @Override
     public void announce(Model changeSet) {
         Collection<Resource> extResources = getExternalResources(changeSet);
@@ -100,10 +104,6 @@ public class RemoteNotificationService extends RemoteNotificationServiceBase {
         HttpResponse response = new DefaultHttpClient().execute(httpPost);
 
         logger.info("Posted changeset to '" +remoteService+ "', response: " +response.getStatusLine().getStatusCode());
-    }
-
-    public void setAuthoritativeUri(String authoritativeUri) {
-        this.authoritativeUri = authoritativeUri;
     }
 
 }
