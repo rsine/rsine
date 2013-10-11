@@ -10,6 +10,8 @@ import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -19,6 +21,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+@Component
 public class QueryDispatcher implements IQueryDispatcher {
 
     private final Logger logger = LoggerFactory.getLogger(QueryDispatcher.class);
@@ -27,9 +30,15 @@ public class QueryDispatcher implements IQueryDispatcher {
     public final static String QUERY_LAST_ISSUED = "QUERY_LAST_ISSUED";
     public final static String MANAGED_STORE_SPARQL_ENDPONT = "MANAGED_STORE_SPARQL_ENDPONT";
 
+    @Autowired
     private RegistrationService registrationService;
+
+    @Autowired
     private ChangeSetStore changeSetStore;
+
+    @Autowired
     private String managedTripleStoreSparqlEndpoint = "";
+
     private ExecutorService notificationExecutor;
 
     public QueryDispatcher() {
@@ -116,18 +125,6 @@ public class QueryDispatcher implements IQueryDispatcher {
 
     private String amendManagedTripleStoreURIs(String query) {
         return query.replace(MANAGED_STORE_SPARQL_ENDPONT, managedTripleStoreSparqlEndpoint);
-    }
-
-    public void setRegistrationService(RegistrationService registrationService) {
-        this.registrationService = registrationService;
-    }
-
-    public void setChangeSetStore(ChangeSetStore changeSetStore) {
-        this.changeSetStore = changeSetStore;
-    }
-
-    public void setManagedTripleStore(String sparqlEndpoint) {
-        managedTripleStoreSparqlEndpoint = sparqlEndpoint;
     }
 
     private class Notification implements Runnable {

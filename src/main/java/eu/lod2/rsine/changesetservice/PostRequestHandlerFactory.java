@@ -1,18 +1,20 @@
 package eu.lod2.rsine.changesetservice;
 
-import eu.lod2.rsine.changesetstore.ChangeSetStore;
-import eu.lod2.rsine.querydispatcher.IQueryDispatcher;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.remotenotification.RemoteChangeSetHandler;
-import eu.lod2.rsine.remotenotification.RemoteNotificationServiceBase;
 import org.apache.http.protocol.HttpRequestHandler;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class PostRequestHandlerFactory {
 
     private static PostRequestHandlerFactory instance = new PostRequestHandlerFactory();
 
     private PersistAndNotifyProvider persistAndNotifyProvider = new PersistAndNotifyProvider();
+
+    @Autowired
     private ChangeSetCreator changeSetCreator;
+
+    @Autowired
     private RegistrationService registrationService;
     
     public static PostRequestHandlerFactory getInstance() {
@@ -43,26 +45,6 @@ public class PostRequestHandlerFactory {
     public HttpRequestHandler createUnRegistrationHandler() {
         UnRegistrationHandler unregistrationHandler = new UnRegistrationHandler(registrationService);
         return unregistrationHandler;
-    }
-    
-    public void setChangeSetCreator(ChangeSetCreator changeSetCreator) {
-        this.changeSetCreator = changeSetCreator;
-    }
-
-    public void setChangeSetStore(ChangeSetStore changeSetStore) {
-        persistAndNotifyProvider.setChangeSetStore(changeSetStore);
-    }
-
-    public void setQueryDispatcher(IQueryDispatcher queryDispatcher) {
-        persistAndNotifyProvider.setQueryDispatcher(queryDispatcher);
-    }
-
-    public void setRemoteNotificationService(RemoteNotificationServiceBase remoteNotificationService) {
-        persistAndNotifyProvider.setRemoteNotificationService(remoteNotificationService);
-    }
-
-    public void setRegistrationService(RegistrationService registrationService) {
-        this.registrationService = registrationService;
     }
 
 }

@@ -6,9 +6,11 @@ import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.sail.memory.MemoryStore;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 
+@Component
 public class ChangeSetStore {
 
     private Repository repository;

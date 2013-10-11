@@ -2,11 +2,7 @@ package eu.lod2.rsine;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
-import eu.lod2.rsine.changesetservice.ChangeSetCreator;
 import eu.lod2.rsine.changesetservice.ChangeSetService;
-import eu.lod2.rsine.changesetservice.PostRequestHandlerFactory;
-import eu.lod2.rsine.changesetstore.ChangeSetStore;
-import eu.lod2.rsine.querydispatcher.QueryDispatcher;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.rsine.remotenotification.NullRemoteNotificationService;
@@ -32,9 +28,7 @@ public class Rsine {
     private static JCommander jc;
     private ChangeSetService changeSetService;
     private RegistrationService registrationService;
-    private QueryDispatcher queryDispatcher;
     private RemoteNotificationServiceBase remoteNotificationService = new NullRemoteNotificationService();
-    private ChangeSetStore changeSetStore;
 
     @Parameter(names = {"-a", "--authoritative-uri"}, description = "URI scheme of local resources")
     private String authoritativeUri;
@@ -53,20 +47,6 @@ public class Rsine {
 
     private void init() {
         changeSetService = new ChangeSetService(changesListeningPort);
-        registrationService = new RegistrationService();
-        queryDispatcher = new QueryDispatcher();
-        changeSetStore = new ChangeSetStore();
-
-        queryDispatcher.setRegistrationService(registrationService);
-        queryDispatcher.setManagedTripleStore(managedStoreSparqlEndpoint);
-        queryDispatcher.setChangeSetStore(changeSetStore);
-
-        PostRequestHandlerFactory handlerFactory = PostRequestHandlerFactory.getInstance();
-        handlerFactory.setChangeSetCreator(new ChangeSetCreator());
-        handlerFactory.setChangeSetStore(changeSetStore);
-        handlerFactory.setQueryDispatcher(queryDispatcher);
-        handlerFactory.setRemoteNotificationService(remoteNotificationService);
-        handlerFactory.setRegistrationService(registrationService);                
     }
 
     /**
