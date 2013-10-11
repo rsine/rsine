@@ -19,12 +19,7 @@ public class EmailNotifier implements INotifier {
 
     private final Logger logger = LoggerFactory.getLogger(EmailNotifier.class);
 
-    private final String PROP_KEY_FROM = "emailnotifier.from";
-    private final String PROP_KEY_HOST = "emailnotifier.host";
-    private final String PROP_KEY_SMTP_HOST = "mail.smtp.host";
-    
     private String emailAddress, from, smtpServer, subject = "[WP5] Notification";
-
     
     public EmailNotifier(String emailAddress) {
         this.emailAddress = emailAddress.replaceFirst("mailto:", "");
