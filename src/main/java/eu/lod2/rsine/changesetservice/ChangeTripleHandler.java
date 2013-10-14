@@ -13,6 +13,7 @@ import org.openrdf.rio.helpers.RDFHandlerBase;
 import org.openrdf.rio.ntriples.NTriplesParserFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -31,7 +32,10 @@ public class ChangeTripleHandler extends PostRequestHandler {
     public static String CHANGETYPE_REMOVE = "remove";
     public static String CHANGETYPE_UPDATE = "update";
 
+    @Autowired
     private ChangeSetCreator changeSetCreator;
+
+    @Autowired
     private PersistAndNotifyProvider persistAndNotifyProvider;
 
     @Override
@@ -99,10 +103,6 @@ public class ChangeTripleHandler extends PostRequestHandler {
     private void errorResponse(HttpResponse response, String message) {
         response.setStatusCode(HttpStatus.SC_BAD_REQUEST);
         response.setReasonPhrase(message);
-    }
-
-    public void setChangeSetCreator(ChangeSetCreator changeSetCreator) {
-        this.changeSetCreator = changeSetCreator;
     }
 
     public void setPersistAndNotifyProvider(PersistAndNotifyProvider persistAndNotifyProvider) {

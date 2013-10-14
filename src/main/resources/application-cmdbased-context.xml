@@ -21,6 +21,13 @@
         <constructor-arg value="#{defaults['managedstore.endpoint']}" />
     </bean>
 
+    <bean id="remoteNotificationService"
+          class="eu.lod2.rsine.remotenotification.RemoteNotificationServiceFactory"
+          factory-method="createRemoteNotificationService"
+    >
+        <constructor-arg value="#{defaults['managedstore.authUri']}" />
+    </bean>
+
     <bean id="rsine" class="eu.lod2.rsine.Rsine"/>
 
 </beans>

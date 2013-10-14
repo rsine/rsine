@@ -25,10 +25,14 @@ import java.util.Properties;
 
 public class Helper {
 
-    public static int MANAGED_STORE_LISTENING_PORT = 8991;
+    private int changeSetListeningPort;
 
-    public int doPost(int port, Properties properties) throws IOException {
-        HttpPost httpPost = new HttpPost("http://localhost:" +port);
+    public Helper(int changeSetListeningPort) {
+        this.changeSetListeningPort = changeSetListeningPort;
+    }
+
+    public int doPost(Properties properties) throws IOException {
+        HttpPost httpPost = new HttpPost("http://localhost:" +changeSetListeningPort);
         StringWriter sw = new StringWriter();
         properties.store(sw, null);
         httpPost.setEntity(new StringEntity(sw.toString()));
@@ -58,6 +62,10 @@ public class Helper {
         rdfParser.setRDFHandler(collector);
         rdfParser.parse(Rsine.class.getResourceAsStream(fileName), "");
         return model;
+    }
+
+    public int getChangeSetListeningPort() {
+        return changeSetListeningPort;
     }
 
 }

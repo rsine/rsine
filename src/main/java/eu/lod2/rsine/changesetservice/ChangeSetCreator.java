@@ -6,11 +6,13 @@ import org.openrdf.model.impl.StatementImpl;
 import org.openrdf.model.impl.TreeModel;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.model.vocabulary.RDF;
+import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 
+@Component
 public class ChangeSetCreator {
 
     private ValueFactory valueFactory = ValueFactoryImpl.getInstance();

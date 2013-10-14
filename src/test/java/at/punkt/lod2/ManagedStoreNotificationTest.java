@@ -14,30 +14,34 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.openrdf.model.Literal;
 import org.openrdf.query.BindingSet;
 import org.openrdf.repository.RepositoryException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.IOException;
 import java.util.Properties;
 
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations = {"LocalTest-context.xml"})
 public class ManagedStoreNotificationTest {
 
-    private final Logger logger = LoggerFactory.getLogger(ManagedStoreNotificationTest.class);
+    @Autowired
+    private Rsine rsine;
+
+    @Autowired
+    private Helper helper;
 
     private SPARQLServer fusekiServer;
-    private Rsine rsine;
     private ScopeNoteCreationFormatter scopeNoteCreationFormatter;
     private CountingNotifier countingNotifier;
 
     @Before
     public void setUp() throws IOException, RepositoryException {
-        fusekiServer = new Helper().initFuseki(Rsine.class.getResource("/reegle.rdf"), "dataset");
-
-        rsine = new Rsine(Helper.MANAGED_STORE_LISTENING_PORT, "http://localhost:3030/dataset/query");
-
+        fusekiServer = helper.initFuseki(Rsine.class.getResource("/reegle.rdf"), "dataset");
         scopeNoteCreationFormatter = new ScopeNoteCreationFormatter();
         countingNotifier = new CountingNotifier();
 
@@ -92,7 +96,7 @@ public class ManagedStoreNotificationTest {
             ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
             "<http://reegle.info/glossary/2547> <http://www.w3.org/2004/02/skos/core#scopeNote> \"some additional info\"@en .");
 
-        new Helper().doPost(Helper.MANAGED_STORE_LISTENING_PORT, props);
+        helper.doPost(props);
 
     }
 

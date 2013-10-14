@@ -12,23 +12,13 @@ public class PostRequestHandlerFactory {
     private PersistAndNotifyProvider persistAndNotifyProvider = new PersistAndNotifyProvider();
 
     @Autowired
-    private ChangeSetCreator changeSetCreator;
-
-    @Autowired
     private RegistrationService registrationService;
-    
+
     public static PostRequestHandlerFactory getInstance() {
         return instance;
     }
 
     public PostRequestHandlerFactory() {
-    }
-
-    public HttpRequestHandler createChangeTripleHandler() {
-        ChangeTripleHandler changeTripleHandler = new ChangeTripleHandler();
-        changeTripleHandler.setChangeSetCreator(changeSetCreator);
-        changeTripleHandler.setPersistAndNotifyProvider(persistAndNotifyProvider);
-        return changeTripleHandler;
     }
 
     public HttpRequestHandler createRemoteChangeSetHandler() {

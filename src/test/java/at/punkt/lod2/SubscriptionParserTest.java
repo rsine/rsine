@@ -7,18 +7,27 @@ import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.rsine.registrationservice.SubscriptionParser;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.openrdf.model.Model;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParseException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.IOException;
 
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations = {"LocalTest-context.xml"})
 public class SubscriptionParserTest {
+
+    @Autowired
+    private Helper helper;
 
     @Test
     public void emailNotificationSubscription() throws RDFParseException, IOException, RDFHandlerException {
-        Model rdfSubscription = new Helper().createModelFromResourceFile("/emailNotifierSubscription.ttl", RDFFormat.TURTLE);
+        Model rdfSubscription = helper.createModelFromResourceFile("/emailNotifierSubscription.ttl", RDFFormat.TURTLE);
         Subscription subscription = new SubscriptionParser(rdfSubscription).createSubscription();
 
         Assert.assertTrue(subscription.getNotifierIterator().hasNext());
@@ -27,7 +36,7 @@ public class SubscriptionParserTest {
 
     @Test
     public void customFormatterTest() throws RDFParseException, IOException, RDFHandlerException {
-        Model rdfSubscription = new Helper().createModelFromResourceFile("/labelChangeSubscriptionFormatted.ttl", RDFFormat.TURTLE);
+        Model rdfSubscription = helper.createModelFromResourceFile("/labelChangeSubscriptionFormatted.ttl", RDFFormat.TURTLE);
         Subscription subscription = new SubscriptionParser(rdfSubscription).createSubscription();
 
         NotificationQuery notificationQuery = subscription.getQueryIterator().next();

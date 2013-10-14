@@ -19,7 +19,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class RemoteNotificationService extends RemoteNotificationServiceBase {
+class RemoteNotificationService extends RemoteNotificationServiceBase {
 
     private final Logger logger = LoggerFactory.getLogger(RemoteNotificationService.class);
     private String authoritativeUri;

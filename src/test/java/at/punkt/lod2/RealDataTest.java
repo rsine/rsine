@@ -12,6 +12,7 @@ import org.apache.jena.fuseki.server.SPARQLServer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.vocabulary.XMLSchema;
@@ -22,14 +23,25 @@ import org.openrdf.rio.helpers.StatementCollector;
 import org.openrdf.rio.ntriples.NTriplesWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.*;
 
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations = {"LocalTest-context.xml"})
 public class RealDataTest {
 
     private final Logger logger = LoggerFactory.getLogger(RealDataTest.class);
+
+    @Autowired
+    private Rsine rsine;
+
+    @Autowired
+    private Helper helper;
 
     private String[] predicates = {Namespaces.DCTERMS_NAMESPACE.getName() + "title",
             Namespaces.DCTERMS_NAMESPACE.getName() + "creator",
@@ -50,15 +62,13 @@ public class RealDataTest {
     private final String VOCAB_FILENAME = "/stw.rdf";
 
     private SPARQLServer managedServer;
-    private Rsine rsine;
     private List<Statement> vocabStatements;
     private long accumulatedPostDurations = 0;
 
     @Before
     public void setUp() throws IOException, RepositoryException, RDFParseException, RDFHandlerException
     {
-        managedServer = new Helper().initFuseki(Rsine.class.getResource(VOCAB_FILENAME), "dataset");
-        rsine = new Rsine(Helper.MANAGED_STORE_LISTENING_PORT, "http://localhost:3030/dataset/query");
+        managedServer = helper.initFuseki(Rsine.class.getResource(VOCAB_FILENAME), "dataset");
         rsine.start();
 
         createVocabModel();
@@ -164,7 +174,7 @@ public class RealDataTest {
             );
 
         long startTimeMillis = System.currentTimeMillis();
-        new Helper().doPost(Helper.MANAGED_STORE_LISTENING_PORT, props);
+        helper.doPost(props);
         accumulatedPostDurations += System.currentTimeMillis() - startTimeMillis;
     }
 

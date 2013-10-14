@@ -7,15 +7,24 @@ import org.openrdf.model.Model;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
+@Component
 public class PersistAndNotifyProvider {
 
     private final Logger logger = LoggerFactory.getLogger(PersistAndNotifyProvider.class);
 
+    @Autowired
     private ChangeSetStore changeSetStore;
+
+    @Autowired
     private IQueryDispatcher queryDispatcher;
+
+    @Autowired
     private RemoteNotificationServiceBase remoteNotificationService;
 
     private ExecutorService executor;

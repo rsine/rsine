@@ -13,6 +13,7 @@ import org.apache.http.protocol.*;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -24,6 +25,9 @@ import java.net.Socket;
 public class ChangeSetService {
 
     private final Logger logger = LoggerFactory.getLogger(ChangeSetService.class);
+
+    @Autowired
+    private ChangeTripleHandler changeTripleHandler;
 
     private ServerSocket serverSocket;
     private Thread requestListenerThread;
@@ -78,7 +82,7 @@ public class ChangeSetService {
 
         private void setupRequestHandler() throws RepositoryException {
             reqistry = new HttpRequestHandlerRegistry();
-            reqistry.register("*", PostRequestHandlerFactory.getInstance().createChangeTripleHandler());
+            reqistry.register("*", changeTripleHandler);
             reqistry.register("/register", PostRequestHandlerFactory.getInstance().createRegistrationHandler());
             reqistry.register("/unregister", PostRequestHandlerFactory.getInstance().createUnRegistrationHandler());
             reqistry.register("/remote", PostRequestHandlerFactory.getInstance().createRemoteChangeSetHandler());                        

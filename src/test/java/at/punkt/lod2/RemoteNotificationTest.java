@@ -1,35 +1,26 @@
 package at.punkt.lod2;
 
 import at.punkt.lod2.util.CountingNotifier;
-import at.punkt.lod2.util.Helper;
 import eu.lod2.rsine.Rsine;
-import eu.lod2.rsine.dissemination.messageformatting.BindingSetFormatter;
-import eu.lod2.rsine.registrationservice.Subscription;
-import eu.lod2.rsine.remotenotification.IRemoteServiceDetector;
-import eu.lod2.util.Namespaces;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.openrdf.model.Model;
-import org.openrdf.model.Resource;
-import org.openrdf.model.URI;
-import org.openrdf.model.impl.TreeModel;
-import org.openrdf.model.impl.URIImpl;
-import org.openrdf.query.BindingSet;
-import org.openrdf.repository.RepositoryException;
-import org.openrdf.rio.*;
-import org.openrdf.rio.helpers.StatementCollector;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.io.IOException;
-
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations = {"LocalTest-context.xml", "RemoteTest-context.xml"})
 public class RemoteNotificationTest {
+
+    @Autowired
+    private Rsine localRsineInstance, remoteRsineInstance;
 
     private int localInstanceListeningPort, remoteInstanceListeningPort;
     private Model changeSet;
-    private Rsine localRsineInstance, remoteRsineInstance;
+
     private CountingNotifier countingNotifier;
 
+    /*
     @Before
     public void setUp() throws RDFParseException, IOException, RDFHandlerException, RepositoryException {
         localInstanceListeningPort = Helper.MANAGED_STORE_LISTENING_PORT;
@@ -117,4 +108,5 @@ public class RemoteNotificationTest {
         }
 
     }
+    */
 }
