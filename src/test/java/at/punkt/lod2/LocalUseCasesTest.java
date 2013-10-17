@@ -9,7 +9,7 @@ import eu.lod2.rsine.dissemination.notifier.logging.LoggingNotifier;
 import eu.lod2.rsine.querydispatcher.QueryDispatcher;
 import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.util.Namespaces;
-import org.apache.jena.fuseki.server.SPARQLServer;
+import org.apache.jena.fuseki.Fuseki;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -35,20 +35,19 @@ public class LocalUseCasesTest {
     @Autowired
     private Helper helper;
 
-    private SPARQLServer managedServer;
     private CountingNotifier countingNotifier;
 
     @Before
     public void setUp() throws IOException, RepositoryException {
+        helper.initFuseki(Rsine.class.getResource("/reegle.rdf"), "dataset");
         countingNotifier = new CountingNotifier();
-        managedServer = helper.initFuseki(Rsine.class.getResource("/reegle.rdf"), "dataset");
         registerUser();
         rsine.start();
     }
 
     @After
-    public void tearDown() throws IOException, InterruptedException {
-        managedServer.stop();
+    public void tearDown() throws Exception {
+        Fuseki.getServer().stop();
         rsine.stop();
     }
 
@@ -96,7 +95,7 @@ public class LocalUseCasesTest {
                     "?addition rdf:subject ?concept . " +
                     "?addition rdf:predicate ?hierarchicalRelation . " +
                     "?addition rdf:object ?otherConcept . "+
-                    "SERVICE <http://localhost:3030/dataset/query> {" +
+                    "SERVICE <" +QueryDispatcher.MANAGED_STORE_SPARQL_ENDPONT+"> {" +
                         "?concept skos:prefLabel ?conceptLabel . " +
                         "?otherConcept skos:prefLabel ?otherConceptLabel . " +
                         "?concept dcterms:creator \"" +contributor+ "\""+
@@ -145,8 +144,8 @@ public class LocalUseCasesTest {
         Properties props = new Properties();
         props.setProperty(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD);
         props.setProperty(
-            ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
-            "<http://reegle.info/glossary/1> <http://www.w3.org/2004/02/skos/core#scopeNote> \"some scope note\"@en .");
+                ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
+                "<http://reegle.info/glossary/1> <http://www.w3.org/2004/02/skos/core#scopeNote> \"some scope note\"@en .");
 
         helper.doPost(props);
     }

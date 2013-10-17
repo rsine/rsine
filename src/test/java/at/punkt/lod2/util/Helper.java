@@ -44,8 +44,7 @@ public class Helper {
     public SPARQLServer initFuseki(URL rdfFile, String datasetName) {
         DatasetGraph datasetGraph = DatasetGraphFactory.createMem();
         RDFDataMgr.read(datasetGraph, new File(rdfFile.getFile()).toURI().toString());
-
-        ServerConfig serverConfig = FusekiConfig.defaultConfiguration(datasetName, datasetGraph, true) ;
+        ServerConfig serverConfig = FusekiConfig.defaultConfiguration(datasetName, datasetGraph, false) ;
         SPARQLServer fusekiServer = new SPARQLServer(serverConfig) ;
         Fuseki.setServer(fusekiServer);
         fusekiServer.start();

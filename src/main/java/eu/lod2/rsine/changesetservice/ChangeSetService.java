@@ -31,7 +31,7 @@ public class ChangeSetService {
 
     private ServerSocket serverSocket;
     private Thread requestListenerThread;
-    private boolean shoudStop;
+    private boolean shouldStop;
     private int port;
 
     public ChangeSetService(int port) {
@@ -39,13 +39,14 @@ public class ChangeSetService {
     }
 
     public void start() throws IOException, RepositoryException {
+        shouldStop = false;
         requestListenerThread = new RequestListenerThread(port);
         requestListenerThread.setDaemon(false);
         requestListenerThread.start();
     }
 
     public void stop() throws InterruptedException, IOException {
-        shoudStop = true;
+        shouldStop = true;
 
         serverSocket.close();
         requestListenerThread.join();
@@ -92,7 +93,7 @@ public class ChangeSetService {
         public void run() {
             logger.info("Listening on port " + serverSocket.getLocalPort());
 
-            while (!shoudStop) {
+            while (!shouldStop) {
                 try {
                     // Set up HTTP connection
                     Socket socket = serverSocket.accept();
@@ -137,7 +138,7 @@ public class ChangeSetService {
         public void run() {
             HttpContext context = new BasicHttpContext(null);
             try {
-                while (!shoudStop && conn.isOpen()) {
+                while (!shouldStop && conn.isOpen()) {
                     httpservice.handleRequest(conn, context);
                 }
                 conn.shutdown();

@@ -42,16 +42,18 @@ public class ChangesetServiceTest {
     @Autowired
     private Helper helper;
 
+    @Autowired
     private ChangeSetStore changeSetStore;
 
     @Before
     public void setUp() throws IOException, RepositoryException {
-        changeSetStore = new ChangeSetStore();
+        System.out.println("starting service");
         changeSetService.start();
     }
 
     @After
     public void after() throws IOException, InterruptedException {
+        System.out.println("stopping service");
         changeSetService.stop();
     }
 
