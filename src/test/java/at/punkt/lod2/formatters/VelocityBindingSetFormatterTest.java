@@ -6,7 +6,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.openrdf.model.Model;
 import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.query.*;
@@ -18,18 +17,10 @@ import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParseException;
 import org.openrdf.sail.memory.MemoryStore;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.IOException;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"LocalTest-context.xml"})
 public class VelocityBindingSetFormatterTest {
-
-    @Autowired
-    public Helper helper;
 
     private VelocityBindingSetFormatter velocityBindingSetFormatter;
     private RepositoryConnection repCon;
@@ -40,7 +31,7 @@ public class VelocityBindingSetFormatterTest {
             "The preferred label of the concept '$bindingSet.getValue('to_concept')' " +
             "has been changed to $bindingSet.getValue('added_label')", "en"));
 
-        Model vocab = helper.createModelFromResourceFile("/reegle.rdf", RDFFormat.RDFXML);
+        Model vocab = Helper.createModelFromResourceFile("/reegle.rdf", RDFFormat.RDFXML);
         Repository repository = new SailRepository(new MemoryStore());
         repository.initialize();
         repCon = repository.getConnection();

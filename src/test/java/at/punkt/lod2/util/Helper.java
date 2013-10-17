@@ -52,7 +52,7 @@ public class Helper {
         return fusekiServer;
     }
 
-    public Model createModelFromResourceFile(String fileName, RDFFormat format)
+    public static Model createModelFromResourceFile(String fileName, RDFFormat format)
         throws RDFParseException, IOException, RDFHandlerException
     {
         RDFParser rdfParser = Rio.createParser(format);
