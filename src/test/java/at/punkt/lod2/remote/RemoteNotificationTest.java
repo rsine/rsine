@@ -1,50 +1,57 @@
-package at.punkt.lod2;
+package at.punkt.lod2.remote;
 
 import at.punkt.lod2.util.CountingNotifier;
 import eu.lod2.rsine.Rsine;
+import eu.lod2.rsine.dissemination.messageformatting.BindingSetFormatter;
+import eu.lod2.rsine.registrationservice.Subscription;
+import eu.lod2.rsine.remotenotification.RemoteNotificationServiceBase;
+import eu.lod2.util.Namespaces;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openrdf.model.Model;
+import org.openrdf.model.impl.TreeModel;
+import org.openrdf.query.BindingSet;
+import org.openrdf.rio.*;
+import org.openrdf.rio.helpers.StatementCollector;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.io.IOException;
+
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"LocalTest-context.xml", "RemoteTest-context.xml"})
-public class RemoteNotificationTest {
+@ContextConfiguration(locations = {"RemoteTest-localContext.xml", "RemoteTest-remoteContext.xml"})
+public class RemoteNotificationTest implements ApplicationContextAware {
 
     @Autowired
-    private Rsine localRsineInstance, remoteRsineInstance;
+    private Rsine localRsine, remoteRsine;
 
-    private int localInstanceListeningPort, remoteInstanceListeningPort;
     private Model changeSet;
+    private CountingNotifier countingNotifier = new CountingNotifier();
+    private ApplicationContext applicationContext;
 
-    private CountingNotifier countingNotifier;
-
-    /*
     @Before
-    public void setUp() throws RDFParseException, IOException, RDFHandlerException, RepositoryException {
-        localInstanceListeningPort = Helper.MANAGED_STORE_LISTENING_PORT;
-        remoteInstanceListeningPort = Helper.MANAGED_STORE_LISTENING_PORT + 1;
-        countingNotifier = new CountingNotifier();
-
+    public void setUp() throws IOException, RDFParseException, RDFHandlerException {
         initServices();
         readChangeSet();
     }
 
     @After
     public void tearDown() throws IOException, InterruptedException {
-        localRsineInstance.stop();
-        remoteRsineInstance.stop();
+        localRsine.stop();
+        remoteRsine.stop();
     }
 
-    private void initServices() throws IOException, RepositoryException {
-        localRsineInstance = new Rsine(localInstanceListeningPort, "", "http://reegle.info/");
-        localRsineInstance.getRemoteNotificationService().setRemoteServiceDetector(new TestRemoteServiceDetector());
-        localRsineInstance.start();
-
-        remoteRsineInstance = new Rsine(remoteInstanceListeningPort, "", "http://zbw.eu");
-        registerRemoteChangeSubscriber(remoteRsineInstance);
-        remoteRsineInstance.start();
+    private void initServices() throws IOException {
+        registerRemoteChangeSubscriber(remoteRsine);
+        localRsine.start();
+        remoteRsine.start();
     }
 
     private void registerRemoteChangeSubscriber(Rsine rsine) {
@@ -81,17 +88,15 @@ public class RemoteNotificationTest {
 
     @Test
     public void changeSetDissemination() throws RDFParseException, IOException, RDFHandlerException {
-        localRsineInstance.getRemoteNotificationService().announce(changeSet);
+        RemoteNotificationServiceBase remoteNotificationServiceBase = (RemoteNotificationServiceBase) applicationContext.
+            getBean("remoteNotificationServiceBase");
+        remoteNotificationServiceBase.announce(changeSet);
         Assert.assertTrue(countingNotifier.waitForNotification() >= 1);
     }
 
-    private class TestRemoteServiceDetector implements IRemoteServiceDetector {
-
-        @Override
-        public URI getRemoteService(Resource resource) {
-            return new URIImpl("http://localhost:" +remoteInstanceListeningPort+ "/remote");
-        }
-
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
     }
 
     private class RemoteReferencesFormatter implements BindingSetFormatter {
@@ -108,5 +113,5 @@ public class RemoteNotificationTest {
         }
 
     }
-    */
+
 }
