@@ -10,7 +10,6 @@ import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.SyncBasicHttpParams;
 import org.apache.http.protocol.*;
-import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +37,7 @@ public class ChangeSetService {
         this.port = port;
     }
 
-    public void start() throws IOException, RepositoryException {
+    public void start() throws IOException {
         shouldStop = false;
         requestListenerThread = new RequestListenerThread(port);
         requestListenerThread.setDaemon(false);
@@ -58,7 +57,7 @@ public class ChangeSetService {
         private HttpService httpService;
         private HttpRequestHandlerRegistry reqistry;
 
-        RequestListenerThread(int port) throws IOException, RepositoryException {
+        RequestListenerThread(int port) throws IOException {
             serverSocket = new ServerSocket(port);
 
             setupParams();
@@ -81,7 +80,7 @@ public class ChangeSetService {
                 .setParameter(CoreProtocolPNames.ORIGIN_SERVER, "HttpComponents/1.1");
         }
 
-        private void setupRequestHandler() throws RepositoryException {
+        private void setupRequestHandler() {
             reqistry = new HttpRequestHandlerRegistry();
             reqistry.register("*", changeTripleHandler);
             reqistry.register("/register", PostRequestHandlerFactory.getInstance().createRegistrationHandler());
