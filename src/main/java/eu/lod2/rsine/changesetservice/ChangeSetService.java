@@ -1,5 +1,6 @@
 package eu.lod2.rsine.changesetservice;
 
+import eu.lod2.rsine.remotenotification.RemoteChangeSetHandler;
 import org.apache.http.ConnectionClosedException;
 import org.apache.http.HttpException;
 import org.apache.http.HttpServerConnection;
@@ -12,7 +13,10 @@ import org.apache.http.params.SyncBasicHttpParams;
 import org.apache.http.protocol.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -21,12 +25,14 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 @Component
-public class ChangeSetService {
+public class ChangeSetService implements ApplicationContextAware {
 
     private final Logger logger = LoggerFactory.getLogger(ChangeSetService.class);
 
     @Autowired
     private ChangeTripleHandler changeTripleHandler;
+
+    private ApplicationContext applicationContext;
 
     private ServerSocket serverSocket;
     private Thread requestListenerThread;
@@ -49,6 +55,11 @@ public class ChangeSetService {
 
         serverSocket.close();
         requestListenerThread.join();
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
     }
 
     private class RequestListenerThread extends Thread {
@@ -83,9 +94,9 @@ public class ChangeSetService {
         private void setupRequestHandler() {
             reqistry = new HttpRequestHandlerRegistry();
             reqistry.register("*", changeTripleHandler);
-            reqistry.register("/register", PostRequestHandlerFactory.getInstance().createRegistrationHandler());
-            reqistry.register("/unregister", PostRequestHandlerFactory.getInstance().createUnRegistrationHandler());
-            reqistry.register("/remote", PostRequestHandlerFactory.getInstance().createRemoteChangeSetHandler());                        
+            reqistry.register("/register", applicationContext.getBean(RegistrationHandler.class));
+            reqistry.register("/unregister", applicationContext.getBean(UnRegistrationHandler.class));
+            reqistry.register("/remote", applicationContext.getBean(RemoteChangeSetHandler.class));
         }
 
         @Override

@@ -7,6 +7,9 @@ import org.openrdf.model.Model;
 import org.openrdf.model.impl.TreeModel;
 import org.openrdf.rio.*;
 import org.openrdf.rio.helpers.StatementCollector;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
@@ -14,14 +17,14 @@ import java.io.IOException;
  *
  * @author http://www.turnguard.com/turnguard
  */
+
+@Component
+@Scope("prototype")
 public class RegistrationHandler extends PostRequestHandler  {
 
+    @Autowired
     private RegistrationService registrationService;
 
-    public RegistrationHandler(RegistrationService registrationService) {
-        this.registrationService = registrationService;
-    }        
-    
     @Override
     protected void handlePost(BasicHttpEntityEnclosingRequest request, HttpResponse response) {
         String contentType = request.getFirstHeader("content-type").getValue();

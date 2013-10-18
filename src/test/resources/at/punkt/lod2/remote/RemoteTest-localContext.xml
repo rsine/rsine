@@ -16,7 +16,7 @@
         <constructor-arg value="8991"/>
     </bean>
 
-    <bean id="localChangeSetService" class="eu.lod2.rsine.changesetservice.ChangeSetService">
+    <bean id="changeSetService" class="eu.lod2.rsine.changesetservice.ChangeSetService">
         <constructor-arg ref="listeningPort"/>
     </bean>
 
@@ -39,9 +39,8 @@
           factory-method="createRemoteNotificationService"/>
 
     <bean id="remoteServiceDetector" class="at.punkt.lod2.remote.TestRemoteServiceDetector">
-        <constructor-arg ref="listeningPort"/>
+        <constructor-arg value="8992"/>
     </bean>
-    <bean id="changeTripleHandler" class="eu.lod2.rsine.changesetservice.ChangeTripleHandler"/>
 
     <bean id="localRsine" class="eu.lod2.rsine.Rsine"/>
 

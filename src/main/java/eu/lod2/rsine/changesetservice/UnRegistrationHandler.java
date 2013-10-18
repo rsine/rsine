@@ -7,6 +7,9 @@ import org.apache.http.HttpResponse;
 import org.apache.http.message.BasicHttpEntityEnclosingRequest;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
@@ -14,14 +17,13 @@ import java.io.IOException;
  *
  * @author http://www.turnguard.com/turnguard
  */
+@Component
+@Scope("prototype")
 public class UnRegistrationHandler extends PostRequestHandler  {
 
+    @Autowired
     private RegistrationService registrationService;
 
-    public UnRegistrationHandler(RegistrationService registrationService) {
-        this.registrationService = registrationService;
-    }        
-    
     @Override
     protected void handlePost(BasicHttpEntityEnclosingRequest request, HttpResponse response) {        
         try {

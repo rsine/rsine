@@ -27,8 +27,9 @@
         <constructor-arg value="" />
     </bean>
 
+    <bean id="remoteServiceDetector" class="eu.lod2.rsine.remotenotification.NullRemoteServiceDetector"/>
     <bean id="remoteNotificationServiceBase" class="eu.lod2.rsine.remotenotification.NullRemoteNotificationService"/>
-    <bean id="changeTripleHandler" class="eu.lod2.rsine.changesetservice.ChangeTripleHandler"/>
+
     <bean id="remoteRsine" class="eu.lod2.rsine.Rsine"/>
 
 </beans>

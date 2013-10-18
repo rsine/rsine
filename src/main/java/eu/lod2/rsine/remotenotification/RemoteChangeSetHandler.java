@@ -13,14 +13,20 @@ import org.openrdf.rio.Rio;
 import org.openrdf.rio.helpers.StatementCollector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.InputStream;
 
+@Component
+@Scope("prototype")
 public class RemoteChangeSetHandler extends PostRequestHandler {
 
     private final Logger logger = LoggerFactory.getLogger(RemoteChangeSetHandler.class);
 
+    @Autowired
     private PersistAndNotifyProvider persistAndNotifyProvider;
 
     @Override
@@ -44,10 +50,6 @@ public class RemoteChangeSetHandler extends PostRequestHandler {
         rdfParser.setRDFHandler(collector);
         rdfParser.parse(remoteChangeSetContent, "");
         return changeSet;
-    }
-
-    public void setPersistAndNotifyProvider(PersistAndNotifyProvider persistAndNotifyProvider) {
-        this.persistAndNotifyProvider = persistAndNotifyProvider;
     }
 
 }

@@ -10,31 +10,23 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.openrdf.model.Model;
 import org.openrdf.model.impl.TreeModel;
 import org.openrdf.query.BindingSet;
 import org.openrdf.rio.*;
 import org.openrdf.rio.helpers.StatementCollector;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.context.support.AbstractApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.io.IOException;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"RemoteTest-localContext.xml", "RemoteTest-remoteContext.xml"})
-public class RemoteNotificationTest implements ApplicationContextAware {
+public class RemoteNotificationTest {
 
-    @Autowired
     private Rsine localRsine, remoteRsine;
 
     private Model changeSet;
     private CountingNotifier countingNotifier = new CountingNotifier();
-    private ApplicationContext applicationContext;
+    private AbstractApplicationContext localContext;
 
     @Before
     public void setUp() throws IOException, RDFParseException, RDFHandlerException {
@@ -49,16 +41,22 @@ public class RemoteNotificationTest implements ApplicationContextAware {
     }
 
     private void initServices() throws IOException {
-        registerRemoteChangeSubscriber(remoteRsine);
+        localContext = new ClassPathXmlApplicationContext("/at/punkt/lod2/remote/RemoteTest-localContext.xml");
+        localRsine = localContext.getBean("localRsine", Rsine.class);
+
+        remoteRsine = new ClassPathXmlApplicationContext("/at/punkt/lod2/remote/RemoteTest-remoteContext.xml").
+            getBean("remoteRsine", Rsine.class);
+
+        registerRemoteChangeSubscriber();
         localRsine.start();
         remoteRsine.start();
     }
 
-    private void registerRemoteChangeSubscriber(Rsine rsine) {
+    private void registerRemoteChangeSubscriber() {
         Subscription subscription = new Subscription();
         subscription.addQuery(createRemoteReferencesDetectionQuery(), new RemoteReferencesFormatter());
         subscription.addNotifier(countingNotifier);
-        rsine.registerSubscription(subscription);
+        remoteRsine.registerSubscription(subscription);
     }
 
     private String createRemoteReferencesDetectionQuery() {
@@ -88,15 +86,11 @@ public class RemoteNotificationTest implements ApplicationContextAware {
 
     @Test
     public void changeSetDissemination() throws RDFParseException, IOException, RDFHandlerException {
-        RemoteNotificationServiceBase remoteNotificationServiceBase = (RemoteNotificationServiceBase) applicationContext.
-            getBean("remoteNotificationServiceBase");
+        RemoteNotificationServiceBase remoteNotificationServiceBase = localContext.getBean(
+            "remoteNotificationServiceBase",
+            RemoteNotificationServiceBase.class);
         remoteNotificationServiceBase.announce(changeSet);
         Assert.assertTrue(countingNotifier.waitForNotification() >= 1);
-    }
-
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
     }
 
     private class RemoteReferencesFormatter implements BindingSetFormatter {

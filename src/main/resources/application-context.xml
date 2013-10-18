@@ -32,7 +32,5 @@
           factory-method="createRemoteNotificationService"/>
 
     <bean id="remoteServiceDetector" class="eu.lod2.rsine.remotenotification.NullRemoteServiceDetector"/>
-    <bean id="changeTripleHandler" class="eu.lod2.rsine.changesetservice.ChangeTripleHandler"/>
-    <bean id="rsine" class="eu.lod2.rsine.Rsine"/>
 
 </beans>
