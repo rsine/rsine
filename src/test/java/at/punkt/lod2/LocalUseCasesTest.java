@@ -10,37 +10,30 @@ import eu.lod2.rsine.querydispatcher.QueryDispatcher;
 import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.util.Namespaces;
 import org.apache.jena.fuseki.Fuseki;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.*;
 import org.openrdf.model.Literal;
 import org.openrdf.query.BindingSet;
 import org.openrdf.repository.RepositoryException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.context.support.AbstractApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.io.IOException;
 import java.util.Properties;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"LocalTest-context.xml"})
 public class LocalUseCasesTest {
 
-    @Autowired
     private Rsine rsine;
-
-    @Autowired
     private Helper helper;
 
-    private CountingNotifier countingNotifier;
+    private CountingNotifier countingNotifier = new CountingNotifier();
 
     @Before
     public void setUp() throws IOException, RepositoryException {
-        helper.initFuseki(Rsine.class.getResource("/reegle.rdf"), "dataset");
-        countingNotifier = new CountingNotifier();
+        Helper.initFuseki(Rsine.class.getResource("/reegle.rdf"), "dataset");
+        AbstractApplicationContext context = new ClassPathXmlApplicationContext("/at/punkt/lod2/LocalTest-context.xml");
+        helper = context.getBean(Helper.class);
+        rsine = context.getBean(Rsine.class);
+
         registerUser();
         rsine.start();
     }

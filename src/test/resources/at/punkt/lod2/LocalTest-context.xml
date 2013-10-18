@@ -26,6 +26,5 @@
 
     <bean id="remoteServiceDetector" class="eu.lod2.rsine.remotenotification.NullRemoteServiceDetector"/>
     <bean id="remoteNotificationServiceBase" class="eu.lod2.rsine.remotenotification.NullRemoteNotificationService"/>
-    <bean id="localRsine" class="eu.lod2.rsine.Rsine"/>
 
 </beans>
