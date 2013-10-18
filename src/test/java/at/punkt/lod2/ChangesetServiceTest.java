@@ -4,7 +4,7 @@ import at.punkt.lod2.util.Helper;
 import eu.lod2.rsine.changesetservice.ChangeSetService;
 import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
 import eu.lod2.rsine.changesetstore.ChangeSetStore;
-import eu.lod2.rsine.querydispatcher.IQueryDispatcher;
+import eu.lod2.rsine.queryhandling.IQueryDispatcher;
 import eu.lod2.util.Namespaces;
 import info.aduna.iteration.Iterations;
 import org.apache.http.HttpResponse;

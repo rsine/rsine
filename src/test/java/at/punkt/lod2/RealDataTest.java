@@ -5,7 +5,7 @@ import eu.lod2.rsine.Rsine;
 import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
 import eu.lod2.rsine.dissemination.messageformatting.BindingSetFormatter;
 import eu.lod2.rsine.dissemination.notifier.logging.LoggingNotifier;
-import eu.lod2.rsine.querydispatcher.QueryDispatcher;
+import eu.lod2.rsine.queryhandling.QueryEvaluator;
 import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.util.Namespaces;
 import org.apache.jena.fuseki.server.SPARQLServer;
@@ -135,7 +135,7 @@ public class RealDataTest {
                 + "?x rdf:subject ?subject; "
                 + "rdf:predicate <"+predicate+">; "
                 + "rdf:object ?object . "
-                + "FILTER (?csdate > \"" +QueryDispatcher.QUERY_LAST_ISSUED+ "\"^^<"+XMLSchema.DATETIME+">)."
+                + "FILTER (?csdate > \"" + QueryEvaluator.QUERY_LAST_ISSUED+ "\"^^<"+XMLSchema.DATETIME+">)."
                 + "}";
     }
 

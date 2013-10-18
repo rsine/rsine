@@ -1,4 +1,4 @@
-package eu.lod2.rsine.querydispatcher;
+package eu.lod2.rsine.queryhandling;
 
 public interface IQueryDispatcher {
 

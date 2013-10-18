@@ -17,7 +17,7 @@
         <constructor-arg value="#{cmdParams.changesListeningPort}"/>
     </bean>
 
-    <bean id="queryDispatcher" class="eu.lod2.rsine.querydispatcher.QueryDispatcher">
+    <bean id="queryEvaluator" class="eu.lod2.rsine.queryhandling.QueryEvaluator">
         <constructor-arg value="#{cmdParams.managedStoreSparqlEndpoint}" />
     </bean>
 

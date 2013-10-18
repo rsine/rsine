@@ -6,7 +6,7 @@ import eu.lod2.rsine.Rsine;
 import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
 import eu.lod2.rsine.dissemination.messageformatting.BindingSetFormatter;
 import eu.lod2.rsine.dissemination.notifier.logging.LoggingNotifier;
-import eu.lod2.rsine.querydispatcher.QueryDispatcher;
+import eu.lod2.rsine.queryhandling.QueryEvaluator;
 import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.util.Namespaces;
 import org.apache.jena.fuseki.server.SPARQLServer;
@@ -74,7 +74,7 @@ public class ManagedStoreNotificationTest {
                     "?addition rdf:subject ?concept . " +
                     "?addition rdf:predicate skos:scopeNote . " +
                     "?addition rdf:object ?newScopeNote . "+
-                    "SERVICE <" + QueryDispatcher.MANAGED_STORE_SPARQL_ENDPONT+ "> {" +
+                    "SERVICE <" + QueryEvaluator.MANAGED_STORE_SPARQL_ENDPONT+ "> {" +
                         "?concept skos:prefLabel ?prefLabel . " +
                     "}" +
                     "FILTER(langMatches(lang(?prefLabel), \"en\"))" +

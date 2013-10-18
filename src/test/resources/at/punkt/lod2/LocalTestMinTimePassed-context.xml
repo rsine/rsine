@@ -24,6 +24,10 @@
         <constructor-arg value="http://localhost:3030/dataset/query" />
     </bean>
 
+    <bean id="evaluationPolicy" class="eu.lod2.rsine.queryhandling.policies.MinTimePassedEvaluationPolicy">
+        <constructor-arg value="5" />
+    </bean>
+
     <bean id="remoteServiceDetector" class="eu.lod2.rsine.remotenotification.NullRemoteServiceDetector"/>
     <bean id="remoteNotificationServiceBase" class="eu.lod2.rsine.remotenotification.NullRemoteNotificationService"/>
 

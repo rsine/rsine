@@ -24,10 +24,6 @@
         <constructor-arg ref="listeningPort"/>
     </bean>
 
-    <bean id="queryDispatcher" class="eu.lod2.rsine.querydispatcher.QueryDispatcher">
-        <constructor-arg value="" />
-    </bean>
-
     <bean id="remoteNotificationServiceFactory"
           class="eu.lod2.rsine.remotenotification.RemoteNotificationServiceFactory"
             >

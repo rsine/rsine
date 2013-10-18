@@ -6,11 +6,14 @@ import eu.lod2.rsine.Rsine;
 import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
 import eu.lod2.rsine.dissemination.messageformatting.BindingSetFormatter;
 import eu.lod2.rsine.dissemination.notifier.logging.LoggingNotifier;
-import eu.lod2.rsine.querydispatcher.QueryDispatcher;
+import eu.lod2.rsine.queryhandling.QueryEvaluator;
 import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.util.Namespaces;
 import org.apache.jena.fuseki.Fuseki;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import org.openrdf.model.Literal;
 import org.openrdf.query.BindingSet;
 import org.openrdf.repository.RepositoryException;
@@ -66,12 +69,12 @@ public class LocalUseCasesTest {
                     "?addition rdf:subject ?concept . " +
                     "?addition rdf:predicate skos:scopeNote . " +
                     "?addition rdf:object ?scopeNote . "+
-                    "SERVICE <" +QueryDispatcher.MANAGED_STORE_SPARQL_ENDPONT+ "> {" +
+                    "SERVICE <" + QueryEvaluator.MANAGED_STORE_SPARQL_ENDPONT+ "> {" +
                         "?concept skos:prefLabel ?prefLabel . " +
                         "?concept dcterms:creator \"" +contributor+ "\""+
                     "}" +
                     "FILTER(langMatches(lang(?prefLabel), \"en\"))" +
-                    "FILTER (?csdate > \"" + QueryDispatcher.QUERY_LAST_ISSUED+ "\"^^<http://www.w3.org/2001/XMLSchema#dateTime>)" +
+                    "FILTER (?csdate > \"" + QueryEvaluator.QUERY_LAST_ISSUED+ "\"^^<http://www.w3.org/2001/XMLSchema#dateTime>)" +
                "}";
     }
 
@@ -88,7 +91,7 @@ public class LocalUseCasesTest {
                     "?addition rdf:subject ?concept . " +
                     "?addition rdf:predicate ?hierarchicalRelation . " +
                     "?addition rdf:object ?otherConcept . "+
-                    "SERVICE <" +QueryDispatcher.MANAGED_STORE_SPARQL_ENDPONT+"> {" +
+                    "SERVICE <" +QueryEvaluator.MANAGED_STORE_SPARQL_ENDPONT+"> {" +
                         "?concept skos:prefLabel ?conceptLabel . " +
                         "?otherConcept skos:prefLabel ?otherConceptLabel . " +
                         "?concept dcterms:creator \"" +contributor+ "\""+
@@ -96,7 +99,7 @@ public class LocalUseCasesTest {
                     "FILTER(?hierarchicalRelation IN (skos:broader, skos:narrower))"+
                     "FILTER(langMatches(lang(?conceptLabel), \"en\"))" +
                     "FILTER(langMatches(lang(?otherConceptLabel), \"en\"))" +
-                    "FILTER (?csdate > \"" + QueryDispatcher.QUERY_LAST_ISSUED+ "\"^^<http://www.w3.org/2001/XMLSchema#dateTime>)" +
+                    "FILTER (?csdate > \"" + QueryEvaluator.QUERY_LAST_ISSUED+ "\"^^<http://www.w3.org/2001/XMLSchema#dateTime>)" +
                 "}";
     }
 

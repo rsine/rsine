@@ -5,26 +5,19 @@ import at.punkt.lod2.util.Helper;
 import eu.lod2.rsine.Rsine;
 import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
 import eu.lod2.rsine.dissemination.messageformatting.DummyBindingSetFormatter;
-import eu.lod2.rsine.querydispatcher.QueryDispatcher;
+import eu.lod2.rsine.queryhandling.QueryEvaluator;
 import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.util.Namespaces;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.openrdf.repository.RepositoryException;
-import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParseException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.IOException;
 import java.util.Properties;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"LocalTest-context.xml"})
-public class LocalNotificationTest {
+public abstract class LocalNotificationTest {
 
     @Autowired
     private Rsine rsine;
@@ -32,11 +25,10 @@ public class LocalNotificationTest {
     @Autowired
     private Helper helper;
 
-    private CountingNotifier countingNotifier;
+    protected CountingNotifier countingNotifier = new CountingNotifier();
 
     @Before
     public void setUp() throws IOException, RepositoryException, RDFParseException {
-        countingNotifier = new CountingNotifier();
         rsine.start();
     }
 
@@ -45,14 +37,7 @@ public class LocalNotificationTest {
         rsine.stop();
     }
 
-    @Test
-    public void notificationDissemination() throws RDFParseException, IOException, RDFHandlerException {
-        registerUser();
-        postChanges();
-        countingNotifier.waitForNotification();
-    }
-
-    private void registerUser() {
+    protected void registerUser() {
         Subscription subscription = new Subscription();
         subscription.addQuery(createQuery(), new DummyBindingSetFormatter());
         subscription.addNotifier(countingNotifier);
@@ -76,11 +61,11 @@ public class LocalNotificationTest {
                         "?removal rdf:object ?oldLabel . "+
                         "?addition rdf:predicate skos:prefLabel . " +
                         "?addition rdf:object ?newLabel . "+
-                        "FILTER (?csdate > \"" + QueryDispatcher.QUERY_LAST_ISSUED+ "\"^^<http://www.w3.org/2001/XMLSchema#dateTime>)" +
+                        "FILTER (?csdate > \"" + QueryEvaluator.QUERY_LAST_ISSUED+ "\"^^<http://www.w3.org/2001/XMLSchema#dateTime>)" +
                     "}";
     }
 
-    private void postChanges() throws IOException {
+    protected void postEditChanges() throws IOException {
         addConcept();
         setPrefLabel();
         changePrefLabel();
@@ -108,7 +93,7 @@ public class LocalNotificationTest {
         helper.doPost(props);
     }
 
-    private void changePrefLabel() throws IOException {
+    protected void changePrefLabel() throws IOException {
         Properties props = new Properties();
         props.setProperty(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_UPDATE);
         props.setProperty(
