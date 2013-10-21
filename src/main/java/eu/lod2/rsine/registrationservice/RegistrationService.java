@@ -19,7 +19,10 @@ public class RegistrationService {
     public RegistrationService() {
     }
 
-    public void register(Subscription subscription) {
+    public void register(Subscription subscription, boolean deleteOthers) {
+        if (deleteOthers) {
+            subscriptions.clear();
+        }
         subscriptions.add(subscription);
     }
 

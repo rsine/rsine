@@ -1,41 +1,103 @@
 package at.punkt.lod2;
 
-import junit.framework.Assert;
+import at.punkt.lod2.util.TestPersistAndNotifyProvider;
+import eu.lod2.rsine.dissemination.notifier.INotifier;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.openrdf.rio.RDFHandlerException;
+import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.RDFParseException;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.IOException;
+import java.util.Collection;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"LocalTestMinTimePassed-context.xml"})
 public class MinTimePassedLocalNotificationTest extends LocalNotificationTest {
 
+    private final long IMMEDIATE_NOTIFICATION_THRESHOLD_MILLIS = 1000;
+    private TimeMeasureNotifier timeMeasureNotifier = new TimeMeasureNotifier();
+    private TestPersistAndNotifyProvider testPersistAndNotifyProvider;
+
+    @Override
+    public void setUp() throws IOException, RepositoryException, RDFParseException {
+        super.setUp();
+        testPersistAndNotifyProvider = applicationContext.getBean(TestPersistAndNotifyProvider.class);
+    }
+
     @Test
-    public void notificationDissemination() throws RDFParseException, IOException, RDFHandlerException {
-        registerUser();
-        changePrefLabel();
+    public void immediateNotificationOnFirstChange() throws IOException {
+        performChange();
+        timeMeasureNotifier.waitForNotification();
 
-        //immediate notification (1st time of query)
+        Assert.assertTrue(timeMeasureNotifier.millisPassed < IMMEDIATE_NOTIFICATION_THRESHOLD_MILLIS);
+        Assert.assertTrue(testPersistAndNotifyProvider.getSuccess());
+    }
 
+    private void performChange() throws IOException {
+        timeMeasureNotifier.reset();
         changePrefLabel();
-        //no notification (change too soon)
+    }
+
+    @Test
+    public void changeTooSoonForNotification() throws IOException {
+        performChange();
+        timeMeasureNotifier.waitForNotification();
+
+        performChange();
+        Assert.assertFalse(testPersistAndNotifyProvider.getSuccess());
+    }
+
+    @Test
+    public void changeLateEnoughForNotification() throws IOException {
+        performChange();
+        timeMeasureNotifier.waitForNotification();
 
         try {
-            Thread.sleep(7000);
+            Thread.sleep(6000);
         }
         catch (InterruptedException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            // ignore
         }
-        changePrefLabel();
-        //now we get notified again
 
-        countingNotifier.waitForNotification();
+        performChange();
+        timeMeasureNotifier.waitForNotification();
+        Assert.assertTrue(testPersistAndNotifyProvider.getSuccess());
+    }
 
-        Assert.fail();
+    @Override
+    protected INotifier getNotifier() {
+        return timeMeasureNotifier;
+    }
+
+    private class TimeMeasureNotifier implements INotifier {
+
+        private long time = 0;
+        private Long millisPassed = null;
+
+        void reset() {
+            millisPassed = null;
+            time = System.currentTimeMillis();
+        }
+
+        @Override
+        public void notify(Collection<String> messages) {
+            millisPassed = System.currentTimeMillis() - time;
+        }
+
+        void waitForNotification() {
+            while (millisPassed == null) {
+                try {
+                    Thread.sleep(200);
+                }
+                catch (InterruptedException e) {
+                }
+                Thread.yield();
+            }
+        }
+
     }
 
 }

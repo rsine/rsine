@@ -1,10 +1,11 @@
 package at.punkt.lod2;
 
-import at.punkt.lod2.util.CountingNotifier;
 import at.punkt.lod2.util.Helper;
 import eu.lod2.rsine.Rsine;
 import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
 import eu.lod2.rsine.dissemination.messageformatting.DummyBindingSetFormatter;
+import eu.lod2.rsine.dissemination.notifier.INotifier;
+import eu.lod2.rsine.dissemination.notifier.logging.LoggingNotifier;
 import eu.lod2.rsine.queryhandling.QueryEvaluator;
 import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.util.Namespaces;
@@ -12,12 +13,15 @@ import org.junit.After;
 import org.junit.Before;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.RDFParseException;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 
 import java.io.IOException;
 import java.util.Properties;
 
-public abstract class LocalNotificationTest {
+public abstract class LocalNotificationTest implements ApplicationContextAware  {
 
     @Autowired
     private Rsine rsine;
@@ -25,10 +29,11 @@ public abstract class LocalNotificationTest {
     @Autowired
     private Helper helper;
 
-    protected CountingNotifier countingNotifier = new CountingNotifier();
+    protected ApplicationContext applicationContext;
 
     @Before
     public void setUp() throws IOException, RepositoryException, RDFParseException {
+        registerUser();
         rsine.start();
     }
 
@@ -37,11 +42,15 @@ public abstract class LocalNotificationTest {
         rsine.stop();
     }
 
-    protected void registerUser() {
+    private void registerUser() {
         Subscription subscription = new Subscription();
         subscription.addQuery(createQuery(), new DummyBindingSetFormatter());
-        subscription.addNotifier(countingNotifier);
+        subscription.addNotifier(getNotifier());
         rsine.registerSubscription(subscription);
+    }
+
+    protected INotifier getNotifier() {
+        return new LoggingNotifier();
     }
 
     private String createQuery() {
@@ -124,6 +133,11 @@ public abstract class LocalNotificationTest {
             "<http://reegle.info/glossary/1111> <http://www.w3.org/2004/02/skos/core#related> <http://reegle.info/glossary/1112> .");
 
         helper.doPost(props);
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
     }
 
 }

@@ -61,7 +61,7 @@ public class Rsine {
      * @deprecated registration should be exposed as an HTTP service; for testing only
      */
     public void registerSubscription(Subscription subscription) {
-        registrationService.register(subscription);
+        registrationService.register(subscription, true);
     }
 
 }

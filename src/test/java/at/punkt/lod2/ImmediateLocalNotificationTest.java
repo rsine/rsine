@@ -1,5 +1,7 @@
 package at.punkt.lod2;
 
+import at.punkt.lod2.util.CountingNotifier;
+import eu.lod2.rsine.dissemination.notifier.INotifier;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openrdf.rio.RDFHandlerException;
@@ -13,11 +15,16 @@ import java.io.IOException;
 @ContextConfiguration(locations = {"LocalTest-context.xml"})
 public class ImmediateLocalNotificationTest extends LocalNotificationTest {
 
+    protected CountingNotifier countingNotifier = new CountingNotifier();
+
     @Test
     public void notificationDissemination() throws RDFParseException, IOException, RDFHandlerException {
-        registerUser();
         postEditChanges();
         countingNotifier.waitForNotification();
     }
 
+    @Override
+    protected INotifier getNotifier() {
+        return countingNotifier;
+    }
 }
