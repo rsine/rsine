@@ -1,14 +1,18 @@
 package eu.lod2.rsine.queryhandling.policies;
 
 import eu.lod2.rsine.registrationservice.NotificationQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 
 public class MinTimePassedEvaluationPolicy implements IEvaluationPolicy {
 
+    private final Logger logger = LoggerFactory.getLogger(MinTimePassedEvaluationPolicy.class);
     private long minSecondsBetweenEvaluations;
 
     public MinTimePassedEvaluationPolicy(long minSecondsBetweenEvaluations) {
+        logger.info("Minimum seconds between evaluation: " +minSecondsBetweenEvaluations);
         this.minSecondsBetweenEvaluations = minSecondsBetweenEvaluations;
     }
 
