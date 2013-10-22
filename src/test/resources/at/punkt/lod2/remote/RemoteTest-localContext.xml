@@ -34,7 +34,7 @@
           factory-bean="remoteNotificationServiceFactory"
           factory-method="createRemoteNotificationService"/>
 
-    <bean id="remoteServiceDetector" class="at.punkt.lod2.remote.TestRemoteServiceDetector">
+    <bean id="remoteServiceDetector" class="at.punkt.lod2.remote.LoopBackRemoteServiceDetector">
         <constructor-arg value="8992"/>
     </bean>
 

@@ -1,6 +1,6 @@
 package at.punkt.lod2;
 
-import at.punkt.lod2.util.TestPersistAndNotifyProvider;
+import at.punkt.lod2.util.SuccessReportingPersistAndNotifyProvider;
 import eu.lod2.rsine.dissemination.notifier.INotifier;
 import org.junit.Assert;
 import org.junit.Test;
@@ -19,12 +19,12 @@ public class MinTimePassedLocalNotificationTest extends LocalNotificationTest {
 
     private final long IMMEDIATE_NOTIFICATION_THRESHOLD_MILLIS = 1000;
     private TimeMeasureNotifier timeMeasureNotifier = new TimeMeasureNotifier();
-    private TestPersistAndNotifyProvider testPersistAndNotifyProvider;
+    private SuccessReportingPersistAndNotifyProvider successReportingPersistAndNotifyProvider;
 
     @Override
     public void setUp() throws IOException, RepositoryException, RDFParseException {
         super.setUp();
-        testPersistAndNotifyProvider = applicationContext.getBean(TestPersistAndNotifyProvider.class);
+        successReportingPersistAndNotifyProvider = applicationContext.getBean(SuccessReportingPersistAndNotifyProvider.class);
     }
 
     @Test
@@ -33,7 +33,7 @@ public class MinTimePassedLocalNotificationTest extends LocalNotificationTest {
         timeMeasureNotifier.waitForNotification();
 
         Assert.assertTrue(timeMeasureNotifier.millisPassed < IMMEDIATE_NOTIFICATION_THRESHOLD_MILLIS);
-        Assert.assertTrue(testPersistAndNotifyProvider.getSuccess());
+        Assert.assertTrue(successReportingPersistAndNotifyProvider.getSuccess());
     }
 
     private void performChange() throws IOException {
@@ -47,7 +47,7 @@ public class MinTimePassedLocalNotificationTest extends LocalNotificationTest {
         timeMeasureNotifier.waitForNotification();
 
         performChange();
-        Assert.assertFalse(testPersistAndNotifyProvider.getSuccess());
+        Assert.assertFalse(successReportingPersistAndNotifyProvider.getSuccess());
     }
 
     @Test
@@ -64,7 +64,7 @@ public class MinTimePassedLocalNotificationTest extends LocalNotificationTest {
 
         performChange();
         timeMeasureNotifier.waitForNotification();
-        Assert.assertTrue(testPersistAndNotifyProvider.getSuccess());
+        Assert.assertTrue(successReportingPersistAndNotifyProvider.getSuccess());
     }
 
     @Override

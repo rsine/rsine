@@ -4,7 +4,7 @@ import eu.lod2.rsine.changesetservice.PersistAndNotifyProvider;
 import eu.lod2.rsine.queryhandling.EvaluationPostponedException;
 import org.openrdf.model.Model;
 
-public class TestPersistAndNotifyProvider extends PersistAndNotifyProvider {
+public class SuccessReportingPersistAndNotifyProvider extends PersistAndNotifyProvider {
 
     private boolean success;
 

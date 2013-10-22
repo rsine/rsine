@@ -28,7 +28,7 @@
         <constructor-arg value="5" />
     </bean>
 
-    <bean id="persistAndNotifyProvider" class="at.punkt.lod2.util.TestPersistAndNotifyProvider"/>
+    <bean id="persistAndNotifyProvider" class="at.punkt.lod2.util.SuccessReportingPersistAndNotifyProvider"/>
     <bean id="remoteServiceDetector" class="eu.lod2.rsine.remotenotification.NullRemoteServiceDetector"/>
     <bean id="remoteNotificationServiceBase" class="eu.lod2.rsine.remotenotification.NullRemoteNotificationService"/>
 

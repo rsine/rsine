@@ -11,10 +11,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.openrdf.model.Statement;
 import org.openrdf.model.impl.ValueFactoryImpl;
@@ -28,8 +25,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Properties;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -47,13 +42,11 @@ public class ChangesetServiceTest {
 
     @Before
     public void setUp() throws IOException, RepositoryException {
-        System.out.println("starting service");
         changeSetService.start();
     }
 
     @After
     public void after() throws IOException, InterruptedException {
-        System.out.println("stopping service");
         changeSetService.stop();
     }
 
@@ -156,30 +149,26 @@ public class ChangesetServiceTest {
         Assert.assertEquals(400, helper.doPost(props));
     }
 
-    @Test(timeout = 2000)
+    @Test
     public void tripleChangeToRepo() throws IOException, RepositoryException {
         Properties props = new Properties();
         props.setProperty(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD);
         props.setProperty(ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE, "<http://example.org/myconcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"somelabel\"@en .");
 
+        int changeSetsBefore = getChangeSetCount();
         helper.doPost(props);
-        Assert.assertEquals(1, waitForChangeSetCreated());
+        Assert.assertEquals(changeSetsBefore + 1, getChangeSetCount());
     }
 
-    private int waitForChangeSetCreated() throws RepositoryException {
+    private int getChangeSetCount() throws RepositoryException {
         RepositoryConnection repCon = changeSetStore.getRepository().getConnection();
 
-        Collection<Statement> statements = Collections.EMPTY_LIST;
-        while (statements.isEmpty()) {
-            RepositoryResult<Statement> result = repCon.getStatements(
+        RepositoryResult<Statement> result = repCon.getStatements(
                 null,
                 RDF.TYPE,
                 ValueFactoryImpl.getInstance().createURI(Namespaces.CS_NAMESPACE.getName(), "ChangeSet"),
                 false);
-            statements = Iterations.asList(result);
-        }
-
-        return statements.size();
+        return Iterations.asList(result).size();
     }
 
     private class DummyQueryDispatcher implements IQueryDispatcher {

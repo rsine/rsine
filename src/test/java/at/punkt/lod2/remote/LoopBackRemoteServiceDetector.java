@@ -5,11 +5,11 @@ import org.openrdf.model.Resource;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 
-public class TestRemoteServiceDetector implements IRemoteServiceDetector {
+public class LoopBackRemoteServiceDetector implements IRemoteServiceDetector {
 
     private int remoteInstanceListeningPort;
 
-    public TestRemoteServiceDetector(int remoteInstanceListeningPort) {
+    public LoopBackRemoteServiceDetector(int remoteInstanceListeningPort) {
         this.remoteInstanceListeningPort = remoteInstanceListeningPort;
     }
 
