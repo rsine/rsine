@@ -1,18 +1,26 @@
 package eu.lod2.rsine.changesetstore;
 
 import org.openrdf.model.Graph;
+import org.openrdf.model.Statement;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sail.SailRepository;
+import org.openrdf.rio.RDFHandlerException;
+import org.openrdf.rio.turtle.TurtleWriter;
 import org.openrdf.sail.memory.MemoryStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.io.StringWriter;
+import java.util.Iterator;
 
 @Component
 public class ChangeSetStore {
 
+    private final Logger logger = LoggerFactory.getLogger(ChangeSetStore.class);
     private Repository repository;
     private boolean isInitialized;
 
@@ -32,7 +40,27 @@ public class ChangeSetStore {
         repCon.add(changeSet);
 
         repCon.close();
+        logger.debug("created changeset: " +formatChangeSet(changeSet));
     }
+
+    private String formatChangeSet(Graph changeSet) {
+        StringWriter sw = new StringWriter();
+        TurtleWriter turtleWriter = new TurtleWriter(sw);
+
+        try {
+            turtleWriter.startRDF();
+            Iterator<Statement> statementIterator = changeSet.iterator();
+            while (statementIterator.hasNext()) {
+                turtleWriter.handleStatement(statementIterator.next());
+            }
+            turtleWriter.endRDF();
+        }
+        catch (RDFHandlerException e) {
+            return "Could not format changeset";
+        }
+        return sw.toString();
+    }
+
 
     public Repository getRepository() throws RepositoryException {
         ensureInitialized();
