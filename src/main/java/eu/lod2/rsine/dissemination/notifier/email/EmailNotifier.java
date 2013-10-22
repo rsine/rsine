@@ -5,9 +5,7 @@ import eu.lod2.rsine.dissemination.notifier.INotifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.mail.Message;
-import javax.mail.Session;
-import javax.mail.Transport;
+import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.io.IOException;
@@ -19,7 +17,7 @@ public class EmailNotifier implements INotifier {
 
     private final Logger logger = LoggerFactory.getLogger(EmailNotifier.class);
 
-    private String emailAddress, from, smtpServer, subject = "[WP5] Notification";
+    private String emailAddress, from, host, port, subject = "[WP5] Notification", username, password;
     
     public EmailNotifier(String emailAddress) {
         this.emailAddress = emailAddress.replaceFirst("mailto:", "");
@@ -33,9 +31,12 @@ public class EmailNotifier implements INotifier {
 
         try {
             properties.load(stream);
-            smtpServer = (String) properties.get("emailnotifier.smtpserver");
+            host = (String) properties.get("emailnotifier.smtp.host");
+            port = (String) properties.get("emailnotifier.smtp.port");
             from = (String) properties.get("emailnotifier.from");
             subject = (String) properties.get("emailnotifier.subject");
+            username = (String) properties.get("emailnotifier.smtp.username");
+            password = (String) properties.get("emailnotifier.smtp.password");
         }
         catch (IOException e) {
             logger.error("Could not read notifiers properties file");
@@ -44,31 +45,49 @@ public class EmailNotifier implements INotifier {
 
     @Override
     public void notify(Collection<String> messages) {
-        Properties properties = new Properties();
-        properties.setProperty("mail.smtp.host", "localhost");
-        Session session = Session.getDefaultInstance(properties);
+        try {
+            MimeMessage message = new MimeMessage(createSession());
+            message.addRecipient(Message.RecipientType.TO, new InternetAddress(emailAddress));
 
-        try{         
-           MimeMessage message = new MimeMessage(session);
-           message.setFrom(new InternetAddress(from));
-           message.addRecipient(Message.RecipientType.TO, new InternetAddress(emailAddress));
-           message.setSubject(subject);
-           StringBuilder m = new StringBuilder();
-           for(String s : messages){
-               m.append(s);
-               m.append("\n");
-           }
-           message.setText(m.toString());
-           Transport.send(message);
-            logger.info("Sent email to '" +emailAddress+ "'");
-        }catch (Exception mex) {
-            mex.printStackTrace();
-           logger.warn(mex.getMessage());
-        }      
+            message.setFrom(new InternetAddress(from));
+            message.setSubject(subject);
+            message.setText(createMessageText(messages).toString());
+
+            Transport.send(message);
+        }
+        catch (Exception e) {
+            logger.error("Could not send email to '" +emailAddress+ "': " +e.getMessage());
+        }
     }
 
-    public String getSmtpServer() {
-        return smtpServer;
+    private Session createSession() {
+        return Session.getInstance(
+            createMailProperties(),
+            new javax.mail.Authenticator() {
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(username, password);
+                }
+            });
+    }
+
+    private Properties createMailProperties() {
+        Properties properties = new Properties();
+
+        properties.put("mail.smtp.host", host);
+        properties.put("mail.smtp.port", port);
+        properties.put("mail.smtp.auth", true);
+        properties.put("mail.smtp.starttls.enable", true);
+
+        return properties;
+    }
+
+    private StringBuilder createMessageText(Collection<String> messages) throws MessagingException {
+        StringBuilder m = new StringBuilder();
+        for(String s : messages){
+            m.append(s);
+            m.append("\n");
+        }
+        return m;
     }
 
 }
