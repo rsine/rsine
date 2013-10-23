@@ -1,0 +1,40 @@
+@prefix spin: <http://spinrdf.org/sp/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix rsine: <http://lod2.eu/rsine/> .
+
+[] a rsine:Subscription;
+    rsine:query [
+        spin:text "PREFIX cs:<http://purl.org/vocab/changeset/schema#>
+            PREFIX spin:<http://spinrdf.org/sp/>
+            PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+            PREFIX dcterms:<http://purl.org/dc/terms/>
+            PREFIX owl:<http://www.w3.org/2002/07/owl#>
+            SELECT ?concept ?somePredicate ?value WHERE {
+                ?cs a cs:ChangeSet .
+                ?cs cs:createdDate ?csdate .
+                ?cs cs:addition ?addition .
+
+                ?addition rdf:subject ?concept .
+                ?addition rdf:predicate ?somePredicate .
+                ?addition rdf:object ?value .
+
+                SERVICE <MANAGED_STORE_SPARQL_ENDPOINT> {
+                    ?concept a skos:Concept .
+                }
+
+                FILTER ((?csdate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime>)
+                        && (isLiteral(?value))
+                        && (regex(?somePredicate, "^http://www.w3.org/2004/02/skos/core#")))
+            }";
+
+        rsine:formatter [
+            a rsine:vtlFormatter;
+            rsine:message "The property '$bindingSet.getValue('somePredicate')' of concept '$bindingSet.getValue('concept')' has been
+                changed to '$bindingSet.getValue('value')'";
+        ];
+      ];
+
+    rsine:notifier [
+        a rsine:loggingNotifier;
+    ].

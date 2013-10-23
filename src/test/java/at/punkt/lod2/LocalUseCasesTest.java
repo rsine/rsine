@@ -66,7 +66,7 @@ public class LocalUseCasesTest {
                     "?addition rdf:subject ?concept . " +
                     "?addition rdf:predicate skos:scopeNote . " +
                     "?addition rdf:object ?scopeNote . "+
-                    "SERVICE <" + QueryEvaluator.MANAGED_STORE_SPARQL_ENDPONT+ "> {" +
+                    "SERVICE <" + QueryEvaluator.MANAGED_STORE_SPARQL_ENDPOINT+ "> {" +
                         "?concept skos:prefLabel ?prefLabel . " +
                         "?concept dcterms:creator \"" +contributor+ "\""+
                     "}" +
@@ -88,7 +88,7 @@ public class LocalUseCasesTest {
                     "?addition rdf:subject ?concept . " +
                     "?addition rdf:predicate ?hierarchicalRelation . " +
                     "?addition rdf:object ?otherConcept . "+
-                    "SERVICE <" +QueryEvaluator.MANAGED_STORE_SPARQL_ENDPONT+"> {" +
+                    "SERVICE <" +QueryEvaluator.MANAGED_STORE_SPARQL_ENDPOINT+"> {" +
                         "?concept skos:prefLabel ?conceptLabel . " +
                         "?otherConcept skos:prefLabel ?otherConceptLabel . " +
                         "?concept dcterms:creator \"" +contributor+ "\""+

@@ -1,0 +1,41 @@
+@prefix spin: <http://spinrdf.org/sp/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix rsine: <http://lod2.eu/rsine/> .
+
+[] a rsine:Subscription;
+    rsine:query [
+        spin:text "PREFIX cs:<http://purl.org/vocab/changeset/schema#>
+            PREFIX spin:<http://spinrdf.org/sp/>
+            PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+						PREFIX dcterms:<http://purl.org/dc/terms/>
+						PREFIX owl:<http://www.w3.org/2002/07/owl#>
+            SELECT ?concept ?contributor WHERE {
+                ?cs1 a cs:ChangeSet .
+                ?cs2 a cs:ChangeSet .
+
+                ?cs1 cs:createdDate ?csdate1 .
+
+                ?cs1 cs:addition ?addition1 .
+                ?cs2 cs:addition ?addition2 .
+                
+                ?addition1 rdf:subject ?concept .
+                ?addition1 rdf:predicate dcterms:contributor .
+                ?addition1 rdf:object ?contributor .
+
+                ?addition2 rdf:subject ?concept .
+                ?addition2 rdf:predicate owl:deprecated .
+                ?addition2 rdf:object true .
+                
+                FILTER (?csdate1 > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime>)
+            }";
+
+        rsine:formatter [
+            a rsine:vtlFormatter;
+            rsine:message "The concept with URI '$bindingSet.getValue('concept')' has been deleted by '$bindingSet.getValue('contributor')'";
+        ];
+      ];
+
+    rsine:notifier [
+        a rsine:loggingNotifier;
+    ].

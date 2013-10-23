@@ -17,7 +17,7 @@ import java.util.List;
 public class QueryEvaluator {
 
     public final static String QUERY_LAST_ISSUED = "QUERY_LAST_ISSUED";
-    public final static String MANAGED_STORE_SPARQL_ENDPONT = "MANAGED_STORE_SPARQL_ENDPONT";
+    public final static String MANAGED_STORE_SPARQL_ENDPOINT = "MANAGED_STORE_SPARQL_ENDPOINT";
 
     @Autowired
     private ChangeSetStore changeSetStore;
@@ -72,7 +72,7 @@ public class QueryEvaluator {
     }
 
     private String amendManagedTripleStoreURIs(String query) {
-        return query.replace(MANAGED_STORE_SPARQL_ENDPONT, managedTripleStoreSparqlEndpoint);
+        return query.replace(MANAGED_STORE_SPARQL_ENDPOINT, managedTripleStoreSparqlEndpoint);
     }
 
     private List<String> createMessages(NotificationQuery query, String issuedQuery, RepositoryConnection repCon)

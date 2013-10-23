@@ -108,7 +108,7 @@ public class ChangeSetService implements ApplicationContextAware {
                     // Set up HTTP connection
                     Socket socket = serverSocket.accept();
                     DefaultHttpServerConnection conn = new DefaultHttpServerConnection();
-                    logger.info("Incoming connection from " + socket.getInetAddress());
+                    logger.debug("Incoming connection from " + socket.getInetAddress());
                     conn.bind(socket, params);
 
                     // Start worker thread

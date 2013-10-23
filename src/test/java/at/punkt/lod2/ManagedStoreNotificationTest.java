@@ -74,7 +74,7 @@ public class ManagedStoreNotificationTest {
                     "?addition rdf:subject ?concept . " +
                     "?addition rdf:predicate skos:scopeNote . " +
                     "?addition rdf:object ?newScopeNote . "+
-                    "SERVICE <" + QueryEvaluator.MANAGED_STORE_SPARQL_ENDPONT+ "> {" +
+                    "SERVICE <" + QueryEvaluator.MANAGED_STORE_SPARQL_ENDPOINT+ "> {" +
                         "?concept skos:prefLabel ?prefLabel . " +
                     "}" +
                     "FILTER(langMatches(lang(?prefLabel), \"en\"))" +
