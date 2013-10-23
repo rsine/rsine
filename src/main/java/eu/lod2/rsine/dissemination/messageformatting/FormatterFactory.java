@@ -28,7 +28,7 @@ public class FormatterFactory {
     private VelocityBindingSetFormatter createVelocityBindingSetFormatter(Model subscription, Resource formatter) {
         Literal message = subscription.filter(
             formatter,
-            new URIImpl(Namespaces.RSINE_NAMESPACE + "message"),
+            new URIImpl(Namespaces.RSINE_NAMESPACE.getName() + "message"),
             null).objectLiteral();
 
         return new VelocityBindingSetFormatter(message);

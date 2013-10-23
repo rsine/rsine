@@ -31,9 +31,12 @@
           factory-bean="remoteNotificationServiceFactory"
           factory-method="createRemoteNotificationService"/>
 
+    <bean id="evaluationPolicy" class="eu.lod2.rsine.queryhandling.policies.ImmediateEvaluationPolicy"/>
+    <!--
     <bean id="evaluationPolicy" class="eu.lod2.rsine.queryhandling.policies.MinTimePassedEvaluationPolicy">
         <constructor-arg value="10" />
     </bean>
+    -->
 
     <bean id="remoteServiceDetector" class="eu.lod2.rsine.remotenotification.NullRemoteServiceDetector"/>
 

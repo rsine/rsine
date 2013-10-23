@@ -1,5 +1,6 @@
 package eu.lod2.rsine.changesetservice;
 
+import eu.lod2.rsine.queryhandling.EvaluationPostponedException;
 import eu.lod2.util.ItemNotFoundException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -42,7 +43,7 @@ public class ChangeTripleHandler extends PostRequestHandler {
 
     @Override
     protected void handlePost(BasicHttpEntityEnclosingRequest request, HttpResponse response) {
-        logger.info("Handling change triple request");
+        logger.debug("Handling change triple request");
 
         try {
             Properties properties = new Properties();
@@ -65,6 +66,9 @@ public class ChangeTripleHandler extends PostRequestHandler {
         }
         catch (RDFHandlerException e) {
             errorResponse(response, e.getMessage());
+        }
+        catch (EvaluationPostponedException e) {
+            // ignore; when encountering this exception do nothing (special)
         }
     }
 
