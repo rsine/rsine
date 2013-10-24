@@ -10,28 +10,25 @@
             PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
             PREFIX dcterms:<http://purl.org/dc/terms/>
             PREFIX owl:<http://www.w3.org/2002/07/owl#>
-            SELECT ?concept ?somePredicate ?value WHERE {
+            SELECT ?concept ?somePredicate ?otherConcept WHERE {
                 ?cs a cs:ChangeSet .
                 ?cs cs:createdDate ?csdate .
                 ?cs cs:addition ?addition .
 
                 ?addition rdf:subject ?concept .
                 ?addition rdf:predicate ?somePredicate .
-                ?addition rdf:object ?value .
+                ?addition rdf:object ?otherConcept .
 
                 SERVICE <MANAGED_STORE_SPARQL_ENDPOINT> {
-                    ?concept a skos:Concept .
+                    ?concept a skos:Concept
                 }
 
-                FILTER ((?csdate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime>)
-                        && (isLiteral(?value))
-                        && (regex(?somePredicate, "^http://www.w3.org/2004/02/skos/core#")))
+                FILTER (?csdate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime>)
             }";
 
         rsine:formatter [
             a rsine:vtlFormatter;
-            rsine:message "The property '$bindingSet.getValue('somePredicate')' of concept '$bindingSet.getValue('concept')' has been
-                changed to '$bindingSet.getValue('value')'";
+            rsine:message "The concept '$bindingSet.getValue('concept')' has been internally linked to the concept '$bindingSet.getValue('otherConcept')' by the property '$bindingSet.getValue('somePredicate')'";
         ];
       ];
 
