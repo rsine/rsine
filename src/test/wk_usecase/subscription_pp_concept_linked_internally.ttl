@@ -20,10 +20,14 @@
                 ?addition rdf:object ?otherConcept .
 
                 SERVICE <MANAGED_STORE_SPARQL_ENDPOINT> {
-                    ?concept a skos:Concept
+                    ?concept a skos:Concept .
                 }
 
-                FILTER (?csdate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime>)
+                SERVICE <MANAGED_STORE_SPARQL_ENDPOINT> {
+                    ?otherConcept a skos:Concept .
+                }
+
+                FILTER ((?csdate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime>) && (?concept != ?otherConcept))
             }";
 
         rsine:formatter [
