@@ -6,6 +6,8 @@ import eu.lod2.rsine.registrationservice.NotificationQuery;
 import org.openrdf.query.*;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -16,8 +18,10 @@ import java.util.List;
 @Component
 public class QueryEvaluator {
 
+    private final Logger logger = LoggerFactory.getLogger(QueryEvaluator.class);
     public final static String QUERY_LAST_ISSUED = "QUERY_LAST_ISSUED";
     public final static String MANAGED_STORE_SPARQL_ENDPOINT = "MANAGED_STORE_SPARQL_ENDPOINT";
+    public final static String AUTH_URI = "AUTH_URI";
 
     @Autowired
     private ChangeSetStore changeSetStore;
@@ -25,14 +29,11 @@ public class QueryEvaluator {
     @Autowired
     private IEvaluationPolicy evaluationPolicy;
 
-    private String managedTripleStoreSparqlEndpoint;
+    private String managedTripleStoreSparqlEndpoint = "", authoritativeUri = "";
 
-    public QueryEvaluator() {
-        this("");
-    }
-
-    public QueryEvaluator(String managedTripleStoreSparqlEndpoint) {
+    public QueryEvaluator(String managedTripleStoreSparqlEndpoint, String authoritativeUri) {
         this.managedTripleStoreSparqlEndpoint = managedTripleStoreSparqlEndpoint;
+        this.authoritativeUri = authoritativeUri;
     }
 
     public List<String> evaluate(NotificationQuery query)
@@ -43,17 +44,22 @@ public class QueryEvaluator {
         RepositoryConnection repCon = changeSetStore.getRepository().getConnection();
         try {
             String issuedQuery = fillInPlaceholders(query);
-            return createMessages(query, issuedQuery, repCon);
+            long start = System.currentTimeMillis();
+            List<String> messages = createMessages(query, issuedQuery, repCon);
+            logger.info("Query execution and message creation took " +(System.currentTimeMillis() - start) +"ms");
+            return messages;
         }
         finally {
             repCon.close();
+
         }
     }
 
     private String fillInPlaceholders(NotificationQuery query) {
         String sparqlQuery;
         sparqlQuery = amendChangeSetsTimeConstraint(query);
-        sparqlQuery = amendManagedTripleStoreURIs(sparqlQuery);
+        sparqlQuery = sparqlQuery.replace(MANAGED_STORE_SPARQL_ENDPOINT, managedTripleStoreSparqlEndpoint);
+        sparqlQuery = sparqlQuery.replace(AUTH_URI, authoritativeUri);
         return sparqlQuery;
     }
 
@@ -69,10 +75,6 @@ public class QueryEvaluator {
         queryLastIssuedDate = new StringBuffer(queryLastIssuedDate).insert(queryLastIssuedDate.length() - 2, ":").toString();
 
         return sparqlQuery.replace(QUERY_LAST_ISSUED, queryLastIssuedDate);
-    }
-
-    private String amendManagedTripleStoreURIs(String query) {
-        return query.replace(MANAGED_STORE_SPARQL_ENDPOINT, managedTripleStoreSparqlEndpoint);
     }
 
     private List<String> createMessages(NotificationQuery query, String issuedQuery, RepositoryConnection repCon)

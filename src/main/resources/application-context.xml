@@ -19,6 +19,7 @@
 
     <bean id="queryEvaluator" class="eu.lod2.rsine.queryhandling.QueryEvaluator">
         <constructor-arg value="#{cmdParams.managedStoreSparqlEndpoint}" />
+        <constructor-arg value="#{cmdParams.authoritativeUri}" />
     </bean>
 
     <bean id="remoteNotificationServiceFactory"
