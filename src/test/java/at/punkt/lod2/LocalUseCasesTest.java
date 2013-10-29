@@ -100,6 +100,7 @@ public class LocalUseCasesTest {
                 "}";
     }
 
+    @Ignore
     @Test
     public void scopeNoteChanges() throws IOException {
         scopeNoteDefinition();
