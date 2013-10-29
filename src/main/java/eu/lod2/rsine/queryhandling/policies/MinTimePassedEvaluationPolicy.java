@@ -13,7 +13,7 @@ public class MinTimePassedEvaluationPolicy implements IEvaluationPolicy {
     private long minMillisBetweenEvaluations;
 
     public MinTimePassedEvaluationPolicy(long minMillisBetweenEvaluations) {
-        logger.info("Minimum seconds between evaluation: " +minMillisBetweenEvaluations);
+        logger.info("Minimum milliseconds between evaluation: " +minMillisBetweenEvaluations);
         this.minMillisBetweenEvaluations = minMillisBetweenEvaluations;
     }
 
