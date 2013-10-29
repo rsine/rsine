@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 public class ImmediateEvaluationPolicy implements IEvaluationPolicy {
 
     @Override
-    public boolean shouldEvaluate(NotificationQuery query) {
-        return true;
+    public void checkEvaluate(NotificationQuery query) {
+        // always allow, i.e. don't throw any exception
     }
 
 }

@@ -1,6 +1,5 @@
 package at.punkt.lod2;
 
-import at.punkt.lod2.util.SuccessReportingPersistAndNotifyProvider;
 import eu.lod2.rsine.dissemination.notifier.INotifier;
 import org.junit.Assert;
 import org.junit.Test;
@@ -19,21 +18,18 @@ public class MinTimePassedLocalNotificationTest extends LocalNotificationTest {
 
     private final long IMMEDIATE_NOTIFICATION_THRESHOLD_MILLIS = 1000;
     private TimeMeasureNotifier timeMeasureNotifier = new TimeMeasureNotifier();
-    private SuccessReportingPersistAndNotifyProvider successReportingPersistAndNotifyProvider;
 
     @Override
     public void setUp() throws IOException, RepositoryException, RDFParseException {
         super.setUp();
-        successReportingPersistAndNotifyProvider = applicationContext.getBean(SuccessReportingPersistAndNotifyProvider.class);
     }
 
-    @Test
+    @Test(timeout = 2000)
     public void immediateNotificationOnFirstChange() throws IOException {
         performChange();
         timeMeasureNotifier.waitForNotification();
 
         Assert.assertTrue(timeMeasureNotifier.millisPassed < IMMEDIATE_NOTIFICATION_THRESHOLD_MILLIS);
-        Assert.assertTrue(successReportingPersistAndNotifyProvider.getSuccess());
     }
 
     private void performChange() throws IOException {
@@ -47,7 +43,15 @@ public class MinTimePassedLocalNotificationTest extends LocalNotificationTest {
         timeMeasureNotifier.waitForNotification();
 
         performChange();
-        Assert.assertFalse(successReportingPersistAndNotifyProvider.getSuccess());
+        Assert.assertFalse(notificationReceivedWithinASecond());
+    }
+
+    private boolean notificationReceivedWithinASecond() {
+        long start = System.currentTimeMillis();
+        while (timeMeasureNotifier.millisPassed == null) {
+            if (System.currentTimeMillis() - start > 1000) return false;
+        }
+        return true;
     }
 
     @Test
@@ -63,8 +67,16 @@ public class MinTimePassedLocalNotificationTest extends LocalNotificationTest {
         }
 
         performChange();
+        Assert.assertTrue(notificationReceivedWithinASecond());
+    }
+
+    @Test(timeout = 10000)
+    public void lastChangeNotMissed() throws IOException {
+        performChange();
         timeMeasureNotifier.waitForNotification();
-        Assert.assertTrue(successReportingPersistAndNotifyProvider.getSuccess());
+
+        performChange();
+        timeMeasureNotifier.waitForNotification();
     }
 
     @Override

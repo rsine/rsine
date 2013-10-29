@@ -101,7 +101,7 @@ class CmdParams {
         logger.info("Listening for changeset from managed store on port " +changesListeningPort);
         logger.info("SPARQL endpoint of managed store is set to " +managedStoreSparqlEndpoint);
         if (authoritativeUri == null) {
-            logger.info("No remote change notification configured (authoritative uri not set)");
+            logger.warn("Authoritative uri not set. This may cause problems with some notification queries and disables remote notification");
         }
         else {
             logger.info("Authoritative URI set to " +authoritativeUri);

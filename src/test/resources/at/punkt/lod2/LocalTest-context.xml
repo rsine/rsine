@@ -21,7 +21,8 @@
     </bean>
 
     <bean id="queryEvaluator" class="eu.lod2.rsine.queryhandling.QueryEvaluator">
-        <constructor-arg value="http://localhost:3030/dataset/query" />
+        <constructor-arg index="0" value="http://localhost:3030/dataset/query" />
+        <constructor-arg index="1" value="" />
     </bean>
 
     <bean id="remoteServiceDetector" class="eu.lod2.rsine.remotenotification.NullRemoteServiceDetector"/>

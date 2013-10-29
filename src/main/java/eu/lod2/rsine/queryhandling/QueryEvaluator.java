@@ -29,17 +29,23 @@ public class QueryEvaluator {
     @Autowired
     private IEvaluationPolicy evaluationPolicy;
 
-    private String managedTripleStoreSparqlEndpoint = "", authoritativeUri = "";
+    private String managedTripleStoreSparqlEndpoint, authoritativeUri;
 
-    public QueryEvaluator(String managedTripleStoreSparqlEndpoint, String authoritativeUri) {
-        this.managedTripleStoreSparqlEndpoint = managedTripleStoreSparqlEndpoint;
+    public QueryEvaluator() {
+        managedTripleStoreSparqlEndpoint = "";
+        authoritativeUri = "";
+    }
+
+    public QueryEvaluator(String sparqlEndpoint, String authoritativeUri) {
+        this();
+        this.managedTripleStoreSparqlEndpoint = sparqlEndpoint;
         this.authoritativeUri = authoritativeUri;
     }
 
     public List<String> evaluate(NotificationQuery query)
         throws RepositoryException, MalformedQueryException, QueryEvaluationException
     {
-        if (!evaluationPolicy.shouldEvaluate(query)) throw new EvaluationPostponedException();
+        evaluationPolicy.checkEvaluate(query);
 
         RepositoryConnection repCon = changeSetStore.getRepository().getConnection();
         try {
@@ -51,7 +57,6 @@ public class QueryEvaluator {
         }
         finally {
             repCon.close();
-
         }
     }
 

@@ -32,7 +32,7 @@ public class SubscriptionParser {
             subscription.addNotifier(notifier);
         }
 
-        for (NotificationQuery notificationQuery : createNotificationQueries()) {
+        for (NotificationQuery notificationQuery : createNotificationQueries(subscription)) {
             subscription.addQuery(notificationQuery);
         }
 
@@ -96,7 +96,7 @@ public class SubscriptionParser {
         return rdfSubscription.filter(notifier, predicate, null).objectValue();
     }
 
-    private Collection<NotificationQuery> createNotificationQueries() {
+    private Collection<NotificationQuery> createNotificationQueries(Subscription subscription) {
         Collection<NotificationQuery> notificationQueries = new ArrayList<NotificationQuery>();
 
         Set<Value> allQueries = rdfSubscription.filter(
@@ -109,7 +109,7 @@ public class SubscriptionParser {
                 (Resource) query,
                 valueFactory.createURI(Namespaces.SPIN.getName(), "text"),
                 null).objectString();
-            notificationQueries.add(new NotificationQuery(sparql, getFormatter((Resource) query)));
+            notificationQueries.add(new NotificationQuery(sparql, getFormatter((Resource) query), subscription));
         }
 
         return notificationQueries;

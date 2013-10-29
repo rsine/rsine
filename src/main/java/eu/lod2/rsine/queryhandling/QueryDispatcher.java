@@ -12,9 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -29,6 +27,9 @@ public class QueryDispatcher implements IQueryDispatcher {
 
     @Autowired
     private QueryEvaluator queryEvaluator;
+
+    @Autowired
+    private PostponedQueryHandler postponedQueryHandler;
 
     private ExecutorService notificationExecutor = Executors.newFixedThreadPool(NUM_NOTIFY_THREADS);
 
@@ -52,21 +53,25 @@ public class QueryDispatcher implements IQueryDispatcher {
         logger.debug("Dispatching queries for subscription with id '" + subscription.getSubscriptionId() + "'");
         Iterator<NotificationQuery> queryIt = subscription.getQueryIterator();        
         while (queryIt.hasNext()) {
-            issueQueryAndNotify(queryIt.next(), subscription);
+            issueQueryAndNotify(queryIt.next());
         }
     }
 
-    private void issueQueryAndNotify(NotificationQuery query, Subscription subscription) throws RepositoryException
+    public void issueQueryAndNotify(NotificationQuery query) throws RepositoryException
     {
         try {
             List<String> messages = queryEvaluator.evaluate(query);
-            sendNotifications(messages, subscription);
+            sendNotifications(messages, query.getSubscription());
+            postponedQueryHandler.remove(query);
         }
         catch (MalformedQueryException e) {
             logger.error("NotificationQuery malformed", e);
         }
         catch (QueryEvaluationException e) {
             logger.error("Could not evaluate query", e);
+        }
+        catch (EvaluationPostponedException e) {
+            postponedQueryHandler.add(query);
         }
     }
 

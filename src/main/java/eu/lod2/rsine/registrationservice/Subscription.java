@@ -43,7 +43,7 @@ public class Subscription {
     }
 
     public void addQuery(String sparqlQuery, BindingSetFormatter bindingSetFormatter) {
-        queries.add(new NotificationQuery(sparqlQuery, bindingSetFormatter));
+        queries.add(new NotificationQuery(sparqlQuery, bindingSetFormatter, this));
     }
 
     public Iterator<NotificationQuery> getQueryIterator() {
