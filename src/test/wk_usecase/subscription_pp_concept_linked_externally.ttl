@@ -10,30 +10,28 @@
             PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
             PREFIX dcterms:<http://purl.org/dc/terms/>
             PREFIX owl:<http://www.w3.org/2002/07/owl#>
-            SELECT {
-                SELECT ?concept ?somePredicate ?someUri WHERE {
-                    ?cs a cs:ChangeSet .
-                    ?cs cs:createdDate ?csdate .
-                    ?cs cs:addition ?addition .
+            SELECT ?concept ?somePredicate ?someUri WHERE {
+                ?cs a cs:ChangeSet .
+                ?cs cs:createdDate ?csdate .
+                ?cs cs:addition ?addition .
 
-                    ?addition rdf:subject ?concept .
-                    ?addition rdf:predicate ?somePredicate .
-                    ?addition rdf:object ?someUri .
+                ?addition rdf:subject ?concept .
+                ?addition rdf:predicate ?somePredicate .
+                ?addition rdf:object ?someUri .
 
-                    SERVICE <MANAGED_STORE_SPARQL_ENDPOINT> {
-                        ?concept a skos:Concept .
-                    }
-
-                    FILTER ((?csdate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime>) &&
-                            (?concept != ?someUri) &&
-                            (!contains(str(?someUri), 'AUTH_URI')) &&
-                            isIRI(?someUri))
+                SERVICE <MANAGED_STORE_SPARQL_ENDPOINT> {
+                    ?concept a skos:Concept .
                 }
+
+                FILTER ((?csdate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime>) &&
+                        (?concept != ?someUri) &&
+                        (!contains(str(?someUri), 'AUTH_URI')) &&
+                        isIRI(?someUri))
             }";
 
         rsine:formatter [
             a rsine:vtlFormatter;
-            rsine:message "The concept '$bindingSet.getValue('concept')' has been internally linked to external resource '$bindingSet.getValue('someUri')' by the property '$bindingSet.getValue('somePredicate')'";
+            rsine:message "An outgoing link to '$bindingSet.getValue('someUri')' has been added for the concept '$bindingSet.getValue('concept')' by using the property '$bindingSet.getValue('somePredicate')'";
         ];
       ];
 

@@ -25,7 +25,7 @@
         <constructor-arg index="1" value="" />
     </bean>
 
-    <bean id="remoteServiceDetector" class="eu.lod2.rsine.remotenotification.NullRemoteServiceDetector"/>
+    <bean id="remoteServiceDetector" class="eu.lod2.rsine.remotenotification.UnavailableRemoteServiceDetector"/>
     <bean id="remoteNotificationServiceBase" class="eu.lod2.rsine.remotenotification.NullRemoteNotificationService"/>
 
 </beans>

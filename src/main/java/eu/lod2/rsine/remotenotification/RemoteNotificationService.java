@@ -14,6 +14,7 @@ import org.openrdf.rio.ntriples.NTriplesWriterFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.naming.ServiceUnavailableException;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -32,43 +33,48 @@ class RemoteNotificationService extends RemoteNotificationServiceBase {
     public void announce(Model changeSet) {
         Collection<Resource> extResources = getExternalResources(changeSet);
 
-        for (Resource extResource : extResources) {
-            URI remoteService = remoteServiceDetector.getRemoteService(extResource);
-            addSourceInfo(changeSet);
+        try {
+            for (Resource extResource : extResources) {
+                notifyRemoteService(remoteServiceDetector.getRemoteService(extResource), changeSet);
+            }
+        }
+        catch (ServiceUnavailableException e) {
+            logger.warn("Remote service unavailable: " +e.getMessage());
+        }
+    }
 
-            try {
-                String ntriplesChangeSet = createNTriplesChangeSet(changeSet);
-                postChangeSet(remoteService, ntriplesChangeSet);
-            }
-            catch (IOException e) {
-                logger.error("Error posting changeset to '" +remoteService.stringValue()+ "': " +e.getMessage());
-            }
-            catch (RDFHandlerException e) {
-                logger.error("Error serializing changeset", e);
-            }
+    private void notifyRemoteService(URI remoteService, Model changeSet) {
+        addSourceInfo(changeSet);
+
+        try {
+            String ntriplesChangeSet = createNTriplesChangeSet(changeSet);
+            postChangeSet(remoteService, ntriplesChangeSet);
+        }
+        catch (IOException e) {
+            logger.error("Error posting changeset to '" +remoteService.stringValue()+ "': " +e.getMessage());
+        }
+        catch (RDFHandlerException e) {
+            logger.error("Error serializing changeset", e);
         }
     }
 
     private Collection<Resource> getExternalResources(Model changeSet) {
-        ValueFactory valueFactory = new ValueFactoryImpl();
-        Resource additionNode = changeSet.filter(null,
-            valueFactory.createURI(Namespaces.CS_NAMESPACE.getName(), "addition"),
-            null).objectResource();
-        Resource additionStatement = changeSet.filter(additionNode, RDF.STATEMENT, null).objectResource();
+        Resource statement = changeSet.filter(null, RDF.STATEMENT, null).objectResource();
 
-        Resource subject = changeSet.filter(additionStatement, RDF.SUBJECT, null).objectResource();
-        Resource object = changeSet.filter(additionStatement, RDF.OBJECT, null).objectResource();
+        Value subject = changeSet.filter(statement, RDF.SUBJECT, null).objectValue();
+        Value object = changeSet.filter(statement, RDF.OBJECT, null).objectValue();
 
         return filterExternalResources(subject, object);
     }
 
-    private Collection<Resource> filterExternalResources(Resource... resources) {
+    private Collection<Resource> filterExternalResources(Value... values) {
         Collection<Resource> externalResources = new ArrayList<Resource>();
-        for (Resource resource : resources) {
-            if (!resource.stringValue().toUpperCase().contains(authoritativeUri.toUpperCase())) {
-                externalResources.add(resource);
-
-                logger.info("Recognized resource '" +resource.stringValue()+ " as external");
+        for (Value value : values) {
+            if (value instanceof Resource &&
+                !value.stringValue().toUpperCase().contains(authoritativeUri.toUpperCase()))
+            {
+                logger.info("Recognized resource '" +value.stringValue()+ " as external");
+                externalResources.add((Resource) value);
             }
         }
         return externalResources;

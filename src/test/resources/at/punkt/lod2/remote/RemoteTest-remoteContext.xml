@@ -23,7 +23,7 @@
         <constructor-arg ref="listeningPort"/>
     </bean>
 
-    <bean id="remoteServiceDetector" class="eu.lod2.rsine.remotenotification.NullRemoteServiceDetector"/>
+    <bean id="remoteServiceDetector" class="eu.lod2.rsine.remotenotification.UnavailableRemoteServiceDetector"/>
     <bean id="remoteNotificationServiceBase" class="eu.lod2.rsine.remotenotification.NullRemoteNotificationService"/>
 
     <bean id="remoteRsine" class="eu.lod2.rsine.Rsine"/>
