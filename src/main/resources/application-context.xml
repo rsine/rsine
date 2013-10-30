@@ -36,9 +36,10 @@
           factory-method="createRemoteNotificationService"/>
 
 
-    <bean id="evaluationPolicy" class="eu.lod2.rsine.queryhandling.policies.ImmediateEvaluationPolicy"/>
-
     <!--
+    <bean id="evaluationPolicy" class="eu.lod2.rsine.queryhandling.policies.ImmediateEvaluationPolicy"/>
+    -->
+
     <bean id="evaluationPolicy" class="eu.lod2.rsine.queryhandling.policies.MinTimePassedEvaluationPolicy">
         <constructor-arg value="10000" />
     </bean>
@@ -48,7 +49,6 @@
         <task:scheduled ref="postponedQueryHandler" method="cleanUp" fixed-rate="20000"/>
     </task:scheduled-tasks>
     <task:scheduler id="taskScheduler" pool-size="1"/>
-    -->
 
     <bean id="remoteServiceDetector" class="eu.lod2.rsine.remotenotification.UnavailableRemoteServiceDetector"/>
 
