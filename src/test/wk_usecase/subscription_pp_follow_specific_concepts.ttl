@@ -1,0 +1,64 @@
+@prefix spin: <http://spinrdf.org/sp/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix rsine: <http://lod2.eu/rsine/> .
+
+[] a rsine:Subscription;
+    rsine:query [
+        spin:text "PREFIX cs:<http://purl.org/vocab/changeset/schema#>
+            PREFIX spin:<http://spinrdf.org/sp/>
+            PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+            PREFIX dcterms:<http://purl.org/dc/terms/>
+
+            SELECT ?concept ?predicate ?value WHERE {
+                ?cs a cs:ChangeSet .
+                ?cs cs:createdDate ?csdate .
+                ?cs cs:addition ?addition .
+
+                ?addition rdf:subject ?concept .
+                ?addition rdf:predicate ?predicate .
+                ?addition rdf:object ?value .
+
+                FILTER ((?csdate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime>) &&
+                        (?concept IN (<http://vocabulary.semantic-web.at/semweb/93>, <http://vocabulary.semantic-web.at/semweb/361>)) &&
+                        (regex(str(?predicate), \"^http://www.w3.org/2004/02/skos/core#\"))
+                       )
+            }";
+
+        rsine:formatter [
+            a rsine:vtlFormatter;
+            rsine:message "SKOS property '$bindingSet.getValue('predicate')' of concept '$bindingSet.getValue('concept')' has been changed to '$bindingSet.getValue('value')'";
+        ];
+    ];
+
+    rsine:query [
+        spin:text "PREFIX cs:<http://purl.org/vocab/changeset/schema#>
+            PREFIX spin:<http://spinrdf.org/sp/>
+            PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+            PREFIX dcterms:<http://purl.org/dc/terms/>
+
+            SELECT ?concept ?predicate ?value WHERE {
+                ?cs a cs:ChangeSet .
+                ?cs cs:createdDate ?csdate .
+                ?cs cs:removal ?removal .
+
+                ?removal rdf:subject ?concept .
+                ?removal rdf:predicate ?predicate .
+                ?removal rdf:object ?value .
+
+                FILTER ((?csdate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime>) &&
+                        (?concept IN (<http://vocabulary.semantic-web.at/semweb/93>, <http://vocabulary.semantic-web.at/semweb/361>)) &&
+                        (regex(str(?predicate), \"^http://www.w3.org/2004/02/skos/core#\"))
+                       )
+            }";
+
+        rsine:formatter [
+            a rsine:vtlFormatter;
+            rsine:message "Property '$bindingSet.getValue('predicate')' of concept '$bindingSet.getValue('concept')' with value '$bindingSet.getValue('value')' has been removed";
+        ];
+    ];
+
+    rsine:notifier [
+        a rsine:loggingNotifier;
+    ].
