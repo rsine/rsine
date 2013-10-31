@@ -19,15 +19,12 @@
                 ?addition rdf:predicate ?somePredicate .
                 ?addition rdf:object ?otherConcept .
 
-                SERVICE <MANAGED_STORE_SPARQL_ENDPOINT> {
-                    ?concept a skos:Concept .
-                }
-
-                SERVICE <MANAGED_STORE_SPARQL_ENDPOINT> {
-                    ?otherConcept a skos:Concept .
-                }
-
-                FILTER ((?csdate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime>) && (?concept != ?otherConcept))
+                FILTER ((?csdate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime>) &&
+                        (?concept != ?otherConcept) &&
+                        isIRI(?concept) && isIRI(?otherConcept) &&
+                        (contains(str(?concept), 'AUTH_URI')) &&
+                        (contains(str(?otherConcept), 'AUTH_URI'))
+                        )
             }";
 
         rsine:formatter [
