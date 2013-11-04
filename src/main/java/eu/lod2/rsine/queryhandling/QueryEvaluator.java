@@ -2,6 +2,7 @@ package eu.lod2.rsine.queryhandling;
 
 import eu.lod2.rsine.changesetstore.ChangeSetStore;
 import eu.lod2.rsine.queryhandling.policies.IEvaluationPolicy;
+import eu.lod2.rsine.registrationservice.Condition;
 import eu.lod2.rsine.registrationservice.NotificationQuery;
 import org.openrdf.query.*;
 import org.openrdf.repository.RepositoryConnection;
@@ -90,10 +91,23 @@ public class QueryEvaluator {
         List<String> messages = new ArrayList<String>();
         while (result.hasNext()) {
             BindingSet bs = result.next();
-            messages.add(query.getBindingSetFormatter().toMessage(bs));
+            if (evaluateCondition(query.getCondition(), bs, repCon)) {
+                messages.add(query.getBindingSetFormatter().toMessage(bs));
+            }
         }
         query.updateLastIssued();
 
         return messages;
     }
+
+    private boolean evaluateCondition(Condition condition, BindingSet bs, RepositoryConnection repCon)
+        throws MalformedQueryException, RepositoryException, QueryEvaluationException
+    {
+        BooleanQuery booleanQuery = repCon.prepareBooleanQuery(QueryLanguage.SPARQL, condition.getAskQuery());
+        for (String bindingName : bs.getBindingNames()) {
+            booleanQuery.setBinding(bindingName, bs.getBinding(bindingName).getValue());
+        }
+        return booleanQuery.evaluate() == condition.getExpectedResult();
+    }
+
 }

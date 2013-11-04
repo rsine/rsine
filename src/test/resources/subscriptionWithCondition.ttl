@@ -1,0 +1,29 @@
+@prefix spin: <http://spinrdf.org/sp/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix rsine: <http://lod2.eu/rsine/> .
+
+[] a rsine:Subscription;
+    rsine:query [
+        spin:text "PREFIX cs:<http://purl.org/vocab/changeset/schema#>
+            PREFIX spin:<http://spinrdf.org/sp/>
+            PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+            SELECT ?concept ?newLabel WHERE {
+                ?cs a cs:ChangeSet .
+                ?cs cs:addition ?addition .
+                ?addition rdf:subject ?concept .
+                ?addition rdf:predicate skos:prefLabel .
+                ?addition rdf:object ?newLabel
+            }";
+
+        rsine:condition [
+            spin:text "PREFIX skos:<http://www.w3.org/2004/02/skos/core#> ASK {?concept skos:prefLabel ?newLabel}";
+            rsine:expect "true"^^xsd:boolean;
+        ];
+
+    ];
+
+    rsine:notifier [
+        a rsine:emailNotifier;
+        foaf:mbox <mailto:office@turnguard.com>
+    ].

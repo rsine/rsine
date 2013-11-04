@@ -16,6 +16,7 @@
                 ?addition rdf:subject ?to_concept .
                 FILTER (?csdate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime>)
             }";
+
         rsine:formatter [
             a rsine:vtlFormatter;
             rsine:message "The preferred label of the concept '$bindingSet.getValue('to_concept')'

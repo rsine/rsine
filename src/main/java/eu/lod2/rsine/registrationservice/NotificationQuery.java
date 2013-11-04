@@ -10,11 +10,21 @@ public class NotificationQuery {
     private String sparqlQuery;
     private Date lastIssued = new Date(0);
     private Subscription subscription;
+    private Condition condition;
 
     NotificationQuery(String sparqlQuery, BindingSetFormatter bindingSetFormatter, Subscription subscription) {
         this.sparqlQuery = sparqlQuery;
         this.bindingSetFormatter = bindingSetFormatter;
         this.subscription = subscription;
+    }
+
+    NotificationQuery(String sparqlQuery,
+                      BindingSetFormatter bindingSetFormatter,
+                      Condition condition,
+                      Subscription subscription)
+    {
+        this(sparqlQuery, bindingSetFormatter, subscription);
+        this.condition = condition;
     }
 
     public void updateLastIssued() {
@@ -27,6 +37,10 @@ public class NotificationQuery {
 
     public String getSparqlQuery() {
         return sparqlQuery;
+    }
+
+    public Condition getCondition() {
+        return condition;
     }
 
     public BindingSetFormatter getBindingSetFormatter() {

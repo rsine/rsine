@@ -9,7 +9,6 @@ import org.openrdf.model.impl.ValueFactoryImpl;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 
 public class Subscription {
@@ -17,7 +16,7 @@ public class Subscription {
     private static int id = 0;
 
     private Resource subscriptionId;
-    private Collection<NotificationQuery> queries;
+    private NotificationQuery query;
     private Collection<INotifier> notifiers;
 
     public Subscription() {
@@ -25,7 +24,6 @@ public class Subscription {
         subscriptionId = valueFactory.createURI(
             Namespaces.RSINE_NAMESPACE.getName(),
             "subscriber_" +id);
-        queries = new HashSet<NotificationQuery>();
         notifiers = new ArrayList<INotifier>();
         id++;
     }
@@ -38,16 +36,16 @@ public class Subscription {
         this.subscriptionId = subscriptionId;
     }
 
-    public void addQuery(NotificationQuery notificationQuery) {
-        queries.add(notificationQuery);
+    public NotificationQuery getQuery() {
+        return query;
     }
 
-    public void addQuery(String sparqlQuery, BindingSetFormatter bindingSetFormatter) {
-        queries.add(new NotificationQuery(sparqlQuery, bindingSetFormatter, this));
+    public void setQuery(String query, BindingSetFormatter formatter) {
+        new NotificationQuery(query, formatter, this);
     }
 
-    public Iterator<NotificationQuery> getQueryIterator() {
-        return queries.iterator();
+    public void setQuery(String query, BindingSetFormatter formatter, Condition condition) {
+        new NotificationQuery(query, formatter, condition, this);
     }
 
     public void addNotifier(INotifier notifier) {
