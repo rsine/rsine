@@ -12,6 +12,14 @@
 
     <context:component-scan base-package="eu.lod2.rsine"/>
 
+    <bean id="managedServerSparqlQuery" class="java.lang.String">
+        <constructor-arg value="http://localhost:3030/dataset/query" />
+    </bean>
+
+    <bean id="managedServerSparqlUpdate" class="java.lang.String">
+        <constructor-arg value="http://localhost:3030/dataset/data" />
+    </bean>
+
     <bean id="changeSetService" class="eu.lod2.rsine.changesetservice.ChangeSetService">
         <constructor-arg value="8991"/>
     </bean>
@@ -21,7 +29,7 @@
     </bean>
 
     <bean id="queryEvaluator" class="eu.lod2.rsine.queryhandling.QueryEvaluator">
-        <constructor-arg index="0" value="http://localhost:3030/dataset/query" />
+        <constructor-arg index="0" ref="managedServerSparqlQuery" />
         <constructor-arg index="1" value="" />
     </bean>
 

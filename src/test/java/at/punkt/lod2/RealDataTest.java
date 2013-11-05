@@ -8,7 +8,7 @@ import eu.lod2.rsine.dissemination.notifier.logging.LoggingNotifier;
 import eu.lod2.rsine.queryhandling.QueryEvaluator;
 import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.util.Namespaces;
-import org.apache.jena.fuseki.server.SPARQLServer;
+import org.apache.jena.fuseki.Fuseki;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -61,14 +61,13 @@ public class RealDataTest {
     private final int POST_COUNT = 50;
     private final String VOCAB_FILENAME = "/stw.rdf";
 
-    private SPARQLServer managedServer;
     private List<Statement> vocabStatements;
     private long accumulatedPostDurations = 0;
 
     @Before
     public void setUp() throws IOException, RepositoryException, RDFParseException, RDFHandlerException
     {
-        managedServer = helper.initFuseki(Rsine.class.getResource(VOCAB_FILENAME), "dataset");
+        helper.initFuseki(Rsine.class.getResource(VOCAB_FILENAME), "dataset");
         rsine.start();
 
         createVocabModel();
@@ -87,7 +86,7 @@ public class RealDataTest {
 
     @After
     public void tearDown() throws IOException, InterruptedException {
-        managedServer.stop();
+        Fuseki.getServer().stop();
         rsine.stop();
     }
 

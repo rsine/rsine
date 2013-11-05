@@ -9,7 +9,7 @@ import eu.lod2.rsine.dissemination.notifier.logging.LoggingNotifier;
 import eu.lod2.rsine.queryhandling.QueryEvaluator;
 import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.util.Namespaces;
-import org.apache.jena.fuseki.server.SPARQLServer;
+import org.apache.jena.fuseki.Fuseki;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -35,13 +35,12 @@ public class ManagedStoreNotificationTest {
     @Autowired
     private Helper helper;
 
-    private SPARQLServer fusekiServer;
     private ScopeNoteCreationFormatter scopeNoteCreationFormatter;
     private CountingNotifier countingNotifier;
 
     @Before
     public void setUp() throws IOException, RepositoryException {
-        fusekiServer = helper.initFuseki(Rsine.class.getResource("/reegle.rdf"), "dataset");
+        helper.initFuseki(Rsine.class.getResource("/reegle.rdf"), "dataset");
         scopeNoteCreationFormatter = new ScopeNoteCreationFormatter();
         countingNotifier = new CountingNotifier();
 
@@ -51,7 +50,7 @@ public class ManagedStoreNotificationTest {
 
     @After
     public void tearDown() throws IOException, InterruptedException {
-        fusekiServer.stop();
+        Fuseki.getServer().stop();
         rsine.stop();
     }
 

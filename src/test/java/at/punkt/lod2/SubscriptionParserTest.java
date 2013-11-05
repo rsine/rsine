@@ -31,7 +31,7 @@ public class SubscriptionParserTest {
         Subscription subscription = new SubscriptionParser(rdfSubscription).createSubscription();
 
         Assert.assertTrue(subscription.getNotifierIterator().hasNext());
-        Assert.assertTrue(subscription.getQueryIterator().hasNext());
+        Assert.assertTrue(subscription.getQueries().hasNext());
     }
 
     @Test
@@ -39,7 +39,7 @@ public class SubscriptionParserTest {
         Model rdfSubscription = helper.createModelFromResourceFile("/labelChangeSubscriptionFormatted.ttl", RDFFormat.TURTLE);
         Subscription subscription = new SubscriptionParser(rdfSubscription).createSubscription();
 
-        NotificationQuery notificationQuery = subscription.getQueryIterator().next();
+        NotificationQuery notificationQuery = subscription.getQueries().next();
         Assert.assertNotNull(notificationQuery);
         Assert.assertTrue(notificationQuery.getBindingSetFormatter() instanceof VelocityBindingSetFormatter);
     }

@@ -7,6 +7,8 @@ import eu.lod2.rsine.registrationservice.NotificationQuery;
 import org.openrdf.query.*;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.sparql.SPARQLConnection;
+import org.openrdf.repository.sparql.SPARQLRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,16 +50,18 @@ public class QueryEvaluator {
     {
         evaluationPolicy.checkEvaluate(query);
 
-        RepositoryConnection repCon = changeSetStore.getRepository().getConnection();
+        RepositoryConnection changeSetCon = changeSetStore.getRepository().getConnection();
+        RepositoryConnection managedStoreCon = new SPARQLConnection(new SPARQLRepository(managedTripleStoreSparqlEndpoint));
         try {
             String issuedQuery = fillInPlaceholders(query);
             long start = System.currentTimeMillis();
-            List<String> messages = createMessages(query, issuedQuery, repCon);
+            List<String> messages = createMessages(query, issuedQuery, changeSetCon, managedStoreCon);
             logger.info("Query execution and message creation took " +(System.currentTimeMillis() - start) +"ms");
             return messages;
         }
         finally {
-            repCon.close();
+            changeSetCon.close();
+            managedStoreCon.close();
         }
     }
 
@@ -83,7 +87,10 @@ public class QueryEvaluator {
         return sparqlQuery.replace(QUERY_LAST_ISSUED, queryLastIssuedDate);
     }
 
-    private List<String> createMessages(NotificationQuery query, String issuedQuery, RepositoryConnection repCon)
+    private List<String> createMessages(NotificationQuery query,
+                                        String issuedQuery,
+                                        RepositoryConnection repCon,
+                                        RepositoryConnection managedStoreCon)
         throws MalformedQueryException, RepositoryException, QueryEvaluationException
     {
         TupleQueryResult result = repCon.prepareTupleQuery(QueryLanguage.SPARQL, issuedQuery).evaluate();
@@ -91,7 +98,7 @@ public class QueryEvaluator {
         List<String> messages = new ArrayList<String>();
         while (result.hasNext()) {
             BindingSet bs = result.next();
-            if (evaluateCondition(query.getCondition(), bs, repCon)) {
+            if (evaluateCondition(query.getCondition(), bs, managedStoreCon)) {
                 messages.add(query.getBindingSetFormatter().toMessage(bs));
             }
         }
@@ -100,14 +107,19 @@ public class QueryEvaluator {
         return messages;
     }
 
-    private boolean evaluateCondition(Condition condition, BindingSet bs, RepositoryConnection repCon)
+    private boolean evaluateCondition(Condition condition, BindingSet bs, RepositoryConnection managedStoreCon)
         throws MalformedQueryException, RepositoryException, QueryEvaluationException
     {
-        BooleanQuery booleanQuery = repCon.prepareBooleanQuery(QueryLanguage.SPARQL, condition.getAskQuery());
+        BooleanQuery booleanQuery = managedStoreCon.prepareBooleanQuery(QueryLanguage.SPARQL, condition.getAskQuery());
         for (String bindingName : bs.getBindingNames()) {
             booleanQuery.setBinding(bindingName, bs.getBinding(bindingName).getValue());
         }
-        return booleanQuery.evaluate() == condition.getExpectedResult();
+
+        boolean queryResult = booleanQuery.evaluate();
+
+        System.out.println("result: " +queryResult);
+
+        return queryResult == condition.getExpectedResult();
     }
 
 }

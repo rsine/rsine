@@ -5,11 +5,8 @@ import at.punkt.lod2.util.Helper;
 import eu.lod2.rsine.Rsine;
 import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
 import eu.lod2.rsine.dissemination.messageformatting.BindingSetFormatter;
-import eu.lod2.rsine.dissemination.messageformatting.ToStringBindingSetFormatter;
 import eu.lod2.rsine.dissemination.notifier.logging.LoggingNotifier;
 import eu.lod2.rsine.queryhandling.QueryEvaluator;
-import eu.lod2.rsine.registrationservice.Condition;
-import eu.lod2.rsine.registrationservice.NotificationQuery;
 import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.util.Namespaces;
 import org.apache.jena.fuseki.Fuseki;
@@ -93,70 +90,19 @@ public class LocalUseCasesTest {
                 "}";
     }
 
-    @Test(timeout = 5000)
-    public void propertyCreated() throws IOException {
-        registerSubscription(
-            createPropertyCreatedQuery(),
-            new ToStringBindingSetFormatter(),
-            new Condition(createPrefLabelCondition(), false));
-        prefLabelAddition();
-
-        Assert.assertEquals(1, countingNotifier.waitForNotification());
-    }
-
-    private void registerSubscription(String query,
-                                      BindingSetFormatter formatter,
-                                      Condition condition)
-    {
+    private Subscription createSubscription(String query, BindingSetFormatter formatter) {
         Subscription subscription = new Subscription();
-        subscription.setQuery(query, formatter, condition);
+        subscription.addQuery(query, formatter);
         subscription.addNotifier(new LoggingNotifier());
         subscription.addNotifier(countingNotifier);
         rsine.registerSubscription(subscription);
-    }
-
-    private String createPropertyCreatedQuery() {
-        return Namespaces.SKOS_PREFIX+
-               Namespaces.CS_PREFIX+
-               Namespaces.DCTERMS_PREFIX+
-                "SELECT ?sub ?obj " +
-                "WHERE {" +
-                    "?cs a cs:ChangeSet . " +
-                    "?cs cs:createdDate ?csdate . " +
-                    "?cs cs:addition ?addition . " +
-
-                    "?addition rdf:subject ?sub . " +
-                    "?addition rdf:predicate ?pre . " +
-                    "?addition rdf:object ?obj . "+
-
-                    "FILTER ((?csdate > \"" + QueryEvaluator.QUERY_LAST_ISSUED+ "\"^^<http://www.w3.org/2001/XMLSchema#dateTime>) && " +
-                            "(?pre IN (skos:prefLabel)))" +
-                "}";
-    }
-
-    private String createPrefLabelCondition() {
-        return Namespaces.SKOS_PREFIX + "ASK {?sub skos:prefLabel ?obj}";
-    }
-
-    private void prefLabelAddition() throws IOException {
-        Properties props = new Properties();
-        props.setProperty(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD);
-        props.setProperty(
-            ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
-            "<http://reegle.info/glossary/someConcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"some preflabel\"@en .");
-
-        helper.doPost(props);
-    }
-
-
-    public void propertyChanged() {
-
+        return subscription;
     }
 
     @Ignore
     @Test
     public void scopeNoteChanges() throws IOException {
-        registerSubscription(createScopeNoteChangesQuery(), new ScopeNoteChangeFormatter());
+        createSubscription(createScopeNoteChangesQuery(), new ScopeNoteChangeFormatter());
 
         scopeNoteDefinition();
         scopeNoteChange();
@@ -201,7 +147,7 @@ public class LocalUseCasesTest {
 
     @Test
     public void conceptLinking() throws IOException {
-        registerSubscription(createConceptLinkingQuery(), new ConceptLinkingFormatter());
+        createSubscription(createConceptLinkingQuery(), new ConceptLinkingFormatter());
         addLink();
 
         Assert.assertEquals(1, countingNotifier.waitForNotification());

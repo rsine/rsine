@@ -41,15 +41,21 @@ public class Helper {
         return response.getStatusLine().getStatusCode();
     }
 
-    public static SPARQLServer initFuseki(URL rdfFile, String datasetName) {
-        DatasetGraph datasetGraph = DatasetGraphFactory.createMem();
-        RDFDataMgr.read(datasetGraph, new File(rdfFile.getFile()).toURI().toString());
-        ServerConfig serverConfig = FusekiConfig.defaultConfiguration(datasetName, datasetGraph, false) ;
+    public static void initFuseki(String datasetName) {
+        initFuseki(DatasetGraphFactory.createMem(), datasetName);
+    }
+
+    private static void initFuseki(DatasetGraph datasetGraph, String datasetName) {
+        ServerConfig serverConfig = FusekiConfig.defaultConfiguration(datasetName, datasetGraph, true) ;
         SPARQLServer fusekiServer = new SPARQLServer(serverConfig) ;
         Fuseki.setServer(fusekiServer);
         fusekiServer.start();
+    }
 
-        return fusekiServer;
+    public static void initFuseki(URL rdfFile, String datasetName) {
+        DatasetGraph datasetGraph = DatasetGraphFactory.createMem();
+        RDFDataMgr.read(datasetGraph, new File(rdfFile.getFile()).toURI().toString());
+        initFuseki(datasetGraph, datasetName);
     }
 
     public static Model createModelFromResourceFile(String fileName, RDFFormat format)

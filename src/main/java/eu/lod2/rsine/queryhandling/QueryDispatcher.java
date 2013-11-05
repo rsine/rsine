@@ -51,7 +51,7 @@ public class QueryDispatcher implements IQueryDispatcher {
 
     private void dispatchForSubscription(Subscription subscription) throws RepositoryException {
         logger.debug("Dispatching queries for subscription with id '" + subscription.getSubscriptionId() + "'");
-        Iterator<NotificationQuery> queryIt = subscription.getQueryIterator();        
+        Iterator<NotificationQuery> queryIt = subscription.getQueries();
         while (queryIt.hasNext()) {
             issueQueryAndNotify(queryIt.next());
         }
