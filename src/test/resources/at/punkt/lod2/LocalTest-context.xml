@@ -17,7 +17,7 @@
     </bean>
 
     <bean id="managedServerSparqlUpdate" class="java.lang.String">
-        <constructor-arg value="http://localhost:3030/dataset/data" />
+        <constructor-arg value="http://localhost:3030/dataset/update" />
     </bean>
 
     <bean id="changeSetService" class="eu.lod2.rsine.changesetservice.ChangeSetService">

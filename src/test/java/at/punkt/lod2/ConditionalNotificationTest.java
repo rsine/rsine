@@ -60,7 +60,9 @@ public class ConditionalNotificationTest {
                 createPropertyCreatedQuery(),
                 new ToStringBindingSetFormatter(),
                 new Condition(createPrefLabelCondition(), false)); // triple did not exist before
-        addPrefLabel();
+
+        postTripleChange();
+        insertIntoManagedStore();
 
         Assert.assertEquals(1, countingNotifier.waitForNotification());
     }
@@ -96,30 +98,25 @@ public class ConditionalNotificationTest {
         return Namespaces.SKOS_PREFIX + "ASK {?sub skos:prefLabel ?obj}";
     }
 
-    private void addPrefLabel()
-        throws RepositoryException, MalformedQueryException, IOException, UpdateExecutionException
-    {
-        String triple = "<http://reegle.info/glossary/someConcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"some preflabel\"@en .";
-
-        insertIntoManagedStore(triple);
-        postTripleChange(triple);
-    }
-
-    private void insertIntoManagedStore(String triple)
+    private void insertIntoManagedStore()
         throws MalformedQueryException, RepositoryException, UpdateExecutionException
     {
         String managedServerSparqlEndpoint = applicationContext.getBean("managedServerSparqlUpdate", String.class);
         RepositoryConnection repCon = new SPARQLConnection(new SPARQLRepository(managedServerSparqlEndpoint));
-        repCon.prepareUpdate(QueryLanguage.SPARQL, "INSERT DATA {" +triple+ "}").execute();
+        repCon.prepareUpdate(QueryLanguage.SPARQL, "INSERT DATA {" +getPrefLabelTriple()+ "}").execute();
         repCon.close();
     }
 
-    private void postTripleChange(String triple) throws IOException {
+    private String getPrefLabelTriple() {
+        return "<http://reegle.info/glossary/someConcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"some preflabel\"@en .";
+    }
+
+    private void postTripleChange() throws IOException {
         Properties props = new Properties();
         props.setProperty(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD);
         props.setProperty(
             ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
-            triple);
+            getPrefLabelTriple());
 
         helper.doPost(props);
     }
@@ -133,8 +130,10 @@ public class ConditionalNotificationTest {
                 new ToStringBindingSetFormatter(),
                 new Condition(createPrefLabelCondition(), true)); // triple did exist before
 
-        addPrefLabel();  // no notification should occur here because condition is not fulfilled
-        addPrefLabel();  // here we get the one and only notification
+        postTripleChange(); // no notification should occur here because condition is not fulfilled
+
+        insertIntoManagedStore();
+        postTripleChange(); // here we get the one and only notification
 
         Assert.assertEquals(1, countingNotifier.waitForNotification());
     }

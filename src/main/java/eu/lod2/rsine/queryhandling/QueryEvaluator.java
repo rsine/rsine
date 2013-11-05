@@ -115,11 +115,7 @@ public class QueryEvaluator {
             booleanQuery.setBinding(bindingName, bs.getBinding(bindingName).getValue());
         }
 
-        boolean queryResult = booleanQuery.evaluate();
-
-        System.out.println("result: " +queryResult);
-
-        return queryResult == condition.getExpectedResult();
+        return booleanQuery.evaluate() == condition.getExpectedResult();
     }
 
 }
