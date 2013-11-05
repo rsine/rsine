@@ -35,7 +35,7 @@ public class SubscriptionParserTest {
     }
 
     @Test
-    public void customFormatterTest() throws RDFParseException, IOException, RDFHandlerException {
+    public void customFormatter() throws RDFParseException, IOException, RDFHandlerException {
         Model rdfSubscription = helper.createModelFromResourceFile("/labelChangeSubscriptionFormatted.ttl", RDFFormat.TURTLE);
         Subscription subscription = new SubscriptionParser(rdfSubscription).createSubscription();
 
@@ -43,4 +43,15 @@ public class SubscriptionParserTest {
         Assert.assertNotNull(notificationQuery);
         Assert.assertTrue(notificationQuery.getBindingSetFormatter() instanceof VelocityBindingSetFormatter);
     }
+
+    @Test
+    public void queryWithCondition() throws RDFParseException, IOException, RDFHandlerException {
+        Model rdfSubscription = helper.createModelFromResourceFile("/subscriptionWithCondition.ttl", RDFFormat.TURTLE);
+        Subscription subscription = new SubscriptionParser(rdfSubscription).createSubscription();
+
+        NotificationQuery notificationQuery = subscription.getQueries().next();
+        Assert.assertNotNull(notificationQuery);
+        Assert.assertNotNull(notificationQuery.getCondition());
+    }
+
 }

@@ -109,7 +109,10 @@ public class SubscriptionParser {
                 (Resource) query,
                 valueFactory.createURI(Namespaces.SPIN.getName(), "text"),
                 null).objectString();
-            notificationQueries.add(new NotificationQuery(sparql, getFormatter((Resource) query), subscription));
+            notificationQueries.add(new NotificationQuery(sparql,
+                    getFormatter((Resource) query),
+                    getCondition((Resource) query),
+                    subscription));
         }
 
         return notificationQueries;
@@ -126,6 +129,15 @@ public class SubscriptionParser {
         }
 
         return new FormatterFactory().createFormatter(rdfSubscription, formatter);
+    }
+
+    private Condition getCondition(Resource query) {
+        Resource condition = rdfSubscription.filter(
+            query,
+            valueFactory.createURI(Namespaces.RSINE_NAMESPACE.getName(), "condition"),
+            null).objectResource();
+
+
     }
 
 }

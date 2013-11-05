@@ -12,18 +12,14 @@ public class NotificationQuery {
     private Subscription subscription;
     private Condition condition;
 
-    NotificationQuery(String sparqlQuery, BindingSetFormatter bindingSetFormatter, Subscription subscription) {
-        this.sparqlQuery = sparqlQuery;
-        this.bindingSetFormatter = bindingSetFormatter;
-        this.subscription = subscription;
-    }
-
     NotificationQuery(String sparqlQuery,
                       BindingSetFormatter bindingSetFormatter,
                       Condition condition,
                       Subscription subscription)
     {
-        this(sparqlQuery, bindingSetFormatter, subscription);
+        this.sparqlQuery = sparqlQuery;
+        this.bindingSetFormatter = bindingSetFormatter;
+        this.subscription = subscription;
         this.condition = condition;
     }
 
