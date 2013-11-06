@@ -125,7 +125,6 @@ public class QueryEvaluator {
             }
         }
 
-
         return allConditionsFulfilled;
     }
 

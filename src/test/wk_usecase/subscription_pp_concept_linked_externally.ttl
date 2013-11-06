@@ -19,15 +19,16 @@
                 ?addition rdf:predicate ?somePredicate .
                 ?addition rdf:object ?someUri .
 
-                SERVICE <MANAGED_STORE_SPARQL_ENDPOINT> {
-                    ?concept a skos:Concept .
-                }
-
                 FILTER ((?csdate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime>) &&
                         (?concept != ?someUri) &&
                         (!contains(str(?someUri), 'AUTH_URI')) &&
                         isIRI(?someUri))
             }";
+
+        rsine:condition [
+            spin:text "PREFIX skos:<http://www.w3.org/2004/02/skos/core#> ASK {?concept a skos:Concept}";
+            rsine:expect "true"^^xsd:boolean;
+        ];
 
         rsine:formatter [
             a rsine:vtlFormatter;
