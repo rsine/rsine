@@ -1,0 +1,56 @@
+@prefix spin: <http://spinrdf.org/sp/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix rsine: <http://lod2.eu/rsine/> .
+
+[] a rsine:Subscription;
+    rsine:query [
+        spin:text "PREFIX cs:<http://purl.org/vocab/changeset/schema#>
+                   PREFIX spin:<http://spinrdf.org/sp/>
+                   PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                   PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+                   PREFIX dcterms:<http://purl.org/dc/terms/>
+                   PREFIX owl:<http://www.w3.org/2002/07/owl#>
+                   PREFIX wkd:<http://schema.wolterskluwer.de/>
+                   PREFIX bibo:<http://purl.org/ontology/bibo/>
+
+                   SELECT ?document ?somePredicate ?value WHERE {
+                       ?cs a cs:ChangeSet .
+                       ?cs cs:createdDate ?csdate .
+                       ?cs cs:addition ?addition .
+
+                       ?addition rdf:subject ?document .
+                       ?addition rdf:predicate ?somePredicate .
+                       ?addition rdf:object ?value .
+
+                       FILTER ((?csdate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime>) &&
+                               (?somePredicate IN (dcterms:language,dcterms:subject,dcterms:description,dcterms:alternative,
+                                                   dcterms:references,dcterms:source,dcterms:title,dcterms:hasPart,dcterms:creator,
+
+                                                   wkd:fileName,wkd:reproducedAs,wkd:jurisprudenceType,wkd:decisionDate,
+                                                   wkd:legalBase,wkd:reason,wkd:facts,wkd:associatedPracticeArea,wkd:cost,
+                                                   wkd:claimedValue,wkd:reportedBy,wkd:mainEntry,wkd:judgementType,wkd:heading,
+                                                   wkd:tenor,wkd:pleading,
+
+                                                   bibo:issuer,bibo:court,bibo:reproducedIn,skos:note)))
+                   }";
+
+        rsine:condition [
+            spin:text "ASK {?document a <http://purl.org/ontology/bibo/Document>}";
+            rsine:expect "true"^^xsd:boolean;
+        ];
+
+        // not yet implemented!
+        rsine:pullIn [
+            spin:text "SELECT {?document dcterms:title ?title}";
+        ]
+        //---
+
+        rsine:formatter [
+            a rsine:vtlFormatter;
+            rsine:message "The metadata element '$bindingSet.getValue('somePredicate')' of document '$bindingSet.getValue('document')' has been changed to '$bindingSet.getValue('value')'";
+        ];
+      ];
+
+    rsine:notifier [
+        a rsine:loggingNotifier;
+    ].
