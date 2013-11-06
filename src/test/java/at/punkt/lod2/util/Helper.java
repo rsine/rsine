@@ -16,15 +16,21 @@ import org.openrdf.model.Model;
 import org.openrdf.model.impl.TreeModel;
 import org.openrdf.rio.*;
 import org.openrdf.rio.helpers.StatementCollector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.net.URI;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Properties;
 
 public class Helper {
 
+    private final static Logger logger = LoggerFactory.getLogger(Helper.class);
     private int changeSetListeningPort;
 
     public Helper(int changeSetListeningPort) {
@@ -53,8 +59,19 @@ public class Helper {
     }
 
     public static void initFuseki(URL rdfFile, String datasetName) {
+        initFuseki(Arrays.asList(new File(rdfFile.getFile()).toURI()), datasetName);
+    }
+
+    public static void initFuseki(Collection<URI> rdfFiles, String datasetName) {
         DatasetGraph datasetGraph = DatasetGraphFactory.createMem();
-        RDFDataMgr.read(datasetGraph, new File(rdfFile.getFile()).toURI().toString());
+        for (URI rdfFile : rdfFiles) {
+            try {
+                RDFDataMgr.read(datasetGraph, rdfFile.toString());
+            }
+            catch (Exception e) {
+                // ignore
+            }
+        }
         initFuseki(datasetGraph, datasetName);
     }
 

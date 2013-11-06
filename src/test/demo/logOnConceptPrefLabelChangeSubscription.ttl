@@ -1,9 +1,0 @@
-@prefix spin: <http://spinrdf.org/sp/> .
-@prefix foaf: <http://xmlns.com/foaf/0.1/> .
-@prefix rsine: <http://lod2.eu/rsine/> .
-
-[] a rsine:Subscription;
-   spin:text "PREFIX cs:<http://purl.org/vocab/changeset/schema#> PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX skos:<http://www.w3.org/2004/02/skos/core#> SELECT ?added_label ?to_concept WHERE {?cs a cs:ChangeSet . ?cs cs:createdDate ?csdate . ?cs cs:addition ?addition . ?addition rdf:predicate skos:prefLabel . ?addition rdf:object ?added_label . ?addition rdf:subject ?to_concept . FILTER (?csdate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime>)}";
-   rsine:notifier [
-       a rsine:loggingNotifier;
-   ].
