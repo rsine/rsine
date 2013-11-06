@@ -51,7 +51,7 @@ public class SubscriptionParserTest {
 
         NotificationQuery notificationQuery = subscription.getQueries().next();
         Assert.assertNotNull(notificationQuery);
-        Assert.assertNotNull(notificationQuery.getCondition());
+        Assert.assertTrue(notificationQuery.getConditions().hasNext());
     }
 
 }

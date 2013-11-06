@@ -4,6 +4,7 @@ import eu.lod2.rsine.changesetstore.ChangeSetStore;
 import eu.lod2.rsine.queryhandling.policies.IEvaluationPolicy;
 import eu.lod2.rsine.registrationservice.Condition;
 import eu.lod2.rsine.registrationservice.NotificationQuery;
+import org.openrdf.OpenRDFException;
 import org.openrdf.query.*;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 @Component
@@ -98,13 +100,33 @@ public class QueryEvaluator {
         List<String> messages = new ArrayList<String>();
         while (result.hasNext()) {
             BindingSet bs = result.next();
-            if (evaluateCondition(query.getCondition(), bs, managedStoreCon)) {
+            if (evaluateConditions(query.getConditions(), bs, managedStoreCon)) {
                 messages.add(query.getBindingSetFormatter().toMessage(bs));
             }
         }
         query.updateLastIssued();
 
         return messages;
+    }
+
+    private boolean evaluateConditions(Iterator<Condition> conditions,
+                                       BindingSet bs,
+                                       RepositoryConnection managedStoreCon)
+    {
+        boolean allConditionsFulfilled = true;
+
+        while (conditions.hasNext()) {
+            Condition condition = conditions.next();
+            try {
+                allConditionsFulfilled &= evaluateCondition(condition, bs, managedStoreCon);
+            }
+            catch (OpenRDFException e) {
+                logger.error("Ignoring condition due to error", e);
+            }
+        }
+
+
+        return allConditionsFulfilled;
     }
 
     private boolean evaluateCondition(Condition condition, BindingSet bs, RepositoryConnection managedStoreCon)

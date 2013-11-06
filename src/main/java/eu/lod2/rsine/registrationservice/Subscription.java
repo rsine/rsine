@@ -7,10 +7,7 @@ import org.openrdf.model.Resource;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
+import java.util.*;
 
 public class Subscription {
 
@@ -50,7 +47,7 @@ public class Subscription {
     }
 
     public void addQuery(String query, BindingSetFormatter formatter, Condition condition) {
-        queries.add(new NotificationQuery(query, formatter, condition, this));
+        queries.add(new NotificationQuery(query, formatter, Arrays.asList(condition), this));
     }
 
     public void addNotifier(INotifier notifier) {

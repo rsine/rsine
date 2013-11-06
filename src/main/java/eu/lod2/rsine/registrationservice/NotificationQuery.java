@@ -2,7 +2,10 @@ package eu.lod2.rsine.registrationservice;
 
 import eu.lod2.rsine.dissemination.messageformatting.BindingSetFormatter;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
 
 public class NotificationQuery {
 
@@ -10,17 +13,24 @@ public class NotificationQuery {
     private String sparqlQuery;
     private Date lastIssued = new Date(0);
     private Subscription subscription;
-    private Condition condition;
+    private Collection<Condition> conditions = new ArrayList<Condition>();
 
     NotificationQuery(String sparqlQuery,
                       BindingSetFormatter bindingSetFormatter,
-                      Condition condition,
                       Subscription subscription)
     {
         this.sparqlQuery = sparqlQuery;
         this.bindingSetFormatter = bindingSetFormatter;
         this.subscription = subscription;
-        this.condition = condition;
+    }
+
+    NotificationQuery(String sparqlQuery,
+                      BindingSetFormatter bindingSetFormatter,
+                      Collection<Condition> conditions,
+                      Subscription subscription)
+    {
+        this(sparqlQuery, bindingSetFormatter, subscription);
+        this.conditions = conditions;
     }
 
     public void updateLastIssued() {
@@ -35,8 +45,8 @@ public class NotificationQuery {
         return sparqlQuery;
     }
 
-    public Condition getCondition() {
-        return condition;
+    public Iterator<Condition> getConditions() {
+        return conditions.iterator();
     }
 
     public BindingSetFormatter getBindingSetFormatter() {
