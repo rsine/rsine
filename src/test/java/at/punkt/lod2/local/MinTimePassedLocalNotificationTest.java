@@ -1,4 +1,4 @@
-package at.punkt.lod2;
+package at.punkt.lod2.local;
 
 import eu.lod2.rsine.dissemination.notifier.INotifier;
 import org.junit.Assert;

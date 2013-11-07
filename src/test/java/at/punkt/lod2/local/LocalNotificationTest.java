@@ -1,4 +1,4 @@
-package at.punkt.lod2;
+package at.punkt.lod2.local;
 
 import at.punkt.lod2.util.Helper;
 import eu.lod2.rsine.Rsine;
@@ -86,10 +86,10 @@ public abstract class LocalNotificationTest implements ApplicationContextAware  
         Properties props = new Properties();
         props.setProperty(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD);
         props.setProperty(
-            ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
-            "<http://reegle.info/glossary/1111> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2004/02/skos/core#Concept> .");
+                ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
+                "<http://reegle.info/glossary/1111> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2004/02/skos/core#Concept> .");
 
-        helper.doPost(props);
+        helper.postChangeset(props);
     }
 
     private void setPrefLabel() throws IOException {
@@ -99,7 +99,7 @@ public abstract class LocalNotificationTest implements ApplicationContextAware  
             ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
             "<http://reegle.info/glossary/1111> <http://www.w3.org/2004/02/skos/core#prefLabel> \"Ottakringer Helles\"@en .");
 
-        helper.doPost(props);
+        helper.postChangeset(props);
     }
 
     protected void changePrefLabel() throws IOException {
@@ -112,7 +112,7 @@ public abstract class LocalNotificationTest implements ApplicationContextAware  
             ChangeTripleHandler.POST_BODY_SECONDARYTRIPLE,
             "<http://reegle.info/glossary/1111> <http://www.w3.org/2004/02/skos/core#prefLabel> \"Schremser Edelmärzen\"@en .");
 
-        helper.doPost(props);
+        helper.postChangeset(props);
     }
 
     private void addOtherConcept() throws IOException {
@@ -122,7 +122,7 @@ public abstract class LocalNotificationTest implements ApplicationContextAware  
             ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
             "<http://reegle.info/glossary/1112> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2004/02/skos/core#Concept> .");
 
-        helper.doPost(props);
+        helper.postChangeset(props);
     }
 
     private void linkConcepts() throws IOException {
@@ -132,7 +132,7 @@ public abstract class LocalNotificationTest implements ApplicationContextAware  
             ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
             "<http://reegle.info/glossary/1111> <http://www.w3.org/2004/02/skos/core#related> <http://reegle.info/glossary/1112> .");
 
-        helper.doPost(props);
+        helper.postChangeset(props);
     }
 
     @Override

@@ -1,4 +1,4 @@
-package at.punkt.lod2;
+package at.punkt.lod2.local;
 
 import at.punkt.lod2.util.CountingNotifier;
 import at.punkt.lod2.util.Helper;
@@ -30,7 +30,7 @@ public class LocalUseCasesTest {
     @Before
     public void setUp() throws IOException, RepositoryException {
         Helper.initFuseki(Rsine.class.getResource("/reegle.rdf"), "dataset");
-        AbstractApplicationContext context = new ClassPathXmlApplicationContext("/at/punkt/lod2/LocalTest-context.xml");
+        AbstractApplicationContext context = new ClassPathXmlApplicationContext("/at/punkt/lod2/local/LocalTest-context.xml");
         helper = context.getBean(Helper.class);
         rsine = context.getBean(Rsine.class);
 
@@ -118,7 +118,7 @@ public class LocalUseCasesTest {
             ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
             "<http://reegle.info/glossary/2547> <http://www.w3.org/2004/02/skos/core#scopeNote> \"some scope note\"@en .");
 
-        helper.doPost(props);
+        helper.postChangeset(props);
     }
 
     private void scopeNoteChange() throws IOException {
@@ -131,7 +131,7 @@ public class LocalUseCasesTest {
             ChangeTripleHandler.POST_BODY_SECONDARYTRIPLE,
             "<http://reegle.info/glossary/2547> <http://www.w3.org/2004/02/skos/core#scopeNote> \"updated scope note\"@en .");
 
-        helper.doPost(props);
+        helper.postChangeset(props);
 
     }
 
@@ -142,7 +142,7 @@ public class LocalUseCasesTest {
                 ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
                 "<http://reegle.info/glossary/1> <http://www.w3.org/2004/02/skos/core#scopeNote> \"some scope note\"@en .");
 
-        helper.doPost(props);
+        helper.postChangeset(props);
     }
 
     @Test
@@ -159,7 +159,7 @@ public class LocalUseCasesTest {
         props.setProperty(
             ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
             "<http://reegle.info/glossary/443> <http://www.w3.org/2004/02/skos/core#narrower> <http://reegle.info/glossary/442> .");
-        helper.doPost(props);
+        helper.postChangeset(props);
     }
 
     private class ScopeNoteChangeFormatter implements BindingSetFormatter {

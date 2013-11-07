@@ -1,4 +1,4 @@
-package at.punkt.lod2;
+package at.punkt.lod2.local;
 
 import at.punkt.lod2.util.Helper;
 import eu.lod2.rsine.registrationservice.RegistrationService;

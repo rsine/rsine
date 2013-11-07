@@ -107,6 +107,7 @@ public class ChangeTripleHandler extends PostRequestHandler {
     }
 
     private void errorResponse(HttpResponse response, String message) {
+        logger.error(message);
         response.setStatusCode(HttpStatus.SC_BAD_REQUEST);
         response.setReasonPhrase(message);
     }

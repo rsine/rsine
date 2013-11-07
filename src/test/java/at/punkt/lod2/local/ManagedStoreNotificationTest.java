@@ -1,4 +1,4 @@
-package at.punkt.lod2;
+package at.punkt.lod2.local;
 
 import at.punkt.lod2.util.CountingNotifier;
 import at.punkt.lod2.util.Helper;
@@ -95,7 +95,7 @@ public class ManagedStoreNotificationTest {
             ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
             "<http://reegle.info/glossary/2547> <http://www.w3.org/2004/02/skos/core#scopeNote> \"some additional info\"@en .");
 
-        helper.doPost(props);
+        helper.postChangeset(props);
 
     }
 

@@ -36,14 +36,8 @@
 
         rsine:condition [
             spin:text "ASK {?document a <http://purl.org/ontology/bibo/Document>}";
-            rsine:expect "true"^^xsd:boolean;
+            rsine:expect true;
         ];
-
-        // not yet implemented!
-        rsine:pullIn [
-            spin:text "SELECT {?document dcterms:title ?title}";
-        ]
-        //---
 
         rsine:formatter [
             a rsine:vtlFormatter;

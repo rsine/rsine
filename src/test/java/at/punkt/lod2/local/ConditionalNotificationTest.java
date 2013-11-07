@@ -1,4 +1,4 @@
-package at.punkt.lod2;
+package at.punkt.lod2.local;
 
 import at.punkt.lod2.util.CountingNotifier;
 import at.punkt.lod2.util.Helper;
@@ -40,7 +40,7 @@ public class ConditionalNotificationTest {
     public void setUp() throws IOException, RepositoryException {
         Helper.initFuseki("dataset");
 
-        applicationContext = new ClassPathXmlApplicationContext("/at/punkt/lod2/LocalTest-context.xml");
+        applicationContext = new ClassPathXmlApplicationContext("/at/punkt/lod2/local/LocalTest-context.xml");
         helper = applicationContext.getBean(Helper.class);
         rsine = applicationContext.getBean(Rsine.class);
         rsine.start();
@@ -118,7 +118,7 @@ public class ConditionalNotificationTest {
             ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
             getPrefLabelTriple());
 
-        helper.doPost(props);
+        helper.postChangeset(props);
     }
 
     @Test

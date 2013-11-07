@@ -1,4 +1,4 @@
-package at.punkt.lod2;
+package at.punkt.lod2.local;
 
 import at.punkt.lod2.util.Helper;
 import eu.lod2.rsine.Rsine;
@@ -173,7 +173,7 @@ public class RealDataTest {
             );
 
         long startTimeMillis = System.currentTimeMillis();
-        helper.doPost(props);
+        helper.postChangeset(props);
         accumulatedPostDurations += System.currentTimeMillis() - startTimeMillis;
     }
 
