@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.security.InvalidParameterException;
+import java.util.Iterator;
 
 @Component
 public class Rsine {
@@ -58,10 +59,15 @@ public class Rsine {
     }
 
     /**
-     * @deprecated registration should be exposed as an HTTP service; for testing only
+     * These methods are intended for testing only
      */
     public void registerSubscription(Subscription subscription) {
         registrationService.register(subscription, true);
     }
+
+    public Iterator<Subscription> getSubscriptions() {
+        return registrationService.getSubscriptionIterator();
+    }
+    // ---
 
 }

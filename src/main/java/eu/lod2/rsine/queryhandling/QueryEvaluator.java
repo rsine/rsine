@@ -4,7 +4,6 @@ import eu.lod2.rsine.changesetstore.ChangeSetStore;
 import eu.lod2.rsine.queryhandling.policies.IEvaluationPolicy;
 import eu.lod2.rsine.registrationservice.Condition;
 import eu.lod2.rsine.registrationservice.NotificationQuery;
-import org.openrdf.OpenRDFException;
 import org.openrdf.query.*;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
@@ -34,6 +33,9 @@ public class QueryEvaluator {
     @Autowired
     private IEvaluationPolicy evaluationPolicy;
 
+    @Autowired
+    private QueryProfiler queryProfiler;
+
     private String managedTripleStoreSparqlEndpoint, authoritativeUri;
 
     public QueryEvaluator() {
@@ -56,9 +58,11 @@ public class QueryEvaluator {
         RepositoryConnection managedStoreCon = new SPARQLConnection(new SPARQLRepository(managedTripleStoreSparqlEndpoint));
         try {
             String issuedQuery = fillInPlaceholders(query);
+
             long start = System.currentTimeMillis();
             List<String> messages = createMessages(query, issuedQuery, changeSetCon, managedStoreCon);
-            logger.info("Query execution and message creation took " +(System.currentTimeMillis() - start) +"ms");
+            queryProfiler.log(issuedQuery, System.currentTimeMillis() - start);
+
             return messages;
         }
         finally {
@@ -120,7 +124,7 @@ public class QueryEvaluator {
             try {
                 allConditionsFulfilled &= evaluateCondition(condition, bs, managedStoreCon);
             }
-            catch (OpenRDFException e) {
+            catch (Exception e) {
                 logger.error("Ignoring condition due to error", e);
             }
         }
