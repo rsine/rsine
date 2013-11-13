@@ -17,6 +17,7 @@
     <util:constant id="cmdParams" static-field="eu.lod2.rsine.Rsine.cmdParams"/>
 
     <bean id="changeSetService" class="eu.lod2.rsine.changesetservice.ChangeSetService">
+        <constructor-arg value="#{cmdParams.context}"/>
         <constructor-arg value="#{cmdParams.changesListeningPort}"/>
     </bean>
 
@@ -34,7 +35,6 @@
     <bean id="remoteNotificationServiceBase" class="eu.lod2.rsine.remotenotification.RemoteNotificationServiceBase"
           factory-bean="remoteNotificationServiceFactory"
           factory-method="createRemoteNotificationService"/>
-
 
     <!--
     <bean id="evaluationPolicy" class="eu.lod2.rsine.queryhandling.policies.ImmediateEvaluationPolicy"/>

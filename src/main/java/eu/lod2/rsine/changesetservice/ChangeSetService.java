@@ -38,9 +38,15 @@ public class ChangeSetService implements ApplicationContextAware {
     private Thread requestListenerThread;
     private boolean shouldStop;
     private int port;
+    private String context = "";
 
     public ChangeSetService(int port) {
         this.port = port;
+    }
+
+    public ChangeSetService(String context, int port) {
+        this(port);
+        this.context = context;
     }
 
     public void start() throws IOException {
@@ -93,10 +99,10 @@ public class ChangeSetService implements ApplicationContextAware {
 
         private void setupRequestHandler() {
             reqistry = new HttpRequestHandlerRegistry();
-            reqistry.register("*", changeTripleHandler);
-            reqistry.register("/register", applicationContext.getBean(RegistrationHandler.class));
-            reqistry.register("/unregister", applicationContext.getBean(UnRegistrationHandler.class));
-            reqistry.register("/remote", applicationContext.getBean(RemoteChangeSetHandler.class));
+            reqistry.register(context+"*", changeTripleHandler);
+            reqistry.register(context+"/register", applicationContext.getBean(RegistrationHandler.class));
+            reqistry.register(context+"/unregister", applicationContext.getBean(UnRegistrationHandler.class));
+            reqistry.register(context+"/remote", applicationContext.getBean(RemoteChangeSetHandler.class));
         }
 
         @Override
