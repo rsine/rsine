@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	   					   http://www.springframework.org/schema/beans/spring-beans.xsd
+	   					   http://www.springframework.org/schema/util
+	   					   http://www.springframework.org/schema/util/spring-util-3.0.xsd
+	   					   http://www.springframework.org/schema/context
+	   					   http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:component-scan base-package="eu.lod2.rsine"/>
+
+    <bean id="listeningPort" class="java.lang.Integer" factory-method="parseInt">
+        <constructor-arg value="2222"/>
+    </bean>
+
+    <bean id="changeSetService" class="eu.lod2.rsine.changesetservice.ChangeSetService">
+        <constructor-arg ref="listeningPort"/>
+    </bean>
+
+    <bean id="helper" class="at.punkt.lod2.util.Helper">
+        <constructor-arg ref="listeningPort"/>
+    </bean>
+
+    <bean id="remoteNotificationServiceFactory"
+          class="eu.lod2.rsine.remotenotification.RemoteNotificationServiceFactory">
+        <constructor-arg value="http://localhost/myThesaurus" />
+    </bean>
+
+    <bean id="remoteNotificationServiceBase" class="eu.lod2.rsine.remotenotification.RemoteNotificationServiceBase"
+          factory-bean="remoteNotificationServiceFactory"
+          factory-method="createRemoteNotificationService"/>
+
+    <bean id="remoteServiceDetector" class="eu.lod2.rsine.remotenotification.HttpHeaderRemoteServiceDetector"/>
+
+</beans>

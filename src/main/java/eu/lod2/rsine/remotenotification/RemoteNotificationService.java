@@ -105,7 +105,7 @@ class RemoteNotificationService extends RemoteNotificationServiceBase {
     }
 
     private void postChangeSet(URI remoteService, String changeSet) throws IOException, RDFHandlerException {
-        HttpPost httpPost = new HttpPost(remoteService.stringValue());
+        HttpPost httpPost = new HttpPost(remoteService.stringValue() + "/remote");
         httpPost.setEntity(new StringEntity(changeSet));
         HttpResponse response = new DefaultHttpClient().execute(httpPost);
 

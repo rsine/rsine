@@ -14,38 +14,26 @@
                            http://www.springframework.org/schema/task/spring-task-3.0.xsd">
 
     <context:component-scan base-package="eu.lod2.rsine"/>
-    <util:constant id="cmdParams" static-field="eu.lod2.rsine.Rsine.cmdParams"/>
 
     <bean id="changeSetService" class="eu.lod2.rsine.changesetservice.ChangeSetService">
-        <constructor-arg value="#{cmdParams.context}"/>
-        <constructor-arg value="#{cmdParams.changesListeningPort}"/>
+        <constructor-arg value="2221"/>
     </bean>
 
     <bean id="queryEvaluator" class="eu.lod2.rsine.queryhandling.QueryEvaluator">
-        <constructor-arg value="#{cmdParams.managedStoreSparqlEndpoint}" />
-        <constructor-arg value="#{cmdParams.authoritativeUri}" />
+        <constructor-arg name="sparqlEndpoint" value="http://localhost/PoolParty/sparql/thesaurus" />
+        <constructor-arg name="authoritativeUri" value="http://localhost/thesaurus" />
     </bean>
 
     <bean id="remoteNotificationServiceFactory"
-        class="eu.lod2.rsine.remotenotification.RemoteNotificationServiceFactory"
-    >
-        <constructor-arg value="#{cmdParams.authoritativeUri}" />
+          class="eu.lod2.rsine.remotenotification.RemoteNotificationServiceFactory">
+        <constructor-arg value="http://localhost/thesaurus" />
     </bean>
 
     <bean id="remoteNotificationServiceBase" class="eu.lod2.rsine.remotenotification.RemoteNotificationServiceBase"
           factory-bean="remoteNotificationServiceFactory"
           factory-method="createRemoteNotificationService"/>
 
-    <bean id="evaluationPolicy" class="eu.lod2.rsine.queryhandling.policies.MinTimePassedEvaluationPolicy">
-        <constructor-arg value="5000" />
-    </bean>
-
-    <bean id="postponedQueryHandler" class="eu.lod2.rsine.queryhandling.PostponedQueryHandler"/>
-    <task:scheduled-tasks scheduler="taskScheduler">
-        <task:scheduled ref="postponedQueryHandler" method="cleanUp" fixed-rate="20000"/>
-    </task:scheduled-tasks>
-    <task:scheduler id="taskScheduler" pool-size="1"/>
-
-    <bean id="remoteServiceDetector" class="eu.lod2.rsine.remotenotification.HttpHeaderRemoteServiceDetector"/>
+    <bean id="evaluationPolicy" class="eu.lod2.rsine.queryhandling.policies.ImmediateEvaluationPolicy"/>
+    <bean id="remoteServiceDetector" class="eu.lod2.rsine.remotenotification.UnavailableRemoteServiceDetector"/>
 
 </beans>
