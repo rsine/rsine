@@ -21,7 +21,8 @@ import java.io.IOException;
 
 /**
  * This test needs a running PPT instance hosting a project named "thesaurus" on localhost with an rsine
- * service configured to be running also on localhost
+ * service configured to be running also on localhost. Make also sure to have the PoolPartyTuckeyForwarder installed
+ * in a version that supports rsine configuration properties
  */
 public class PPTInteractionTest {
 
