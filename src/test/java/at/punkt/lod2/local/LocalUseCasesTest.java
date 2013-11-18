@@ -37,10 +37,11 @@ public class LocalUseCasesTest {
     @Autowired
     private Helper helper;
 
-    private CountingNotifier countingNotifier = new CountingNotifier();
+    private CountingNotifier countingNotifier;
 
     @Before
     public void setUp() throws IOException, RepositoryException {
+        countingNotifier = new CountingNotifier();
         Helper.initFuseki(Rsine.class.getResource("/reegle.rdf"), "dataset");
         rsine.start();
     }

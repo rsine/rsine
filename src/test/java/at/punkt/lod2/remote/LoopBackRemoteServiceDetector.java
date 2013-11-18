@@ -15,7 +15,7 @@ public class LoopBackRemoteServiceDetector implements IRemoteServiceDetector {
 
     @Override
     public URI getRemoteService(Resource resource) {
-        return new URIImpl("http://localhost:" +remoteInstanceListeningPort+ "/remote");
+        return new URIImpl("http://localhost:" +remoteInstanceListeningPort);
     }
 
 }
