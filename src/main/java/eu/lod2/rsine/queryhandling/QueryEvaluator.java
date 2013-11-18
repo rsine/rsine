@@ -58,7 +58,6 @@ public class QueryEvaluator {
         RepositoryConnection managedStoreCon = new SPARQLConnection(new SPARQLRepository(managedTripleStoreSparqlEndpoint));
         try {
             String issuedQuery = fillInPlaceholders(query);
-
             long start = System.currentTimeMillis();
             List<String> messages = createMessages(query, issuedQuery, changeSetCon, managedStoreCon);
             queryProfiler.log(issuedQuery, System.currentTimeMillis() - start);
@@ -100,15 +99,16 @@ public class QueryEvaluator {
         throws MalformedQueryException, RepositoryException, QueryEvaluationException
     {
         TupleQueryResult result = repCon.prepareTupleQuery(QueryLanguage.SPARQL, issuedQuery).evaluate();
+        query.updateLastIssued();
 
         List<String> messages = new ArrayList<String>();
         while (result.hasNext()) {
             BindingSet bs = result.next();
+
             if (evaluateConditions(query.getConditions(), bs, managedStoreCon)) {
                 messages.add(query.getBindingSetFormatter().toMessage(bs));
             }
         }
-        query.updateLastIssued();
 
         return messages;
     }
