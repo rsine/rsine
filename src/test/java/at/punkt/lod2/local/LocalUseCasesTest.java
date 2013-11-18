@@ -10,19 +10,31 @@ import eu.lod2.rsine.queryhandling.QueryEvaluator;
 import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.util.Namespaces;
 import org.apache.jena.fuseki.Fuseki;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.openrdf.model.Literal;
 import org.openrdf.query.BindingSet;
 import org.openrdf.repository.RepositoryException;
-import org.springframework.context.support.AbstractApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.IOException;
 import java.util.Properties;
 
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations = {"LocalTest-context.xml"})
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class LocalUseCasesTest {
 
+    @Autowired
     private Rsine rsine;
+
+    @Autowired
     private Helper helper;
 
     private CountingNotifier countingNotifier = new CountingNotifier();
@@ -30,10 +42,6 @@ public class LocalUseCasesTest {
     @Before
     public void setUp() throws IOException, RepositoryException {
         Helper.initFuseki(Rsine.class.getResource("/reegle.rdf"), "dataset");
-        AbstractApplicationContext context = new ClassPathXmlApplicationContext("/at/punkt/lod2/local/LocalTest-context.xml");
-        helper = context.getBean(Helper.class);
-        rsine = context.getBean(Rsine.class);
-
         rsine.start();
     }
 
@@ -99,7 +107,6 @@ public class LocalUseCasesTest {
         return subscription;
     }
 
-    @Ignore
     @Test
     public void scopeNoteChanges() throws IOException {
         createSubscription(createScopeNoteChangesQuery(), new ScopeNoteChangeFormatter());

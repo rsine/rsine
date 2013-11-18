@@ -11,7 +11,7 @@
             PREFIX dcterms:<http://purl.org/dc/terms/>
             PREFIX owl:<http://www.w3.org/2002/07/owl#>
 
-            SELECT ?targetConcept ?altLabel ?deletedConcept ?deletionDate ?labelChangeDate WHERE {
+            SELECT ?targetConcept ?altLabel ?deletedConcept WHERE {
                 ?deletion a cs:ChangeSet .
                 ?deletion cs:createdDate ?deletionDate .
                 ?deletion cs:addition ?deletionDetails .
@@ -42,7 +42,7 @@
 
         rsine:formatter [
             a rsine:vtlFormatter;
-            rsine:message "Concept '$bindingSet.getValue('deletedConcept')' was merged into '$bindingSet.getValue('targetConcept')' at '$bindingSet.getValue('deletionDate')'/'$bindingSet.getValue('labelChangeDate')'";
+            rsine:message "Concept '$bindingSet.getValue('deletedConcept')' was merged into '$bindingSet.getValue('targetConcept')'";
         ];
       ];
 
