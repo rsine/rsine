@@ -95,8 +95,8 @@ public class Helper {
         fusekiServer.start();
     }
 
-    public static void initFuseki(URL rdfFile, String datasetName) {
-        initFuseki(Arrays.asList(new File(rdfFile.getFile()).toURI()), datasetName);
+    public static DatasetGraph initFuseki(URL rdfFile, String datasetName) {
+        return initFuseki(Arrays.asList(new File(rdfFile.getFile()).toURI()), datasetName);
     }
 
     public static DatasetGraph initFuseki(Collection<URI> rdfFiles, String datasetName) {

@@ -1,0 +1,51 @@
+@prefix spin: <http://spinrdf.org/sp/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix rsine: <http://lod2.eu/rsine/> .
+
+[] a rsine:Subscription;
+    rsine:query [
+        spin:text "PREFIX cs:<http://purl.org/vocab/changeset/schema#>
+            PREFIX spin:<http://spinrdf.org/sp/>
+            PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+            PREFIX dcterms:<http://purl.org/dc/terms/>
+            PREFIX owl:<http://www.w3.org/2002/07/owl#>
+
+            SELECT ?targetConcept ?altLabel ?deletedConcept WHERE {
+                ?deletion a cs:ChangeSet .
+                ?deletion cs:createdDate ?deletionDate .
+                ?deletion cs:addition ?deletionDetails .
+
+                ?labelChange a cs:ChangeSet .
+                ?labelChange cs:createdDate ?labelChangeDate .
+                ?labelChange cs:addition ?labelChangeDetails .
+
+                ?labelChangeDetails rdf:subject ?targetConcept .
+                ?labelChangeDetails rdf:predicate skos:altLabel .
+                ?labelChangeDetails rdf:object ?altLabel .
+
+                ?deletionDetails rdf:subject ?deletedConcept .
+                ?deletionDetails rdf:predicate owl:deprecated .
+                ?deletionDetails rdf:object true .
+
+                FILTER (?deletionDate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime> &&
+                        ?deletionDate > ?labelChangeDate)
+            }";
+
+        rsine:condition [
+            spin:text "PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+                ASK {
+                    ?deletedConcept skos:prefLabel ?altLabel
+                }";
+            rsine:expect true;
+        ];
+
+        rsine:formatter [
+            a rsine:vtlFormatter;
+            rsine:message "Concept '$bindingSet.getValue('concept')' got prefLabel of '$bindingSet.getValue('deletedConcept')' as altLabel";
+        ];
+      ];
+
+    rsine:notifier [
+        a rsine:loggingNotifier;
+    ].

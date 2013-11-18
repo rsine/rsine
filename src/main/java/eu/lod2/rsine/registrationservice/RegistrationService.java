@@ -26,7 +26,7 @@ public class RegistrationService {
         subscriptions.add(subscription);
     }
 
-    public void register(Model subscriptionData) {
+    public Resource register(Model subscriptionData) {
         Subscription subscription = new SubscriptionParser(subscriptionData).createSubscription();
 
         if (subscriptions.contains(subscription)) {
@@ -35,6 +35,7 @@ public class RegistrationService {
 
         subscriptions.add(subscription);
         logger.info("Successfully registered subscription " +subscription.getSubscriptionId());
+        return subscription.getSubscriptionId();
     }
 
     public void unregister(Resource subscriptionId) {
@@ -52,6 +53,13 @@ public class RegistrationService {
 
     public Iterator<Subscription> getSubscriptionIterator() {
         return subscriptions.iterator();
+    }
+
+    public Subscription getSubscription(Resource subscriptionId) {
+        for (Subscription subscription : subscriptions) {
+            if (subscription.getSubscriptionId().equals(subscriptionId)) return subscription;
+        }
+        throw new IllegalArgumentException();
     }
 
 }
