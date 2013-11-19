@@ -17,6 +17,7 @@ import org.junit.runner.RunWith;
 import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
 import org.openrdf.model.URI;
+import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.model.impl.StatementImpl;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.SKOS;
@@ -59,7 +60,7 @@ public class QualityTest {
     }
 
     @Test
-    public void notifyOnCycle() throws RDFParseException, IOException, RDFHandlerException {
+    public void hierarchicalCycles() throws RDFParseException, IOException, RDFHandlerException {
         subscribe("/quality/cyclic_hierarchical_relations.ttl");
         addTriple(new URIImpl("http://reegle.info/glossary/1124"),
             SKOS.BROADER,
@@ -86,7 +87,7 @@ public class QualityTest {
     }
 
     @Test
-    public void notifyOnMultiHierarchyCycle() throws IOException, RDFHandlerException, RDFParseException {
+    public void multiHierarchicalCycles() throws IOException, RDFHandlerException, RDFParseException {
         subscribe("/quality/cyclic_hierarchical_relations.ttl");
         addTriple(new URIImpl("http://reegle.info/glossary/1124"),
             SKOS.BROADER,
@@ -96,6 +97,36 @@ public class QualityTest {
             new URIImpl("http://reegle.info/glossary/676"));
 
         Assert.assertEquals(1, countingNotifier.waitForNotification());
+    }
+
+    @Test
+    public void noCycle() throws RDFParseException, IOException, RDFHandlerException {
+        subscribe("/quality/cyclic_hierarchical_relations.ttl");
+        addTriple(new URIImpl("http://reegle.info/glossary/1124"),
+            SKOS.NARROWER,
+            new URIImpl("http://reegle.info/glossary/676"));
+
+        Assert.assertEquals(0, countingNotifier.waitForNotification(2000));
+    }
+
+    @Test
+    public void disjointLabelViolations() throws RDFParseException, IOException, RDFHandlerException {
+        subscribe("/quality/disjoint_labels_violation.ttl");
+
+        // clash with preflabel
+        helper.setAltLabel(datasetGraph, new URIImpl("http://reegle.info/glossary/682"), new LiteralImpl("energy efficiency", "en"));
+
+        // clash with altlabel
+        helper.setAltLabel(datasetGraph, new URIImpl("http://reegle.info/glossary/1063"), new LiteralImpl("emission", "en"));
+
+        Assert.assertEquals(2, countingNotifier.waitForNotification());
+    }
+
+    @Test
+    public void noDisjointLabelViolations() throws RDFParseException, IOException, RDFHandlerException {
+        subscribe("/quality/disjoint_labels_violation.ttl");
+        helper.setAltLabel(datasetGraph, new URIImpl("http://reegle.info/glossary/195"), new LiteralImpl("some other label", "en"));
+        Assert.assertEquals(0, countingNotifier.waitForNotification(2000));
     }
 
 }

@@ -1,5 +1,7 @@
 package at.punkt.lod2.util;
 
+import com.hp.hpl.jena.graph.NodeFactory;
+import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.sparql.core.DatasetGraph;
 import com.hp.hpl.jena.sparql.core.DatasetGraphFactory;
 import eu.lod2.rsine.Rsine;
@@ -14,9 +16,12 @@ import org.apache.jena.fuseki.server.FusekiConfig;
 import org.apache.jena.fuseki.server.SPARQLServer;
 import org.apache.jena.fuseki.server.ServerConfig;
 import org.apache.jena.riot.RDFDataMgr;
+import org.openrdf.model.Literal;
 import org.openrdf.model.Model;
 import org.openrdf.model.Statement;
+import org.openrdf.model.impl.StatementImpl;
 import org.openrdf.model.impl.TreeModel;
+import org.openrdf.model.vocabulary.SKOS;
 import org.openrdf.rio.*;
 import org.openrdf.rio.helpers.StatementCollector;
 import org.openrdf.rio.ntriples.NTriplesWriterFactory;
@@ -82,6 +87,16 @@ public class Helper {
         HttpResponse response = new DefaultHttpClient().execute(httpPost);
 
         return response.getStatusLine().getStatusCode();
+    }
+
+    public void setAltLabel(DatasetGraph datasetGraph, org.openrdf.model.URI concept, Literal newAltLabel)
+        throws IOException, RDFHandlerException
+    {
+        datasetGraph.getDefaultGraph().add(new Triple(
+                NodeFactory.createURI(concept.stringValue()),
+                NodeFactory.createURI(SKOS.ALT_LABEL.stringValue()),
+                NodeFactory.createLiteral(newAltLabel.getLabel(), newAltLabel.getLanguage(), false)));
+        postStatementAdded(new StatementImpl(concept, SKOS.ALT_LABEL, newAltLabel));
     }
 
     public static void initFuseki(String datasetName) {

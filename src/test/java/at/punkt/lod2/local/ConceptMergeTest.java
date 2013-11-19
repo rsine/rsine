@@ -23,7 +23,6 @@ import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.model.impl.StatementImpl;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.OWL;
-import org.openrdf.model.vocabulary.SKOS;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParseException;
@@ -79,19 +78,11 @@ public class ConceptMergeTest {
         String abandonedConcept = "http://reegle.info/glossary/422";
         Literal abandonedConceptPrefLabel = new LiteralImpl("combi storage tanks", "en");
 
-        changeAltLabel(new URIImpl(mainConcept), abandonedConceptPrefLabel);
+        helper.setAltLabel(datasetGraph, new URIImpl(mainConcept), abandonedConceptPrefLabel);
         Thread.sleep(1000);
         removeConcept(new URIImpl(abandonedConcept));
 
         Assert.assertEquals(1, countingNotifier.waitForNotification());
-    }
-
-    private void changeAltLabel(URI concept, Literal newAltLabel) throws IOException, RDFHandlerException {
-        datasetGraph.getDefaultGraph().add(new Triple(
-            NodeFactory.createURI(concept.stringValue()),
-            NodeFactory.createURI(SKOS.ALT_LABEL.stringValue()),
-            NodeFactory.createLiteral(newAltLabel.getLabel(), newAltLabel.getLanguage(), false)));
-        helper.postStatementAdded(new StatementImpl(concept, SKOS.ALT_LABEL, newAltLabel));
     }
 
     private void removeConcept(URI concept) throws IOException, RDFHandlerException {
@@ -108,7 +99,7 @@ public class ConceptMergeTest {
 
     @Test
     public void noMerge() throws IOException, RDFHandlerException {
-        changeAltLabel(new URIImpl("http://reegle.info/glossary/1059"), new LiteralImpl("test"));
+        helper.setAltLabel(datasetGraph, new URIImpl("http://reegle.info/glossary/1059"), new LiteralImpl("test"));
         removeConcept(new URIImpl("http://reegle.info/glossary/355"));
 
         Assert.assertEquals(0, countingNotifier.waitForNotification(2000));

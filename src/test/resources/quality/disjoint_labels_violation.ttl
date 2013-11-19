@@ -1,0 +1,43 @@
+@prefix spin: <http://spinrdf.org/sp/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix rsine: <http://lod2.eu/rsine/> .
+
+[] a rsine:Subscription;
+    rsine:query [
+        spin:text "PREFIX cs:<http://purl.org/vocab/changeset/schema#>
+            PREFIX spin:<http://spinrdf.org/sp/>
+            PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+
+            SELECT ?concept ?newLabelType ?newLabel WHERE {
+                ?cs a cs:ChangeSet .
+                ?cs cs:createdDate ?csdate .
+                ?cs cs:addition ?addition .
+
+                ?addition rdf:subject ?concept .
+                ?addition rdf:predicate ?newLabelType .
+                ?addition rdf:object ?newLabel .
+
+                FILTER (?newLabelType IN (skos:prefLabel, skos:altLabel, skos:hiddenLabel) &&
+                        ?csdate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime>)
+            }";
+
+        rsine:condition [
+            spin:text "PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+                ASK {
+                    ?concept ?labelType ?newLabel .
+                    FILTER (?labelType IN (skos:prefLabel, skos:altLabel, skos:hiddenLabel) &&
+                            ?labelType != ?newLabelType)
+                }";
+            rsine:expect true;
+        ];
+
+        rsine:formatter [
+            a rsine:vtlFormatter;
+            rsine:message "The concept '$bindingSet.getValue('concept')' has a label clash for literal '$bindingSet.getValue('newLabel')'";
+        ];
+      ];
+
+    rsine:notifier [
+        a rsine:loggingNotifier;
+    ].
