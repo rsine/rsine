@@ -195,4 +195,12 @@ public class QualityTest {
         Assert.assertEquals(0, countingNotifier.waitForNotification(2000));
     }
 
+    @Test
+    public void overlappingLabels() throws RDFParseException, IOException, RDFHandlerException {
+        subscribe("/quality/overlapping_labels.ttl");
+
+        helper.setAltLabel(datasetGraph, new URIImpl("http://reegle.info/glossary/357"), new LiteralImpl("Biogas", "en"));
+        Assert.assertEquals(1, countingNotifier.waitForNotification());
+    }
+
 }
