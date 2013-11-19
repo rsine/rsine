@@ -1,0 +1,49 @@
+@prefix spin: <http://spinrdf.org/sp/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix rsine: <http://lod2.eu/rsine/> .
+
+[] a rsine:Subscription;
+    rsine:query [
+        spin:text "PREFIX cs:<http://purl.org/vocab/changeset/schema#>
+            PREFIX spin:<http://spinrdf.org/sp/>
+            PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+
+            SELECT ?concept ?hierarchicalProperty ?otherConcept WHERE {
+                ?cs a cs:ChangeSet .
+                ?cs cs:createdDate ?csdate .
+                ?cs cs:addition ?addition .
+
+                ?addition rdf:subject ?concept .
+                ?addition rdf:predicate ?hierarchicalProperty .
+                ?addition rdf:object ?otherConcept .
+
+                FILTER (?csdate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime> &&
+                        ?hierarchicalProperty IN (skos:broader, skos:narrower))
+            }";
+
+        rsine:condition [
+            spin:text "PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+                ASK {
+                    {
+                        ?concept (skos:broader|^skos:narrower){2,10} ?otherConcept .
+                        FILTER (?hierarchicalProperty IN (skos:broader))
+                    }
+                    UNION
+                    {
+                        ?concept (skos:narrower|^skos:broader){2,10} ?otherConcept .
+                        FILTER (?hierarchicalProperty IN (skos:narrower))
+                    }
+                }";
+            rsine:expect true;
+        ];
+
+        rsine:formatter [
+            a rsine:vtlFormatter;
+            rsine:message "The relation '$bindingSet.getValue('hierarchicalProperty')' between the concepts '$bindingSet.getValue('concept')' and '$bindingSet.getValue('otherConcept')' may be superfluous because they are already hierarchically connected";
+        ];
+      ];
+
+    rsine:notifier [
+        a rsine:loggingNotifier;
+    ].

@@ -156,4 +156,43 @@ public class QualityTest {
         Assert.assertEquals(0, countingNotifier.waitForNotification(2000));
     }
 
+    @Test
+    public void hierarchicalRedundancies_broader() throws RDFParseException, IOException, RDFHandlerException {
+        subscribe("/quality/hierarchical_redundancy.ttl");
+
+        String level1Concept = "http://reegle.info/glossary/1056";
+        String level3Concept = "http://reegle.info/glossary/196";
+        addTriple(new URIImpl(level3Concept), SKOS.BROADER, new URIImpl(level1Concept));
+
+        Assert.assertEquals(1, countingNotifier.waitForNotification());
+    }
+
+    @Test
+    public void hierarchicalRedundancies_narrower() throws RDFParseException, IOException, RDFHandlerException {
+        subscribe("/quality/hierarchical_redundancy.ttl");
+
+        String level1Concept = "http://reegle.info/level1";
+        String level2Concept = "http://reegle.info/level2";
+        String level3Concept = "http://reegle.info/level3";
+
+        addTriple(new URIImpl(level1Concept), SKOS.NARROWER, new URIImpl(level2Concept));
+        addTriple(new URIImpl(level2Concept), SKOS.NARROWER, new URIImpl(level3Concept));
+
+        // this is the potentially redundant relation
+        addTriple(new URIImpl(level1Concept), SKOS.NARROWER, new URIImpl(level3Concept));
+
+        Assert.assertEquals(1, countingNotifier.waitForNotification());
+    }
+
+    @Test
+    public void noHierarchicalRedundancies() throws RDFParseException, IOException, RDFHandlerException {
+        subscribe("/quality/hierarchical_redundancy.ttl");
+
+        String level1Concept = "http://reegle.info/glossary/196";
+        String cousinConcept = "http://reegle.info/glossary/783";
+        addTriple(new URIImpl(cousinConcept), SKOS.BROADER, new URIImpl(level1Concept));
+
+        Assert.assertEquals(0, countingNotifier.waitForNotification(2000));
+    }
+
 }
