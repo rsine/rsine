@@ -203,4 +203,15 @@ public class QualityTest {
         Assert.assertEquals(1, countingNotifier.waitForNotification());
     }
 
+    @Test
+    public void relationClashes() throws RDFParseException, IOException, RDFHandlerException {
+        subscribe("/quality/relation_clashes.ttl");
+
+        String level1Concept = "http://reegle.info/glossary/1056";
+        String level3Concept = "http://reegle.info/glossary/196";
+        addTriple(new URIImpl(level3Concept), SKOS.RELATED, new URIImpl(level1Concept));
+
+        Assert.assertEquals(1, countingNotifier.waitForNotification());
+    }
+
 }
