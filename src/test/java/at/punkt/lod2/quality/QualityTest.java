@@ -9,10 +9,7 @@ import eu.lod2.rsine.Rsine;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
 import org.apache.jena.fuseki.Fuseki;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
@@ -25,6 +22,7 @@ import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParseException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -32,6 +30,7 @@ import java.io.IOException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"QualityTest-context.xml"})
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class QualityTest {
 
     @Autowired
@@ -43,19 +42,27 @@ public class QualityTest {
     @Autowired
     private RegistrationService registrationService;
 
+    private static DatasetGraph datasetGraph;
     private CountingNotifier countingNotifier;
-    private DatasetGraph datasetGraph;
+
+    @BeforeClass
+    public static void setUpClass() {
+        datasetGraph = Helper.initFuseki(Rsine.class.getResource("/reegle.rdf"), "dataset");
+    }
+
+    @AfterClass
+    public static void tearDownClass() {
+        Fuseki.getServer().stop();
+    }
 
     @Before
     public void setUp() throws IOException, RDFParseException, RDFHandlerException {
         countingNotifier = new CountingNotifier();
-        datasetGraph = helper.initFuseki(Rsine.class.getResource("/reegle.rdf"), "dataset");
         rsine.start();
     }
 
     @After
     public void tearDown() throws IOException, InterruptedException {
-        Fuseki.getServer().stop();
         rsine.stop();
     }
 
@@ -102,9 +109,9 @@ public class QualityTest {
     @Test
     public void noCycle() throws RDFParseException, IOException, RDFHandlerException {
         subscribe("/quality/cyclic_hierarchical_relations.ttl");
-        addTriple(new URIImpl("http://reegle.info/glossary/1124"),
+        addTriple(new URIImpl("http://reegle.info/glossary/1510"),
             SKOS.NARROWER,
-            new URIImpl("http://reegle.info/glossary/676"));
+            new URIImpl("http://reegle.info/glossary/229"));
 
         Assert.assertEquals(0, countingNotifier.waitForNotification(2000));
     }
@@ -126,6 +133,26 @@ public class QualityTest {
     public void noDisjointLabelViolations() throws RDFParseException, IOException, RDFHandlerException {
         subscribe("/quality/disjoint_labels_violation.ttl");
         helper.setAltLabel(datasetGraph, new URIImpl("http://reegle.info/glossary/195"), new LiteralImpl("some other label", "en"));
+        Assert.assertEquals(0, countingNotifier.waitForNotification(2000));
+    }
+
+    @Test
+    public void valuelessAssociativeRelations() throws RDFParseException, IOException, RDFHandlerException {
+        subscribe("/quality/valueless_associative_relations.ttl");
+        String sibling1 = "http://reegle.info/glossary/1676";
+        String sibling2 = "http://reegle.info/glossary/1252";
+        addTriple(new URIImpl(sibling1), SKOS.RELATED, new URIImpl(sibling2));
+
+        Assert.assertEquals(1, countingNotifier.waitForNotification());
+    }
+
+    @Test
+    public void noValuelessAssociativeRelations() throws RDFParseException, IOException, RDFHandlerException {
+        subscribe("/quality/valueless_associative_relations.ttl");
+        String nonSibling1 = "http://reegle.info/glossary/1510";
+        String nonSibling2 = "http://reegle.info/glossary/229";
+
+        addTriple(new URIImpl(nonSibling1), SKOS.RELATED, new URIImpl(nonSibling2));
         Assert.assertEquals(0, countingNotifier.waitForNotification(2000));
     }
 
