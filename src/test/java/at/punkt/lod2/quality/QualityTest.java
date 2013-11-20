@@ -214,4 +214,23 @@ public class QualityTest {
         Assert.assertEquals(1, countingNotifier.waitForNotification());
     }
 
+    @Test
+    public void mappingClashes() throws RDFParseException, IOException, RDFHandlerException {
+        subscribe("/quality/mapping_clashes.ttl");
+
+        String concept = "http://reegle.info/glossary/1912";
+        String relatedMappedConcept = "http://dbpedia.org/resource/Vulnerability";
+
+        // errpr
+        addTriple(new URIImpl(concept), SKOS.BROAD_MATCH, new URIImpl(relatedMappedConcept));
+
+        // error
+        addTriple(new URIImpl(relatedMappedConcept), SKOS.EXACT_MATCH, new URIImpl(concept));
+
+        // ok
+        addTriple(new URIImpl(concept), SKOS.BROAD_MATCH, new URIImpl("http://reegle.info/glossary/1674"));
+
+        Assert.assertEquals(2, countingNotifier.waitForNotification());
+    }
+
 }
