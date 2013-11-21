@@ -252,4 +252,22 @@ public class QualityTest {
         Assert.assertEquals(2, countingNotifier.waitForNotification());
     }
 
+    @Test
+    public void topConceptsHavingBroaderConcepts() throws RDFParseException, IOException, RDFHandlerException {
+        subscribe("/quality/top_concepts_having_broader_concepts.ttl");
+
+        String topConcept = "http://reegle.info/glossary/1127";
+
+        // error
+        addTriple(new URIImpl(topConcept), SKOS.BROADER, new URIImpl("http://some.concept"));
+
+        // error
+        addTriple(new URIImpl("http://some.other.concept"), SKOS.NARROWER, new URIImpl(topConcept));
+
+        // no error
+        addTriple(new URIImpl(topConcept), SKOS.NARROWER, new URIImpl("http://some.completely.other.concept"));
+
+        Assert.assertEquals(2, countingNotifier.waitForNotification());
+    }
+
 }

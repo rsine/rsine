@@ -1,0 +1,49 @@
+@prefix spin: <http://spinrdf.org/sp/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix rsine: <http://lod2.eu/rsine/> .
+
+[] a rsine:Subscription;
+    rsine:query [
+        spin:text "PREFIX cs:<http://purl.org/vocab/changeset/schema#>
+            PREFIX spin:<http://spinrdf.org/sp/>
+            PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+
+            SELECT ?concept ?otherConcept WHERE {
+                ?cs a cs:ChangeSet .
+                ?cs cs:createdDate ?csdate .
+                ?cs cs:addition ?addition .
+
+                ?addition rdf:subject ?concept .
+                ?addition rdf:predicate ?hierarchicalRelation .
+                ?addition rdf:object ?otherConcept .
+
+                FILTER (?csdate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime> &&
+                        ?hierarchicalRelation IN (skos:broader, skos:narrower))
+            }";
+
+        rsine:condition [
+            spin:text "PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+                ASK {
+                    {
+                        ?concept skos:topConceptOf ?cs1 .
+                        ?concept skos:broader|^skos:narrower ?otherConcept
+                    }
+                    UNION
+                    {
+                        ?otherConcept skos:topConceptOf ?cs2 .
+                        ?otherConcept skos:broader|^skos:narrower ?concept
+                    }
+                }";
+            rsine:expect true;
+        ];
+
+        rsine:formatter [
+            a rsine:vtlFormatter;
+            rsine:message "One of the concepts '$bindingSet.getValue('concept')' or '$bindingSet.getValue('otherConcept')' is a top concept and has a broader concept";
+        ];
+      ];
+
+    rsine:notifier [
+        a rsine:loggingNotifier;
+    ].

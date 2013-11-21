@@ -42,7 +42,7 @@
 
         rsine:formatter [
             a rsine:vtlFormatter;
-            rsine:message "The concepts '$bindingSet.getValue('concept')' and '$bindingSet.getValue('mappedConcept')' are already mapped by either exactMatch, broadMatch, narrowMatch or relatedMatch";
+            rsine:message "The concepts '$bindingSet.getValue('concept')' and '$bindingSet.getValue('mappedConcept')' are in the same concept scheme and should not be associated by a mapping relation";
         ];
       ];
 
