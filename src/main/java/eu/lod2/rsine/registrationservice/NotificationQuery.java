@@ -59,11 +59,13 @@ public class NotificationQuery {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof NotificationQuery && sparqlQuery.equals(((NotificationQuery) obj).sparqlQuery);
+        return obj instanceof NotificationQuery &&
+                sparqlQuery.equals(((NotificationQuery) obj).sparqlQuery) &&
+                conditions.equals(((NotificationQuery) obj).conditions);
     }
 
     @Override
     public int hashCode() {
-        return sparqlQuery.hashCode();
+        return sparqlQuery.hashCode() + conditions.hashCode();
     }
 }

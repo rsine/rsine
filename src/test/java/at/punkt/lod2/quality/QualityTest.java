@@ -221,7 +221,7 @@ public class QualityTest {
         String concept = "http://reegle.info/glossary/1912";
         String relatedMappedConcept = "http://dbpedia.org/resource/Vulnerability";
 
-        // errpr
+        // error
         addTriple(new URIImpl(concept), SKOS.BROAD_MATCH, new URIImpl(relatedMappedConcept));
 
         // error
@@ -229,6 +229,25 @@ public class QualityTest {
 
         // ok
         addTriple(new URIImpl(concept), SKOS.BROAD_MATCH, new URIImpl("http://reegle.info/glossary/1674"));
+
+        Assert.assertEquals(2, countingNotifier.waitForNotification());
+    }
+
+    @Test
+    public void mappingMisuse() throws RDFParseException, IOException, RDFHandlerException {
+        subscribe("/quality/mapping_relations_misuse.ttl");
+
+        String conceptScheme = "http://reegle.info/glossary/1";
+
+        // error: concepts are in same concept scheme
+        addTriple(new URIImpl("http://reegle.info/glossary/1124"), SKOS.BROAD_MATCH, new URIImpl("http://reegle.info/glossary/1682"));
+
+        // ok: concepts in different concept schemes
+        addTriple(new URIImpl("http://reegle.info/glossary/1124"), SKOS.BROAD_MATCH, new URIImpl("http://reegle.info/glossary/1714"));
+
+        // error
+        addTriple(new URIImpl("http://reegle.info/glossary/1714"), SKOS.IN_SCHEME, new URIImpl(conceptScheme));
+        addTriple(new URIImpl("http://reegle.info/glossary/1124"), SKOS.CLOSE_MATCH, new URIImpl("http://reegle.info/glossary/1714"));
 
         Assert.assertEquals(2, countingNotifier.waitForNotification());
     }
