@@ -7,10 +7,7 @@ import eu.lod2.rsine.dissemination.notifier.INotifier;
 import eu.lod2.rsine.queryhandling.QueryProfiler;
 import eu.lod2.rsine.registrationservice.Subscription;
 import org.apache.jena.fuseki.Fuseki;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.openrdf.OpenRDFException;
 import org.openrdf.model.Resource;
@@ -24,6 +21,7 @@ import org.openrdf.repository.sparql.SPARQLRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -36,6 +34,7 @@ import java.util.Iterator;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"ScenarioTests-context.xml"})
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class ScenarioTests {
 
     private final int MAX_FILE_CNT = 10000;
@@ -96,6 +95,7 @@ public class ScenarioTests {
         rsine.stop();
     }
 
+    @Ignore
     @Test
     public void queryExecutionTime() throws OpenRDFException, IOException {
         int simulatedChanges = 10;

@@ -9,10 +9,7 @@ import eu.lod2.rsine.Rsine;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
 import org.apache.jena.fuseki.Fuseki;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Model;
@@ -48,11 +45,20 @@ public class ConceptMergeTest {
     private RegistrationService registrationService;
 
     private CountingNotifier countingNotifier;
-    private DatasetGraph datasetGraph;
+    private static DatasetGraph datasetGraph;
+
+    @BeforeClass
+    public static void setUpClass() {
+        datasetGraph = Helper.initFuseki(Rsine.class.getResource("/reegle.rdf"), "dataset");
+    }
+
+    @AfterClass
+    public static void tearDownClass() {
+        Fuseki.getServer().stop();
+    }
 
     @Before
     public void setUp() throws IOException, RDFParseException, RDFHandlerException {
-        datasetGraph = helper.initFuseki(Rsine.class.getResource("/reegle.rdf"), "dataset");
         subscribe();
         rsine.start();
     }
@@ -68,7 +74,6 @@ public class ConceptMergeTest {
 
     @After
     public void tearDown() throws IOException, InterruptedException {
-        Fuseki.getServer().stop();
         rsine.stop();
     }
 

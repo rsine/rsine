@@ -10,15 +10,13 @@ import eu.lod2.rsine.queryhandling.QueryEvaluator;
 import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.util.Namespaces;
 import org.apache.jena.fuseki.Fuseki;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.openrdf.model.Literal;
 import org.openrdf.query.BindingSet;
 import org.openrdf.repository.RepositoryException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -27,6 +25,7 @@ import java.util.Properties;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"LocalTest-context.xml"})
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class ManagedStoreNotificationTest {
 
     @Autowired
@@ -38,9 +37,18 @@ public class ManagedStoreNotificationTest {
     private ScopeNoteCreationFormatter scopeNoteCreationFormatter;
     private CountingNotifier countingNotifier;
 
+    @BeforeClass
+    public static void setUpClass() {
+        Helper.initFuseki(Rsine.class.getResource("/reegle.rdf"), "dataset");
+    }
+
+    @AfterClass
+    public static void tearDownClass() {
+        Fuseki.getServer().stop();
+    }
+
     @Before
     public void setUp() throws IOException, RepositoryException {
-        helper.initFuseki(Rsine.class.getResource("/reegle.rdf"), "dataset");
         scopeNoteCreationFormatter = new ScopeNoteCreationFormatter();
         countingNotifier = new CountingNotifier();
 
@@ -50,7 +58,6 @@ public class ManagedStoreNotificationTest {
 
     @After
     public void tearDown() throws IOException, InterruptedException {
-        Fuseki.getServer().stop();
         rsine.stop();
     }
 

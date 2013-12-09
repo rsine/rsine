@@ -10,10 +10,7 @@ import eu.lod2.rsine.queryhandling.QueryEvaluator;
 import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.util.Namespaces;
 import org.apache.jena.fuseki.Fuseki;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.openrdf.model.Literal;
 import org.openrdf.query.BindingSet;
@@ -39,16 +36,24 @@ public class LocalUseCasesTest {
 
     private CountingNotifier countingNotifier;
 
+    @BeforeClass
+    public static void setUpClass() {
+        Helper.initFuseki(Rsine.class.getResource("/reegle.rdf"), "dataset");
+    }
+
+    @AfterClass
+    public static void tearDownClass() {
+        Fuseki.getServer().stop();
+    }
+
     @Before
     public void setUp() throws IOException, RepositoryException {
         countingNotifier = new CountingNotifier();
-        Helper.initFuseki(Rsine.class.getResource("/reegle.rdf"), "dataset");
         rsine.start();
     }
 
     @After
     public void tearDown() throws Exception {
-        Fuseki.getServer().stop();
         rsine.stop();
     }
 
@@ -108,6 +113,7 @@ public class LocalUseCasesTest {
         return subscription;
     }
 
+    @Ignore
     @Test
     public void scopeNoteChanges() throws IOException {
         createSubscription(createScopeNoteChangesQuery(), new ScopeNoteChangeFormatter());
@@ -153,6 +159,7 @@ public class LocalUseCasesTest {
         helper.postChangeset(props);
     }
 
+    @Ignore
     @Test
     public void conceptLinking() throws IOException {
         createSubscription(createConceptLinkingQuery(), new ConceptLinkingFormatter());

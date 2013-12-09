@@ -33,6 +33,8 @@ import java.io.IOException;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class QualityTest {
 
+    private final long NOTIFICATION_WAIT_TIMEOUT_MILLIS = 5000;
+
     @Autowired
     private Rsine rsine;
 
@@ -73,7 +75,7 @@ public class QualityTest {
             SKOS.BROADER,
             new URIImpl("http://reegle.info/glossary/676"));
 
-        Assert.assertEquals(1, countingNotifier.waitForNotification());
+        Assert.assertEquals(1, countingNotifier.waitForNotification(NOTIFICATION_WAIT_TIMEOUT_MILLIS));
     }
 
     private void subscribe(String subscriptionFileLocation) throws RDFParseException, IOException, RDFHandlerException {
@@ -103,7 +105,7 @@ public class QualityTest {
             SKOS.BROADER,
             new URIImpl("http://reegle.info/glossary/676"));
 
-        Assert.assertEquals(1, countingNotifier.waitForNotification());
+        Assert.assertEquals(1, countingNotifier.waitForNotification(NOTIFICATION_WAIT_TIMEOUT_MILLIS));
     }
 
     @Test
@@ -113,7 +115,7 @@ public class QualityTest {
             SKOS.NARROWER,
             new URIImpl("http://reegle.info/glossary/229"));
 
-        Assert.assertEquals(0, countingNotifier.waitForNotification(2000));
+        Assert.assertEquals(0, countingNotifier.waitForNotification(NOTIFICATION_WAIT_TIMEOUT_MILLIS));
     }
 
     @Test
@@ -126,14 +128,14 @@ public class QualityTest {
         // clash with altlabel
         helper.setAltLabel(datasetGraph, new URIImpl("http://reegle.info/glossary/1063"), new LiteralImpl("emission", "en"));
 
-        Assert.assertEquals(2, countingNotifier.waitForNotification());
+        Assert.assertEquals(2, countingNotifier.waitForNotification(NOTIFICATION_WAIT_TIMEOUT_MILLIS));
     }
 
     @Test
     public void noDisjointLabelViolations() throws RDFParseException, IOException, RDFHandlerException {
         subscribe("/quality/disjoint_labels_violation.ttl");
         helper.setAltLabel(datasetGraph, new URIImpl("http://reegle.info/glossary/195"), new LiteralImpl("some other label", "en"));
-        Assert.assertEquals(0, countingNotifier.waitForNotification(2000));
+        Assert.assertEquals(0, countingNotifier.waitForNotification(NOTIFICATION_WAIT_TIMEOUT_MILLIS));
     }
 
     @Test
@@ -143,7 +145,7 @@ public class QualityTest {
         String sibling2 = "http://reegle.info/glossary/1252";
         addTriple(new URIImpl(sibling1), SKOS.RELATED, new URIImpl(sibling2));
 
-        Assert.assertEquals(1, countingNotifier.waitForNotification());
+        Assert.assertEquals(1, countingNotifier.waitForNotification(NOTIFICATION_WAIT_TIMEOUT_MILLIS));
     }
 
     @Test
@@ -153,7 +155,7 @@ public class QualityTest {
         String nonSibling2 = "http://reegle.info/glossary/229";
 
         addTriple(new URIImpl(nonSibling1), SKOS.RELATED, new URIImpl(nonSibling2));
-        Assert.assertEquals(0, countingNotifier.waitForNotification(2000));
+        Assert.assertEquals(0, countingNotifier.waitForNotification(NOTIFICATION_WAIT_TIMEOUT_MILLIS));
     }
 
     @Test
@@ -164,7 +166,7 @@ public class QualityTest {
         String level3Concept = "http://reegle.info/glossary/196";
         addTriple(new URIImpl(level3Concept), SKOS.BROADER, new URIImpl(level1Concept));
 
-        Assert.assertEquals(1, countingNotifier.waitForNotification());
+        Assert.assertEquals(1, countingNotifier.waitForNotification(NOTIFICATION_WAIT_TIMEOUT_MILLIS));
     }
 
     @Test
@@ -181,7 +183,7 @@ public class QualityTest {
         // this is the potentially redundant relation
         addTriple(new URIImpl(level1Concept), SKOS.NARROWER, new URIImpl(level3Concept));
 
-        Assert.assertEquals(1, countingNotifier.waitForNotification());
+        Assert.assertEquals(1, countingNotifier.waitForNotification(NOTIFICATION_WAIT_TIMEOUT_MILLIS));
     }
 
     @Test
@@ -192,7 +194,7 @@ public class QualityTest {
         String cousinConcept = "http://reegle.info/glossary/783";
         addTriple(new URIImpl(cousinConcept), SKOS.BROADER, new URIImpl(level1Concept));
 
-        Assert.assertEquals(0, countingNotifier.waitForNotification(2000));
+        Assert.assertEquals(0, countingNotifier.waitForNotification(NOTIFICATION_WAIT_TIMEOUT_MILLIS));
     }
 
     @Test
@@ -200,7 +202,7 @@ public class QualityTest {
         subscribe("/quality/overlapping_labels.ttl");
 
         helper.setAltLabel(datasetGraph, new URIImpl("http://reegle.info/glossary/357"), new LiteralImpl("Biogas", "en"));
-        Assert.assertEquals(1, countingNotifier.waitForNotification());
+        Assert.assertEquals(1, countingNotifier.waitForNotification(NOTIFICATION_WAIT_TIMEOUT_MILLIS));
     }
 
     @Test
@@ -211,7 +213,7 @@ public class QualityTest {
         String level3Concept = "http://reegle.info/glossary/196";
         addTriple(new URIImpl(level3Concept), SKOS.RELATED, new URIImpl(level1Concept));
 
-        Assert.assertEquals(1, countingNotifier.waitForNotification());
+        Assert.assertEquals(1, countingNotifier.waitForNotification(NOTIFICATION_WAIT_TIMEOUT_MILLIS));
     }
 
     @Test
@@ -230,7 +232,7 @@ public class QualityTest {
         // ok
         addTriple(new URIImpl(concept), SKOS.BROAD_MATCH, new URIImpl("http://reegle.info/glossary/1674"));
 
-        Assert.assertEquals(2, countingNotifier.waitForNotification());
+        Assert.assertEquals(2, countingNotifier.waitForNotification(NOTIFICATION_WAIT_TIMEOUT_MILLIS));
     }
 
     @Test
@@ -249,7 +251,7 @@ public class QualityTest {
         addTriple(new URIImpl("http://reegle.info/glossary/1714"), SKOS.IN_SCHEME, new URIImpl(conceptScheme));
         addTriple(new URIImpl("http://reegle.info/glossary/1124"), SKOS.CLOSE_MATCH, new URIImpl("http://reegle.info/glossary/1714"));
 
-        Assert.assertEquals(2, countingNotifier.waitForNotification());
+        Assert.assertEquals(2, countingNotifier.waitForNotification(NOTIFICATION_WAIT_TIMEOUT_MILLIS));
     }
 
     @Test
@@ -267,7 +269,7 @@ public class QualityTest {
         // no error
         addTriple(new URIImpl(topConcept), SKOS.NARROWER, new URIImpl("http://some.completely.other.concept"));
 
-        Assert.assertEquals(2, countingNotifier.waitForNotification());
+        Assert.assertEquals(2, countingNotifier.waitForNotification(NOTIFICATION_WAIT_TIMEOUT_MILLIS));
     }
 
 }

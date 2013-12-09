@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.RDFParseException;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -14,6 +15,7 @@ import java.util.Collection;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"LocalTestMinTimePassed-context.xml"})
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class MinTimePassedLocalNotificationTest extends LocalNotificationTest {
 
     private final long IMMEDIATE_NOTIFICATION_THRESHOLD_MILLIS = 1000;
@@ -70,7 +72,7 @@ public class MinTimePassedLocalNotificationTest extends LocalNotificationTest {
         Assert.assertTrue(notificationReceivedWithinASecond());
     }
 
-    @Test(timeout = 10000)
+    @Test(timeout = 20000)
     public void lastChangeNotMissed() throws IOException {
         performChange();
         timeMeasureNotifier.waitForNotification();
