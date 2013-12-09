@@ -68,4 +68,9 @@ public class NotificationQuery {
     public int hashCode() {
         return sparqlQuery.hashCode() + conditions.hashCode();
     }
+
+    @Override
+    public String toString() {
+        return "query: '" +sparqlQuery+ "', conditions: '" +conditions.toString()+ "'";
+    }
 }

@@ -52,7 +52,7 @@ public class QueryEvaluator {
     public List<String> evaluate(NotificationQuery query)
         throws RepositoryException, MalformedQueryException, QueryEvaluationException
     {
-        evaluationPolicy.checkEvaluate(query);
+        evaluationPolicy.checkEvaluationNeeded(query);
 
         RepositoryConnection changeSetCon = changeSetStore.getRepository().getConnection();
         RepositoryConnection managedStoreCon = new SPARQLConnection(new SPARQLRepository(managedTripleStoreSparqlEndpoint));

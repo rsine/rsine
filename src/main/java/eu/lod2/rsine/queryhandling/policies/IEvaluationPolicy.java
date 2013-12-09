@@ -4,6 +4,6 @@ import eu.lod2.rsine.registrationservice.NotificationQuery;
 
 public interface IEvaluationPolicy {
 
-    void checkEvaluate(NotificationQuery query);
+    void checkEvaluationNeeded(NotificationQuery query);
 
 }

@@ -24,7 +24,7 @@ public class PostponedQueryHandler {
 
     public synchronized void add(NotificationQuery notificationQuery) {
         postponedQueries.add(notificationQuery);
-        logger.info("Query postponed; " +inQueue());
+        logger.info("Query postponed; now " +inQueue());
     }
 
     private String inQueue() {

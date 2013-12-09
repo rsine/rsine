@@ -113,7 +113,6 @@ public class LocalUseCasesTest {
         return subscription;
     }
 
-    @Ignore
     @Test
     public void scopeNoteChanges() throws IOException {
         createSubscription(createScopeNoteChangesQuery(), new ScopeNoteChangeFormatter());

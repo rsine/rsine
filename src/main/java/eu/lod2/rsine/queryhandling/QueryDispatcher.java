@@ -20,7 +20,7 @@ import java.util.concurrent.Executors;
 public class QueryDispatcher implements IQueryDispatcher {
 
     private final Logger logger = LoggerFactory.getLogger(QueryDispatcher.class);
-    private final int NUM_NOTIFY_THREADS = 10;
+    private final int NUM_NOTIFY_THREADS = 15;
 
     @Autowired
     private RegistrationService registrationService;
@@ -34,7 +34,7 @@ public class QueryDispatcher implements IQueryDispatcher {
     private ExecutorService notificationExecutor = Executors.newFixedThreadPool(NUM_NOTIFY_THREADS);
 
     @Override
-    public void trigger() {
+    public synchronized void trigger() {
         Iterator<Subscription> subscriptionIt = registrationService.getSubscriptionIterator();
         if (!subscriptionIt.hasNext()) {
             logger.info("No subscribers registered");
@@ -57,7 +57,7 @@ public class QueryDispatcher implements IQueryDispatcher {
         }
     }
 
-    public void issueQueryAndNotify(NotificationQuery query) throws RepositoryException
+    public synchronized void issueQueryAndNotify(NotificationQuery query) throws RepositoryException
     {
         try {
             List<String> messages = queryEvaluator.evaluate(query);

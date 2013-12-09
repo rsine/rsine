@@ -29,6 +29,7 @@
                 ?deletionDetails rdf:object true .
 
                 FILTER (?deletionDate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime> &&
+                        ?targetConcept != ?deletedConcept &&
                         ?deletionDate > ?labelChangeDate)
             }";
 

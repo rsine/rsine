@@ -26,7 +26,7 @@ public class RegistrationService {
         subscriptions.add(subscription);
     }
 
-    public Resource register(Model subscriptionData) {
+    public synchronized Resource register(Model subscriptionData) {
         Subscription subscription = new SubscriptionParser(subscriptionData).createSubscription();
 
         if (subscriptions.contains(subscription)) {
