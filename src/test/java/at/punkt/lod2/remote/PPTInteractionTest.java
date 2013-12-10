@@ -8,7 +8,6 @@ import eu.lod2.rsine.queryhandling.QueryEvaluator;
 import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.util.Namespaces;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openrdf.model.impl.StatementImpl;
@@ -75,10 +74,10 @@ public class PPTInteractionTest {
                 "}";
     }
 
-    @Test
+    @Test(timeout = 5000)
     public void notifyRemotePPT() throws IOException, RDFHandlerException {
         referenceRemoteConcept();
-        Assert.assertTrue(countingNotifier.waitForNotification() == 1);
+        countingNotifier.waitForNotification();
     }
 
     private void referenceRemoteConcept() throws IOException, RDFHandlerException {

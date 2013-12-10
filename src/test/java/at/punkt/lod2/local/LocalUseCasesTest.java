@@ -113,7 +113,7 @@ public class LocalUseCasesTest {
         return subscription;
     }
 
-    @Test
+    @Test(timeout = 5000)
     public void scopeNoteChanges() throws IOException {
         createSubscription(createScopeNoteChangesQuery(), new ScopeNoteChangeFormatter());
 
@@ -158,8 +158,7 @@ public class LocalUseCasesTest {
         helper.postChangeset(props);
     }
 
-    @Ignore
-    @Test
+    @Test(timeout = 5000)
     public void conceptLinking() throws IOException {
         createSubscription(createConceptLinkingQuery(), new ConceptLinkingFormatter());
         addLink();

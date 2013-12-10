@@ -77,7 +77,7 @@ public class ConceptMergeTest {
         rsine.stop();
     }
 
-    @Test
+    @Test(timeout = 5000)
     public void mergeDetection() throws IOException, RDFHandlerException, InterruptedException {
         String mainConcept = "http://reegle.info/glossary/440";
         String abandonedConcept = "http://reegle.info/glossary/422";
@@ -87,7 +87,7 @@ public class ConceptMergeTest {
         Thread.sleep(1000);
         removeConcept(new URIImpl(abandonedConcept));
 
-        Assert.assertEquals(1, countingNotifier.waitForNotification());
+        countingNotifier.waitForNotification();
     }
 
     private void removeConcept(URI concept) throws IOException, RDFHandlerException {
@@ -107,7 +107,7 @@ public class ConceptMergeTest {
         helper.setAltLabel(datasetGraph, new URIImpl("http://reegle.info/glossary/1059"), new LiteralImpl("test"));
         removeConcept(new URIImpl("http://reegle.info/glossary/355"));
 
-        Assert.assertEquals(0, countingNotifier.waitForNotification(2000));
+        Assert.assertEquals(0, countingNotifier.waitForNotificationMaxTime(2000));
     }
 
 }

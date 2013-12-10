@@ -31,9 +31,6 @@ public class QueryEvaluator {
     private ChangeSetStore changeSetStore;
 
     @Autowired
-    private IEvaluationPolicy evaluationPolicy;
-
-    @Autowired
     private QueryProfiler queryProfiler;
 
     private String managedTripleStoreSparqlEndpoint, authoritativeUri;
@@ -49,10 +46,10 @@ public class QueryEvaluator {
         this.authoritativeUri = authoritativeUri;
     }
 
-    public List<String> evaluate(NotificationQuery query)
-        throws RepositoryException, MalformedQueryException, QueryEvaluationException
+    public List<String> evaluate(NotificationQuery query, IEvaluationPolicy usePolicy)
+            throws RepositoryException, MalformedQueryException, QueryEvaluationException
     {
-        evaluationPolicy.checkEvaluationNeeded(query);
+        usePolicy.checkEvaluationNeeded(query);
 
         RepositoryConnection changeSetCon = changeSetStore.getRepository().getConnection();
         RepositoryConnection managedStoreCon = new SPARQLConnection(new SPARQLRepository(managedTripleStoreSparqlEndpoint));

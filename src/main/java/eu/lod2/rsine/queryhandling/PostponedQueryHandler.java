@@ -39,7 +39,7 @@ public class PostponedQueryHandler {
     public void cleanUp() throws RepositoryException, QueryEvaluationException, MalformedQueryException {
         logger.debug("Cleaning up postponed queries; " + (postponedQueries.isEmpty() ? "nothing to do" : inQueue()));
         for (NotificationQuery query : new ArrayList<NotificationQuery>(postponedQueries)) {
-            queryDispatcher.issueQueryAndNotify(query);
+            queryDispatcher.issueQueryAndNotify(query, true);
             remove(query);
         }
         logger.debug("Postponed query cleanup finished");

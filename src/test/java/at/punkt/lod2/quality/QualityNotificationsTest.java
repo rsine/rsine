@@ -29,11 +29,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import java.io.IOException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"QualityTest-context.xml"})
+@ContextConfiguration(locations = {"QualityNotificationsTest-context.xml"})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-public class QualityTest {
-
-    private final long NOTIFICATION_WAIT_TIMEOUT_MILLIS = 5000;
+public class QualityNotificationsTest {
 
     @Autowired
     private Rsine rsine;
@@ -68,14 +66,14 @@ public class QualityTest {
         rsine.stop();
     }
 
-    @Test
+    @Test(timeout = 5000)
     public void hierarchicalCycles() throws RDFParseException, IOException, RDFHandlerException {
         subscribe("/quality/cyclic_hierarchical_relations.ttl");
         addTriple(new URIImpl("http://reegle.info/glossary/1124"),
             SKOS.BROADER,
             new URIImpl("http://reegle.info/glossary/676"));
 
-        Assert.assertEquals(1, countingNotifier.waitForNotification(NOTIFICATION_WAIT_TIMEOUT_MILLIS));
+        countingNotifier.waitForNotification();
     }
 
     private void subscribe(String subscriptionFileLocation) throws RDFParseException, IOException, RDFHandlerException {
@@ -95,7 +93,7 @@ public class QualityTest {
         helper.postStatementAdded(new StatementImpl(subject, predicate, object));
     }
 
-    @Test
+    @Test(timeout = 5000)
     public void multiHierarchicalCycles() throws IOException, RDFHandlerException, RDFParseException {
         subscribe("/quality/cyclic_hierarchical_relations.ttl");
         addTriple(new URIImpl("http://reegle.info/glossary/1124"),
@@ -105,7 +103,7 @@ public class QualityTest {
             SKOS.BROADER,
             new URIImpl("http://reegle.info/glossary/676"));
 
-        Assert.assertEquals(1, countingNotifier.waitForNotification(NOTIFICATION_WAIT_TIMEOUT_MILLIS));
+        countingNotifier.waitForNotification();
     }
 
     @Test
@@ -115,10 +113,10 @@ public class QualityTest {
             SKOS.NARROWER,
             new URIImpl("http://reegle.info/glossary/229"));
 
-        Assert.assertEquals(0, countingNotifier.waitForNotification(NOTIFICATION_WAIT_TIMEOUT_MILLIS));
+        Assert.assertEquals(0, countingNotifier.waitForNotificationMaxTime(2000));
     }
 
-    @Test
+    @Test(timeout = 5000)
     public void disjointLabelViolations() throws RDFParseException, IOException, RDFHandlerException {
         subscribe("/quality/disjoint_labels_violation.ttl");
 
@@ -128,24 +126,24 @@ public class QualityTest {
         // clash with altlabel
         helper.setAltLabel(datasetGraph, new URIImpl("http://reegle.info/glossary/1063"), new LiteralImpl("emission", "en"));
 
-        Assert.assertEquals(2, countingNotifier.waitForNotification(NOTIFICATION_WAIT_TIMEOUT_MILLIS));
+        countingNotifier.waitForNotificationCountReached(2);
     }
 
     @Test
     public void noDisjointLabelViolations() throws RDFParseException, IOException, RDFHandlerException {
         subscribe("/quality/disjoint_labels_violation.ttl");
         helper.setAltLabel(datasetGraph, new URIImpl("http://reegle.info/glossary/195"), new LiteralImpl("some other label", "en"));
-        Assert.assertEquals(0, countingNotifier.waitForNotification(NOTIFICATION_WAIT_TIMEOUT_MILLIS));
+        Assert.assertEquals(0, countingNotifier.waitForNotificationMaxTime(2000));
     }
 
-    @Test
+    @Test(timeout = 5000)
     public void valuelessAssociativeRelations() throws RDFParseException, IOException, RDFHandlerException {
         subscribe("/quality/valueless_associative_relations.ttl");
         String sibling1 = "http://reegle.info/glossary/1676";
         String sibling2 = "http://reegle.info/glossary/1252";
         addTriple(new URIImpl(sibling1), SKOS.RELATED, new URIImpl(sibling2));
 
-        Assert.assertEquals(1, countingNotifier.waitForNotification(NOTIFICATION_WAIT_TIMEOUT_MILLIS));
+        countingNotifier.waitForNotification();
     }
 
     @Test
@@ -155,10 +153,10 @@ public class QualityTest {
         String nonSibling2 = "http://reegle.info/glossary/229";
 
         addTriple(new URIImpl(nonSibling1), SKOS.RELATED, new URIImpl(nonSibling2));
-        Assert.assertEquals(0, countingNotifier.waitForNotification(NOTIFICATION_WAIT_TIMEOUT_MILLIS));
+        Assert.assertEquals(0, countingNotifier.waitForNotificationMaxTime(2000));
     }
 
-    @Test
+    @Test(timeout = 5000)
     public void hierarchicalRedundancies_broader() throws RDFParseException, IOException, RDFHandlerException {
         subscribe("/quality/hierarchical_redundancy.ttl");
 
@@ -166,10 +164,10 @@ public class QualityTest {
         String level3Concept = "http://reegle.info/glossary/196";
         addTriple(new URIImpl(level3Concept), SKOS.BROADER, new URIImpl(level1Concept));
 
-        Assert.assertEquals(1, countingNotifier.waitForNotification(NOTIFICATION_WAIT_TIMEOUT_MILLIS));
+        countingNotifier.waitForNotification();
     }
 
-    @Test
+    @Test(timeout = 5000)
     public void hierarchicalRedundancies_narrower() throws RDFParseException, IOException, RDFHandlerException {
         subscribe("/quality/hierarchical_redundancy.ttl");
 
@@ -183,7 +181,7 @@ public class QualityTest {
         // this is the potentially redundant relation
         addTriple(new URIImpl(level1Concept), SKOS.NARROWER, new URIImpl(level3Concept));
 
-        Assert.assertEquals(1, countingNotifier.waitForNotification(NOTIFICATION_WAIT_TIMEOUT_MILLIS));
+        countingNotifier.waitForNotification();
     }
 
     @Test
@@ -194,18 +192,18 @@ public class QualityTest {
         String cousinConcept = "http://reegle.info/glossary/783";
         addTriple(new URIImpl(cousinConcept), SKOS.BROADER, new URIImpl(level1Concept));
 
-        Assert.assertEquals(0, countingNotifier.waitForNotification(NOTIFICATION_WAIT_TIMEOUT_MILLIS));
+        Assert.assertEquals(0, countingNotifier.waitForNotificationMaxTime(2000));
     }
 
-    @Test
+    @Test(timeout = 5000)
     public void overlappingLabels() throws RDFParseException, IOException, RDFHandlerException {
         subscribe("/quality/overlapping_labels.ttl");
 
         helper.setAltLabel(datasetGraph, new URIImpl("http://reegle.info/glossary/357"), new LiteralImpl("Biogas", "en"));
-        Assert.assertEquals(1, countingNotifier.waitForNotification(NOTIFICATION_WAIT_TIMEOUT_MILLIS));
+        countingNotifier.waitForNotification();
     }
 
-    @Test
+    @Test(timeout = 5000)
     public void relationClashes() throws RDFParseException, IOException, RDFHandlerException {
         subscribe("/quality/relation_clashes.ttl");
 
@@ -213,10 +211,10 @@ public class QualityTest {
         String level3Concept = "http://reegle.info/glossary/196";
         addTriple(new URIImpl(level3Concept), SKOS.RELATED, new URIImpl(level1Concept));
 
-        Assert.assertEquals(1, countingNotifier.waitForNotification(NOTIFICATION_WAIT_TIMEOUT_MILLIS));
+        countingNotifier.waitForNotification();
     }
 
-    @Test
+    @Test(timeout = 10000)
     public void mappingClashes() throws RDFParseException, IOException, RDFHandlerException {
         subscribe("/quality/mapping_clashes.ttl");
 
@@ -232,10 +230,10 @@ public class QualityTest {
         // ok
         addTriple(new URIImpl(concept), SKOS.BROAD_MATCH, new URIImpl("http://reegle.info/glossary/1674"));
 
-        Assert.assertEquals(2, countingNotifier.waitForNotification(NOTIFICATION_WAIT_TIMEOUT_MILLIS));
+        countingNotifier.waitForNotificationCountReached(2);
     }
 
-    @Test
+    @Test(timeout = 5000)
     public void mappingMisuse() throws RDFParseException, IOException, RDFHandlerException {
         subscribe("/quality/mapping_relations_misuse.ttl");
 
@@ -251,10 +249,10 @@ public class QualityTest {
         addTriple(new URIImpl("http://reegle.info/glossary/1714"), SKOS.IN_SCHEME, new URIImpl(conceptScheme));
         addTriple(new URIImpl("http://reegle.info/glossary/1124"), SKOS.CLOSE_MATCH, new URIImpl("http://reegle.info/glossary/1714"));
 
-        Assert.assertEquals(2, countingNotifier.waitForNotification(NOTIFICATION_WAIT_TIMEOUT_MILLIS));
+        countingNotifier.waitForNotificationCountReached(2);
     }
 
-    @Test
+    @Test(timeout = 5000)
     public void topConceptsHavingBroaderConcepts() throws RDFParseException, IOException, RDFHandlerException {
         subscribe("/quality/top_concepts_having_broader_concepts.ttl");
 
@@ -269,7 +267,7 @@ public class QualityTest {
         // no error
         addTriple(new URIImpl(topConcept), SKOS.NARROWER, new URIImpl("http://some.completely.other.concept"));
 
-        Assert.assertEquals(2, countingNotifier.waitForNotification(NOTIFICATION_WAIT_TIMEOUT_MILLIS));
+        countingNotifier.waitForNotificationCountReached(2);
     }
 
 }

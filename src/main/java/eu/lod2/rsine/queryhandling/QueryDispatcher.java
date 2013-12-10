@@ -1,6 +1,8 @@
 package eu.lod2.rsine.queryhandling;
 
 import eu.lod2.rsine.dissemination.notifier.INotifier;
+import eu.lod2.rsine.queryhandling.policies.IEvaluationPolicy;
+import eu.lod2.rsine.queryhandling.policies.ImmediateEvaluationPolicy;
 import eu.lod2.rsine.registrationservice.NotificationQuery;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
@@ -31,10 +33,13 @@ public class QueryDispatcher implements IQueryDispatcher {
     @Autowired
     private PostponedQueryHandler postponedQueryHandler;
 
+    @Autowired
+    private IEvaluationPolicy evaluationPolicy;
+
     private ExecutorService notificationExecutor = Executors.newFixedThreadPool(NUM_NOTIFY_THREADS);
 
     @Override
-    public synchronized void trigger() {
+    public void trigger() {
         Iterator<Subscription> subscriptionIt = registrationService.getSubscriptionIterator();
         if (!subscriptionIt.hasNext()) {
             logger.info("No subscribers registered");
@@ -57,10 +62,17 @@ public class QueryDispatcher implements IQueryDispatcher {
         }
     }
 
-    public synchronized void issueQueryAndNotify(NotificationQuery query) throws RepositoryException
+    public synchronized void issueQueryAndNotify(NotificationQuery query) throws RepositoryException {
+        issueQueryAndNotify(query, false);
+    }
+
+    public synchronized void issueQueryAndNotify(NotificationQuery query, boolean forceEvaluation)
+            throws RepositoryException
     {
         try {
-            List<String> messages = queryEvaluator.evaluate(query);
+            List<String> messages = queryEvaluator.evaluate(
+                query,
+                forceEvaluation ? new ImmediateEvaluationPolicy() : evaluationPolicy);
             sendNotifications(messages, query.getSubscription());
             postponedQueryHandler.remove(query);
         }

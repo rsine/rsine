@@ -7,7 +7,6 @@ import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.rsine.remotenotification.RemoteNotificationServiceBase;
 import eu.lod2.util.Namespaces;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openrdf.model.Model;
@@ -84,13 +83,13 @@ public class RemoteNotificationTest {
         rdfParser.parse(Rsine.class.getResourceAsStream("/changeset.rdf"), "");
     }
 
-    @Test
+    @Test(timeout = 5000)
     public void changeSetDissemination() throws RDFParseException, IOException, RDFHandlerException {
         RemoteNotificationServiceBase remoteNotificationServiceBase = localContext.getBean(
             "remoteNotificationServiceBase",
             RemoteNotificationServiceBase.class);
         remoteNotificationServiceBase.announce(changeSet);
-        Assert.assertTrue(countingNotifier.waitForNotification() >= 1);
+        countingNotifier.waitForNotification();
     }
 
     private class RemoteReferencesFormatter implements BindingSetFormatter {
