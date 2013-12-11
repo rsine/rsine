@@ -58,7 +58,7 @@ public class QualityNotificationsTest {
         rsine.stop();
     }
 
-    @Test(timeout = 5000)
+    @Test(timeout = 10000)
     public void hierarchicalCycles() throws RDFParseException, IOException, RDFHandlerException {
         subscribe("/quality/cyclic_hierarchical_relations.ttl");
         addTriple(new URIImpl("http://reegle.info/glossary/1124"),
@@ -85,7 +85,7 @@ public class QualityNotificationsTest {
         helper.postStatementAdded(new StatementImpl(subject, predicate, object));
     }
 
-    @Test(timeout = 5000)
+    @Test(timeout = 10000)
     public void multiHierarchicalCycles() throws IOException, RDFHandlerException, RDFParseException {
         subscribe("/quality/cyclic_hierarchical_relations.ttl");
         addTriple(new URIImpl("http://reegle.info/glossary/1124"),
@@ -132,7 +132,7 @@ public class QualityNotificationsTest {
         Assert.assertEquals(0, countingNotifier.waitForNotificationMaxTime(2000));
     }
 
-    @Test(timeout = 5000)
+    @Test(timeout = 10000)
     public void valuelessAssociativeRelations() throws RDFParseException, IOException, RDFHandlerException {
         subscribe("/quality/valueless_associative_relations.ttl");
         String sibling1 = "http://reegle.info/glossary/1676";
@@ -213,14 +213,14 @@ public class QualityNotificationsTest {
         Assert.assertEquals(2, countingNotifier.waitForNotificationMaxTime(5000));
     }
 
-    @Test(timeout = 5000)
+    @Test(timeout = 10000)
     public void mappingMisuse_broadMatch() throws RDFParseException, IOException, RDFHandlerException {
         subscribe("/quality/mapping_relations_misuse.ttl");
         addTriple(new URIImpl("http://reegle.info/glossary/1124"), SKOS.BROAD_MATCH, new URIImpl("http://reegle.info/glossary/1682"));
         countingNotifier.waitForNotification();
     }
 
-    @Test(timeout = 5000)
+    @Test(timeout = 10000)
     public void mappingMisuse_closeMatch() throws RDFParseException, IOException, RDFHandlerException {
         subscribe("/quality/mapping_relations_misuse.ttl");
 

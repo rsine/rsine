@@ -22,10 +22,7 @@
             }";
 
         rsine:condition [
-            spin:text "PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
-                ASK {
-                    ?concept skos:topConceptOf ?cs
-                }";
+            spin:text "PREFIX skos:<http://www.w3.org/2004/02/skos/core#> ASK { ?concept skos:topConceptOf ?cs }";
             rsine:expect true;
         ];
 
