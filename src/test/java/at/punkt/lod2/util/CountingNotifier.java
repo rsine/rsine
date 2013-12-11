@@ -9,7 +9,7 @@ public class CountingNotifier implements INotifier {
     private int notificationCount = 0;
 
     @Override
-    public void notify(Collection<String> messages) {
+    public synchronized void notify(Collection<String> messages) {
         notificationCount++;
     }
 
@@ -21,16 +21,12 @@ public class CountingNotifier implements INotifier {
         return waitForNotification(1, Long.MAX_VALUE);
     }
 
-    public int waitForNotificationCountReached(int expectedCount) {
-        return waitForNotification(expectedCount, Long.MAX_VALUE);
-    }
-
     public int waitForNotificationMaxTime(long maxMillis) {
         return waitForNotification(1, maxMillis);
     }
 
     // waits for notification until either expectedCount is reached or maxMillis have passed
-    private int waitForNotification(int expectedCount, long maxMillis) {
+    private synchronized int waitForNotification(int expectedCount, long maxMillis) {
         long start = System.currentTimeMillis();
         while (notificationCount < expectedCount) {
             try {

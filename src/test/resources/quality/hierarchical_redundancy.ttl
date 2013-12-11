@@ -15,32 +15,23 @@
                 ?cs cs:addition ?addition .
 
                 ?addition rdf:subject ?concept .
-                ?addition rdf:predicate ?hierarchicalProperty .
+                ?addition rdf:predicate skos:broader .
                 ?addition rdf:object ?otherConcept .
 
-                FILTER (?csdate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime> &&
-                        ?hierarchicalProperty IN (skos:broader, skos:narrower))
+                FILTER (?csdate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime>)
             }";
 
         rsine:condition [
             spin:text "PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
                 ASK {
-                    {
-                        ?concept (skos:broader|^skos:narrower){2,10} ?otherConcept .
-                        FILTER (?hierarchicalProperty IN (skos:broader))
-                    }
-                    UNION
-                    {
-                        ?concept (skos:narrower|^skos:broader){2,10} ?otherConcept .
-                        FILTER (?hierarchicalProperty IN (skos:narrower))
-                    }
+                    ?concept (skos:broader){2,10} ?otherConcept .
                 }";
             rsine:expect true;
         ];
 
         rsine:formatter [
             a rsine:vtlFormatter;
-            rsine:message "The relation '$bindingSet.getValue('hierarchicalProperty')' between the concepts '$bindingSet.getValue('concept')' and '$bindingSet.getValue('otherConcept')' may be superfluous because they are already hierarchically connected";
+            rsine:message "The direct hierarchical relation between the concepts '$bindingSet.getValue('concept')' and '$bindingSet.getValue('otherConcept')' may be superfluous because they are already hierarchically connected by another path";
         ];
       ];
 

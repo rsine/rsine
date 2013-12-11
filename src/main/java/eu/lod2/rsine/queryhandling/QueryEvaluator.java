@@ -123,6 +123,8 @@ public class QueryEvaluator {
             }
             catch (Exception e) {
                 logger.error("Ignoring condition due to error", e);
+                allConditionsFulfilled = false;
+                break;
             }
         }
 

@@ -27,7 +27,7 @@ public class SubscriptionParserTest {
 
     @Test
     public void emailNotificationSubscription() throws RDFParseException, IOException, RDFHandlerException {
-        Model rdfSubscription = helper.createModelFromResourceFile("/emailNotifierSubscription.ttl", RDFFormat.TURTLE);
+        Model rdfSubscription = helper.createModelFromResourceFile("/internal/emailNotifierSubscription.ttl", RDFFormat.TURTLE);
         Subscription subscription = new SubscriptionParser(rdfSubscription).createSubscription();
 
         Assert.assertTrue(subscription.getNotifierIterator().hasNext());
@@ -36,7 +36,7 @@ public class SubscriptionParserTest {
 
     @Test
     public void customFormatter() throws RDFParseException, IOException, RDFHandlerException {
-        Model rdfSubscription = helper.createModelFromResourceFile("/labelChangeSubscriptionFormatted.ttl", RDFFormat.TURTLE);
+        Model rdfSubscription = helper.createModelFromResourceFile("/internal/labelChangeSubscriptionFormatted.ttl", RDFFormat.TURTLE);
         Subscription subscription = new SubscriptionParser(rdfSubscription).createSubscription();
 
         NotificationQuery notificationQuery = subscription.getQueries().next();
@@ -46,7 +46,7 @@ public class SubscriptionParserTest {
 
     @Test
     public void queryWithCondition() throws RDFParseException, IOException, RDFHandlerException {
-        Model rdfSubscription = helper.createModelFromResourceFile("/subscriptionWithCondition.ttl", RDFFormat.TURTLE);
+        Model rdfSubscription = helper.createModelFromResourceFile("/internal/subscriptionWithCondition.ttl", RDFFormat.TURTLE);
         Subscription subscription = new SubscriptionParser(rdfSubscription).createSubscription();
 
         NotificationQuery notificationQuery = subscription.getQueries().next();

@@ -15,18 +15,17 @@
                 ?cs cs:addition ?addition .
 
                 ?addition rdf:subject ?concept .
-                ?addition rdf:predicate ?predicate .
+                ?addition rdf:predicate skos:broader .
                 ?addition rdf:object ?otherConcept .
 
-                FILTER (?predicate IN (skos:broader, skos:narrower) &&
-                        ?csdate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime>)
+                FILTER (?csdate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime>)
             }";
 
         rsine:condition [
             spin:text "PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
                 ASK {
-                    ?concept skos:broader+|^skos:narrower+ ?otherConcept .
-                    ?otherConcept skos:broader+|^skos:narrower+ ?concept
+                    ?concept skos:broader+ ?otherConcept .
+                    ?otherConcept skos:broader+ ?concept
                 }";
             rsine:expect true;
         ];

@@ -45,20 +45,11 @@ public class ConceptMergeTest {
     private RegistrationService registrationService;
 
     private CountingNotifier countingNotifier;
-    private static DatasetGraph datasetGraph;
-
-    @BeforeClass
-    public static void setUpClass() {
-        datasetGraph = Helper.initFuseki(Rsine.class.getResource("/reegle.rdf"), "dataset");
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
-        Fuseki.getServer().stop();
-    }
+    private DatasetGraph datasetGraph;
 
     @Before
     public void setUp() throws IOException, RDFParseException, RDFHandlerException {
+        datasetGraph = Helper.initFuseki(Rsine.class.getResource("/reegle.rdf"), "dataset");
         subscribe();
         rsine.start();
     }
@@ -74,6 +65,7 @@ public class ConceptMergeTest {
 
     @After
     public void tearDown() throws IOException, InterruptedException {
+        Fuseki.getServer().stop();
         rsine.stop();
     }
 

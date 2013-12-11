@@ -42,27 +42,19 @@ public class QualityNotificationsTest {
     @Autowired
     private RegistrationService registrationService;
 
-    private static DatasetGraph datasetGraph;
+    private DatasetGraph datasetGraph;
     private CountingNotifier countingNotifier;
-
-    @BeforeClass
-    public static void setUpClass() {
-        datasetGraph = Helper.initFuseki(Rsine.class.getResource("/reegle.rdf"), "dataset");
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
-        Fuseki.getServer().stop();
-    }
 
     @Before
     public void setUp() throws IOException, RDFParseException, RDFHandlerException {
+        datasetGraph = Helper.initFuseki(Rsine.class.getResource("/reegle.rdf"), "dataset");
         countingNotifier = new CountingNotifier();
         rsine.start();
     }
 
     @After
     public void tearDown() throws IOException, InterruptedException {
+        Fuseki.getServer().stop();
         rsine.stop();
     }
 
@@ -102,6 +94,9 @@ public class QualityNotificationsTest {
         addTriple(new URIImpl("http://reegle.info/newConcept"),
             SKOS.BROADER,
             new URIImpl("http://reegle.info/glossary/676"));
+        addTriple(new URIImpl("http://reegle.info/glossary/676"),
+            SKOS.BROADER,
+            new URIImpl("http://reegle.info/glossary/1124"));
 
         countingNotifier.waitForNotification();
     }
@@ -116,20 +111,21 @@ public class QualityNotificationsTest {
         Assert.assertEquals(0, countingNotifier.waitForNotificationMaxTime(2000));
     }
 
-    @Test(timeout = 5000)
-    public void disjointLabelViolations() throws RDFParseException, IOException, RDFHandlerException {
+    @Test
+    public void disjointLabelViolations_withPrefLabel() throws RDFParseException, IOException, RDFHandlerException {
         subscribe("/quality/disjoint_labels_violation.ttl");
-
-        // clash with preflabel
         helper.setAltLabel(datasetGraph, new URIImpl("http://reegle.info/glossary/682"), new LiteralImpl("energy efficiency", "en"));
-
-        // clash with altlabel
-        helper.setAltLabel(datasetGraph, new URIImpl("http://reegle.info/glossary/1063"), new LiteralImpl("emission", "en"));
-
-        countingNotifier.waitForNotificationCountReached(2);
+        countingNotifier.waitForNotification();
     }
 
     @Test
+    public void disjointLabelViolations_withAltLabel() throws RDFParseException, IOException, RDFHandlerException {
+        subscribe("/quality/disjoint_labels_violation.ttl");
+        helper.setAltLabel(datasetGraph, new URIImpl("http://reegle.info/glossary/1063"), new LiteralImpl("emission", "en"));
+        countingNotifier.waitForNotification();
+    }
+
+        @Test
     public void noDisjointLabelViolations() throws RDFParseException, IOException, RDFHandlerException {
         subscribe("/quality/disjoint_labels_violation.ttl");
         helper.setAltLabel(datasetGraph, new URIImpl("http://reegle.info/glossary/195"), new LiteralImpl("some other label", "en"));
@@ -156,32 +152,16 @@ public class QualityNotificationsTest {
         Assert.assertEquals(0, countingNotifier.waitForNotificationMaxTime(2000));
     }
 
-    @Test(timeout = 5000)
-    public void hierarchicalRedundancies_broader() throws RDFParseException, IOException, RDFHandlerException {
+    @Test
+    public void hierarchicalRedundancies() throws RDFParseException, IOException, RDFHandlerException {
         subscribe("/quality/hierarchical_redundancy.ttl");
 
         String level1Concept = "http://reegle.info/glossary/1056";
         String level3Concept = "http://reegle.info/glossary/196";
         addTriple(new URIImpl(level3Concept), SKOS.BROADER, new URIImpl(level1Concept));
+        addTriple(new URIImpl(level3Concept), SKOS.NARROWER, new URIImpl(level1Concept));
 
-        countingNotifier.waitForNotification();
-    }
-
-    @Test(timeout = 5000)
-    public void hierarchicalRedundancies_narrower() throws RDFParseException, IOException, RDFHandlerException {
-        subscribe("/quality/hierarchical_redundancy.ttl");
-
-        String level1Concept = "http://reegle.info/level1";
-        String level2Concept = "http://reegle.info/level2";
-        String level3Concept = "http://reegle.info/level3";
-
-        addTriple(new URIImpl(level1Concept), SKOS.NARROWER, new URIImpl(level2Concept));
-        addTriple(new URIImpl(level2Concept), SKOS.NARROWER, new URIImpl(level3Concept));
-
-        // this is the potentially redundant relation
-        addTriple(new URIImpl(level1Concept), SKOS.NARROWER, new URIImpl(level3Concept));
-
-        countingNotifier.waitForNotification();
+        Assert.assertEquals(1, countingNotifier.waitForNotificationMaxTime(5000));
     }
 
     @Test
@@ -195,7 +175,7 @@ public class QualityNotificationsTest {
         Assert.assertEquals(0, countingNotifier.waitForNotificationMaxTime(2000));
     }
 
-    @Test(timeout = 5000)
+    @Test
     public void overlappingLabels() throws RDFParseException, IOException, RDFHandlerException {
         subscribe("/quality/overlapping_labels.ttl");
 
@@ -203,7 +183,7 @@ public class QualityNotificationsTest {
         countingNotifier.waitForNotification();
     }
 
-    @Test(timeout = 5000)
+    @Test
     public void relationClashes() throws RDFParseException, IOException, RDFHandlerException {
         subscribe("/quality/relation_clashes.ttl");
 
@@ -214,7 +194,7 @@ public class QualityNotificationsTest {
         countingNotifier.waitForNotification();
     }
 
-    @Test(timeout = 10000)
+    @Test
     public void mappingClashes() throws RDFParseException, IOException, RDFHandlerException {
         subscribe("/quality/mapping_clashes.ttl");
 
@@ -230,44 +210,53 @@ public class QualityNotificationsTest {
         // ok
         addTriple(new URIImpl(concept), SKOS.BROAD_MATCH, new URIImpl("http://reegle.info/glossary/1674"));
 
-        countingNotifier.waitForNotificationCountReached(2);
+        Assert.assertEquals(2, countingNotifier.waitForNotificationMaxTime(5000));
     }
 
     @Test(timeout = 5000)
-    public void mappingMisuse() throws RDFParseException, IOException, RDFHandlerException {
+    public void mappingMisuse_broadMatch() throws RDFParseException, IOException, RDFHandlerException {
+        subscribe("/quality/mapping_relations_misuse.ttl");
+        addTriple(new URIImpl("http://reegle.info/glossary/1124"), SKOS.BROAD_MATCH, new URIImpl("http://reegle.info/glossary/1682"));
+        countingNotifier.waitForNotification();
+    }
+
+    @Test(timeout = 5000)
+    public void mappingMisuse_closeMatch() throws RDFParseException, IOException, RDFHandlerException {
         subscribe("/quality/mapping_relations_misuse.ttl");
 
         String conceptScheme = "http://reegle.info/glossary/1";
+        addTriple(new URIImpl("http://reegle.info/glossary/1714"), SKOS.IN_SCHEME, new URIImpl(conceptScheme));
+        addTriple(new URIImpl("http://reegle.info/glossary/1124"), SKOS.CLOSE_MATCH, new URIImpl("http://reegle.info/glossary/1714"));
 
-        // error: concepts are in same concept scheme
-        addTriple(new URIImpl("http://reegle.info/glossary/1124"), SKOS.BROAD_MATCH, new URIImpl("http://reegle.info/glossary/1682"));
+        countingNotifier.waitForNotification();
+    }
+
+    @Test
+    public void mappingMisuse_nomisuse() throws RDFParseException, IOException, RDFHandlerException {
+        subscribe("/quality/mapping_relations_misuse.ttl");
 
         // ok: concepts in different concept schemes
         addTriple(new URIImpl("http://reegle.info/glossary/1124"), SKOS.BROAD_MATCH, new URIImpl("http://reegle.info/glossary/1714"));
 
-        // error
-        addTriple(new URIImpl("http://reegle.info/glossary/1714"), SKOS.IN_SCHEME, new URIImpl(conceptScheme));
-        addTriple(new URIImpl("http://reegle.info/glossary/1124"), SKOS.CLOSE_MATCH, new URIImpl("http://reegle.info/glossary/1714"));
-
-        countingNotifier.waitForNotificationCountReached(2);
+        Assert.assertEquals(0, countingNotifier.waitForNotificationMaxTime(5000));
     }
 
-    @Test(timeout = 5000)
+    @Test
     public void topConceptsHavingBroaderConcepts() throws RDFParseException, IOException, RDFHandlerException {
         subscribe("/quality/top_concepts_having_broader_concepts.ttl");
 
         String topConcept = "http://reegle.info/glossary/1127";
 
-        // error
+        // error (should count as one because of inverse relation)
         addTriple(new URIImpl(topConcept), SKOS.BROADER, new URIImpl("http://some.concept"));
-
-        // error
         addTriple(new URIImpl("http://some.other.concept"), SKOS.NARROWER, new URIImpl(topConcept));
 
         // no error
         addTriple(new URIImpl(topConcept), SKOS.NARROWER, new URIImpl("http://some.completely.other.concept"));
 
-        countingNotifier.waitForNotificationCountReached(2);
+        addTriple(new URIImpl("http://some.completely.other.concept"), SKOS.BROADER, new URIImpl("http://some.completely.other.concept2"));
+
+        Assert.assertEquals(1, countingNotifier.waitForNotificationMaxTime(5000));
     }
 
 }

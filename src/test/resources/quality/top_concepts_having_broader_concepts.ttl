@@ -15,32 +15,23 @@
                 ?cs cs:addition ?addition .
 
                 ?addition rdf:subject ?concept .
-                ?addition rdf:predicate ?hierarchicalRelation .
+                ?addition rdf:predicate skos:broader .
                 ?addition rdf:object ?otherConcept .
 
-                FILTER (?csdate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime> &&
-                        ?hierarchicalRelation IN (skos:broader, skos:narrower))
+                FILTER (?csdate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime>)
             }";
 
         rsine:condition [
             spin:text "PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
                 ASK {
-                    {
-                        ?concept skos:topConceptOf ?cs1 .
-                        ?concept skos:broader|^skos:narrower ?otherConcept
-                    }
-                    UNION
-                    {
-                        ?otherConcept skos:topConceptOf ?cs2 .
-                        ?otherConcept skos:broader|^skos:narrower ?concept
-                    }
+                    ?concept skos:topConceptOf ?cs
                 }";
             rsine:expect true;
         ];
 
         rsine:formatter [
             a rsine:vtlFormatter;
-            rsine:message "One of the concepts '$bindingSet.getValue('concept')' or '$bindingSet.getValue('otherConcept')' is a top concept and has a broader concept";
+            rsine:message "The top concept '$bindingSet.getValue('concept')' has a broader relation to '$bindingSet.getValue('otherConcept')'";
         ];
       ];
 
