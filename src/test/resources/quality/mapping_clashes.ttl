@@ -18,7 +18,7 @@
                 ?addition rdf:predicate ?newMappingType .
                 ?addition rdf:object ?mappedConcept .
 
-                FILTER (?newMappingType IN (skos:exactMatch, skos:broadMatch, skos:narrowMatch, skos:relatedMatch) &&
+                FILTER (?newMappingType IN (skos:exactMatch, skos:broadMatch, skos:narrowMatch, skos:relatedMatch, skos:closeMatch) &&
                         ?csdate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime>)
             }";
 
@@ -32,7 +32,7 @@
                     {
                         ?mappedConcept ?mappingType ?concept .
                     }
-                    FILTER (?mappingType IN (skos:exactMatch, skos:broadMatch, skos:narrowMatch, skos:relatedMatch) &&
+                    FILTER (?mappingType IN (skos:exactMatch, skos:broadMatch, skos:narrowMatch, skos:relatedMatch, skos:closeMatch) &&
                             ?mappingType != ?newMappingType)
                 }";
             rsine:expect true;
@@ -40,7 +40,7 @@
 
         rsine:formatter [
             a rsine:vtlFormatter;
-            rsine:message "The concepts '$bindingSet.getValue('concept')' and '$bindingSet.getValue('mappedConcept')' are already mapped by either exactMatch, broadMatch, narrowMatch or relatedMatch";
+            rsine:message "The concepts '$bindingSet.getValue('concept')' and '$bindingSet.getValue('mappedConcept')' that have been mapped by '$bindingSet.getValue('newMappingType')' are already mapped by another relation";
         ];
       ];
 

@@ -214,21 +214,21 @@ public class QualityNotificationsTest {
     }
 
     @Test(timeout = 10000)
-    public void mappingMisuse_broadMatch() throws RDFParseException, IOException, RDFHandlerException {
+    public void mappingMisues_sameScheme() throws IOException, RDFHandlerException, RDFParseException {
         subscribe("/quality/mapping_relations_misuse.ttl");
-        addTriple(new URIImpl("http://reegle.info/glossary/1124"), SKOS.BROAD_MATCH, new URIImpl("http://reegle.info/glossary/1682"));
+        String[] conceptsInSameScheme = {"http://reegle.info/glossary/676", "http://reegle.info/glossary/1620"};
+        addTriple(new URIImpl(conceptsInSameScheme[0]), SKOS.BROAD_MATCH, new URIImpl(conceptsInSameScheme[1]));
         countingNotifier.waitForNotification();
     }
 
-    @Test(timeout = 10000)
-    public void mappingMisuse_closeMatch() throws RDFParseException, IOException, RDFHandlerException {
+    @Test
+    public void mappingMisues_differentScheme() throws IOException, RDFHandlerException, RDFParseException {
         subscribe("/quality/mapping_relations_misuse.ttl");
 
-        String conceptScheme = "http://reegle.info/glossary/1";
-        addTriple(new URIImpl("http://reegle.info/glossary/1714"), SKOS.IN_SCHEME, new URIImpl(conceptScheme));
-        addTriple(new URIImpl("http://reegle.info/glossary/1124"), SKOS.CLOSE_MATCH, new URIImpl("http://reegle.info/glossary/1714"));
+        String[] conceptsInDifferentSchemes = {"http://reegle.info/glossary/676", "http://reegle.info/glossary/698"};
+        addTriple(new URIImpl(conceptsInDifferentSchemes[0]), SKOS.BROAD_MATCH, new URIImpl(conceptsInDifferentSchemes[1]));
 
-        countingNotifier.waitForNotification();
+        Assert.assertEquals(0, countingNotifier.waitForNotificationMaxTime(5000));
     }
 
     @Test

@@ -25,17 +25,9 @@
         rsine:condition [
             spin:text "PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
                 ASK {
-                    {?concept skos:topConceptOf ?conceptScheme}
-                    UNION
-                    {?conceptScheme skos:hasTopConcept ?concept}
-                    UNION
-                    {?someConcept skos:inScheme ?conceptScheme}
-
-                    {?mappedConcept skos:topConceptOf ?conceptScheme}
-                    UNION
-                    {?conceptScheme skos:hasTopConcept ?mappedConcept}
-                    UNION
-                    {?mappedConcept skos:inScheme ?conceptScheme}
+                    ?concept skos:broader*/skos:topConceptOf ?cs .
+                    ?mappedConcept skos:broader*/skos:topConceptOf ?cs .
+                    ?cs a skos:ConceptScheme .
                 }";
             rsine:expect true;
         ];
