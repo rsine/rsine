@@ -22,6 +22,7 @@ public class VelocityBindingSetFormatter implements BindingSetFormatter {
         Velocity.init();
         VelocityContext context = new VelocityContext();
         context.put("bindingSet", bindingSet);
+        context.put("msgid", System.currentTimeMillis());
         Velocity.evaluate(context, stringWriter, "xxx", velocityTemplate.getLabel());
 
         return stringWriter.toString();

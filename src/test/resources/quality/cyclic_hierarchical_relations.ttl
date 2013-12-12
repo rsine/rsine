@@ -2,7 +2,7 @@
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix rsine: <http://lod2.eu/rsine/> .
 
-[] a rsine:Subscription;
+<http://example.org/chr> a rsine:Subscription;
     rsine:query [
         spin:text "PREFIX cs:<http://purl.org/vocab/changeset/schema#>
             PREFIX spin:<http://spinrdf.org/sp/>
@@ -32,10 +32,18 @@
 
         rsine:formatter [
             a rsine:vtlFormatter;
-            rsine:message "The concepts '$bindingSet.getValue('concept')' and '$bindingSet.getValue('otherConcept')' form a hierarchical cycle";
+            rsine:message "The concepts '$bindingSet.getValue('concept')' and '$bindingSet.getValue('otherConcept')' form a hierarchical cycle\n\n
+                Rate the usefulness of this notification (see scale description at http://tinyurl.com/pgmfvdq):\n
+                must be fixed: http://localhost:2221/feedback?chr=1&msgid=$msgid\n
+                should be fixed: http://localhost:2221/feedback?chr=2&msgid=$msgid\n
+                ignore for this occurrence: http://localhost:2221/feedback?chr=3&msgid=$msgid\n
+                good to know: http://localhost:2221/feedback?chr=4&msgid=$msgid\n
+                irrelevant: http://localhost:2221/feedback?chr=5&msgid=$msgid\n
+                dont know: http://localhost:2221/feedback?chr=6&msgid=$msgid\n";
         ];
       ];
 
     rsine:notifier [
-        a rsine:loggingNotifier;
+        a rsine:emailNotifier;
+        foaf:mbox <mailto:mail@christianmader.net>
     ].

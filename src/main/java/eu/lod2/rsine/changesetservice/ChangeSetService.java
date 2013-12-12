@@ -103,6 +103,7 @@ public class ChangeSetService implements ApplicationContextAware {
             reqistry.register(context+"/register", applicationContext.getBean(RegistrationHandler.class));
             reqistry.register(context+"/unregister", applicationContext.getBean(UnRegistrationHandler.class));
             reqistry.register(context+"/remote", applicationContext.getBean(RemoteChangeSetHandler.class));
+            reqistry.register(context+"/feedback", applicationContext.getBean(FeedbackHandler.class));
         }
 
         @Override
