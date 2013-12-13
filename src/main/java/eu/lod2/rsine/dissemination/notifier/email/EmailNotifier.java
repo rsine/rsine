@@ -53,6 +53,7 @@ public class EmailNotifier implements INotifier {
             message.setSubject(subject);
             message.setText(createMessageText(messages).toString());
 
+            logger.info("Sending email notification");
             Transport.send(message);
         }
         catch (Exception e) {

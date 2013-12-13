@@ -34,12 +34,12 @@
             a rsine:vtlFormatter;
             rsine:message "The concepts '$bindingSet.getValue('concept')' and '$bindingSet.getValue('otherConcept')' form a hierarchical cycle\n\n
                 Rate the usefulness of this notification (see scale description at http://tinyurl.com/pgmfvdq):\n
-                must be fixed: http://localhost:2221/feedback?chr=1&msgid=$msgid\n
-                should be fixed: http://localhost:2221/feedback?chr=2&msgid=$msgid\n
-                ignore for this occurrence: http://localhost:2221/feedback?chr=3&msgid=$msgid\n
-                good to know: http://localhost:2221/feedback?chr=4&msgid=$msgid\n
-                irrelevant: http://localhost:2221/feedback?chr=5&msgid=$msgid\n
-                dont know: http://localhost:2221/feedback?chr=6&msgid=$msgid\n";
+                must be fixed: http://localhost:2221/feedback?issueId=chr&rating=1&msgid=$msgId\n
+                should be fixed: http://localhost:2221/feedback?issueId=chr&rating=2&msgid=$msgId\n
+                ignore for this occurrence: http://localhost:2221/feedback?issueId=chr&rating=3&msgId=$msgid\n
+                good to know: http://localhost:2221/feedback?issueId=chr&rating=4&msgid=$msgId\n
+                irrelevant: http://localhost:2221/feedback?issueId=chr&rating=5&msgid=$msgId\n
+                dont know: http://localhost:2221/feedback?issueId=chr&rating=6&msgid=$msgId\n";
         ];
       ];
 

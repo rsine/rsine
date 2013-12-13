@@ -39,15 +39,17 @@ public class FeedbackHandlerTest {
     }
 
     @Test
-    public void processFeedback() {
+    public void processFeedback() throws IOException {
+        sendFeedbackRequest("chr", "1", "12345");
+        sendFeedbackRequest("chr", "2", "12345");
         Assert.fail();
     }
 
-    private int sendFeedbackRequest(String issueId, String issueResponse, String messageId) throws IOException {
+    private int sendFeedbackRequest(String issueId, String rating, String messageId) throws IOException {
         HttpGet httpGet = new HttpGet("http://localhost:" +helper.getChangeSetListeningPort()+
-                "/feedback?" +issueId+
-                "=" +issueResponse+
-                "&msgid=" +messageId);
+                "/feedback?issueId=" +issueId+
+                "&rating=" +rating+
+                "&msgId=" +messageId);
 
         HttpResponse response = new DefaultHttpClient().execute(httpGet);
         return response.getStatusLine().getStatusCode();
