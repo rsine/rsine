@@ -30,6 +30,21 @@ public class FeedbackHandler implements HttpRequestHandler {
     private final Logger logger = LoggerFactory.getLogger(FeedbackHandler.class);
 
     private Set<String> msgIdsWithReceivedFeedback = new HashSet<String>();
+    private String feedbackFileName;
+
+    public FeedbackHandler() throws IOException {
+        feedbackFileName = determineFeedbackFileName();
+    }
+
+    private String determineFeedbackFileName() throws IOException {
+        Properties properties = new Properties();
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        InputStream stream = loader.getResourceAsStream(Rsine.propertiesFileName);
+
+        properties.load(stream);
+        return (String) properties.get("feedback.filename");
+    }
+
 
     @Override
     public void handle(HttpRequest request, HttpResponse response, HttpContext context) throws HttpException {
@@ -41,8 +56,8 @@ public class FeedbackHandler implements HttpRequestHandler {
                 logger.info("Feedback for message id " +reqParams.msgId+ " already provided; ignoring");
             }
             else {
-                BufferedWriter feedbackWriter = getFeedbackWriter();
-                feedbackWriter.append(reqParams.toString() + "\n");
+                BufferedWriter feedbackWriter = new BufferedWriter(new FileWriter(feedbackFileName, true));
+                feedbackWriter.append(reqParams.toString() + " (msgId: " +reqParams.msgId+ ")\n");
                 feedbackWriter.close();
                 msgIdsWithReceivedFeedback.add(reqParams.msgId);
             }
@@ -55,14 +70,9 @@ public class FeedbackHandler implements HttpRequestHandler {
         }
     }
 
-    private BufferedWriter getFeedbackWriter() throws IOException {
-        Properties properties = new Properties();
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        InputStream stream = loader.getResourceAsStream(Rsine.propertiesFileName);
 
-        properties.load(stream);
-        String feedbackFileName = (String) properties.get("feedback.filename");
-        return new BufferedWriter(new FileWriter(feedbackFileName, true));
+    public String getFeedbackFileName() {
+        return feedbackFileName;
     }
 
     private class RequestParameters {
