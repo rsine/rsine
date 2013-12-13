@@ -68,7 +68,7 @@ public class FeedbackHandlerTest {
     }
 
     private long getFeedbackFileLines() throws IOException {
-        BufferedReader reader = new BufferedReader(new FileReader(feedbackHandler.getFeedbackFileName()));
+        BufferedReader reader = new BufferedReader(new FileReader(feedbackHandler.getOrCreateFeedbackFile()));
         int lines = 0;
         while (reader.readLine() != null) lines++;
         reader.close();

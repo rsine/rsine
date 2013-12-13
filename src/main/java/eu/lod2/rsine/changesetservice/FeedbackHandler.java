@@ -6,6 +6,7 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
@@ -13,10 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashSet;
@@ -45,34 +43,63 @@ public class FeedbackHandler implements HttpRequestHandler {
         return (String) properties.get("feedback.filename");
     }
 
-
     @Override
     public void handle(HttpRequest request, HttpResponse response, HttpContext context) throws HttpException {
+        int statusCode = Integer.MAX_VALUE;
+        String responseText = "";
+
         try {
             RequestParameters reqParams = new RequestParameters();
             reqParams.parse(request);
 
             if (msgIdsWithReceivedFeedback.contains(reqParams.msgId)) {
                 logger.info("Feedback for message id " +reqParams.msgId+ " already provided; ignoring");
+                response.setReasonPhrase("Feedback for this notification has already been provided");
             }
             else {
-                BufferedWriter feedbackWriter = new BufferedWriter(new FileWriter(feedbackFileName, true));
+                BufferedWriter feedbackWriter = new BufferedWriter(new FileWriter(getOrCreateFeedbackFile(), true));
                 feedbackWriter.append(reqParams.toString() + " (msgId: " +reqParams.msgId+ ")\n");
                 feedbackWriter.close();
                 msgIdsWithReceivedFeedback.add(reqParams.msgId);
             }
+
+            statusCode = 200;
+            responseText = "Thank you for your feedback!";
         }
         catch (URISyntaxException e) {
-            logger.error("Invalid feedback request", e);
+            responseText = "Invalid feedback request";
+            statusCode = 500;
+
+            logger.error(responseText, e);
         }
         catch (IOException e) {
-            logger.error("Could not access feedback file", e);
+            responseText = "Could not access feedback file";
+            statusCode = 500;
+
+            logger.error(responseText, e);
+        }
+        finally {
+            setResponseData(response, statusCode, responseText);
         }
     }
 
+    private void setResponseData(HttpResponse response, int statusCode, String responseText) {
+        response.setStatusCode(statusCode);
 
-    public String getFeedbackFileName() {
-        return feedbackFileName;
+        try {
+            response.setEntity(new StringEntity(responseText));
+        }
+        catch (UnsupportedEncodingException e) {
+            logger.error("Error setting feedback response entity", e);
+        }
+    }
+
+    public File getOrCreateFeedbackFile() throws IOException {
+        File feedbackFile = new File(feedbackFileName);
+        if (!feedbackFile.exists()) {
+            feedbackFile.createNewFile();
+        }
+        return feedbackFile;
     }
 
     private class RequestParameters {
