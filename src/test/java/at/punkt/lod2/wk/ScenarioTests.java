@@ -77,7 +77,7 @@ public class ScenarioTests {
 
     private void initRsine() throws IOException {
         rsine.start();
-        helper.postSubscriptionTtl("/wk/subscription_dm_all_doc_metadata.ttl");
+        helper.postSubscriptionTtl("/wk/subscription_dm_all_doc_metadata.ttl.bak");
         installStatisticsNotifier();
     }
 
