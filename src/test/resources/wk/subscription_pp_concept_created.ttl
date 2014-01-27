@@ -28,6 +28,10 @@
       ];
 
     rsine:notifier [
+        a rsine:loggingNotifier;
+    ];
+
+    rsine:notifier [
         a rsine:emailNotifier;
         foaf:mbox <mailto:c.mader@semantic-web.at>
     ].

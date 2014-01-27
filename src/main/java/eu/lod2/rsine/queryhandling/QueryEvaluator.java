@@ -118,26 +118,26 @@ public class QueryEvaluator {
 
         while (conditions.hasNext()) {
             Condition condition = conditions.next();
-            try {
-                allConditionsFulfilled &= evaluateCondition(condition, bs, managedStoreCon);
-            }
-            catch (Exception e) {
-                logger.error("Ignoring condition due to error", e);
-            }
+            allConditionsFulfilled &= evaluateCondition(condition, bs, managedStoreCon);
         }
 
         return allConditionsFulfilled;
     }
 
     private boolean evaluateCondition(Condition condition, BindingSet bs, RepositoryConnection managedStoreCon)
-        throws MalformedQueryException, RepositoryException, QueryEvaluationException
     {
-        BooleanQuery booleanQuery = managedStoreCon.prepareBooleanQuery(QueryLanguage.SPARQL, condition.getAskQuery());
-        for (String bindingName : bs.getBindingNames()) {
-            booleanQuery.setBinding(bindingName, bs.getBinding(bindingName).getValue());
-        }
+        try {
+            BooleanQuery booleanQuery = managedStoreCon.prepareBooleanQuery(QueryLanguage.SPARQL, condition.getAskQuery());
+            for (String bindingName : bs.getBindingNames()) {
+                booleanQuery.setBinding(bindingName, bs.getBinding(bindingName).getValue());
+            }
 
-        return booleanQuery.evaluate() == condition.getExpectedResult();
+            return booleanQuery.evaluate() == condition.getExpectedResult();
+        }
+        catch (Exception e) {
+            logger.error("Error evaluating condition. Query: '" +condition.getAskQuery()+ "'", e);
+        }
+        return false;
     }
 
 }
