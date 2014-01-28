@@ -4,8 +4,6 @@ import eu.lod2.rsine.dissemination.notifier.INotifier;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.openrdf.repository.RepositoryException;
-import org.openrdf.rio.RDFParseException;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -20,11 +18,6 @@ public class MinTimePassedLocalNotificationTest extends LocalNotificationTest {
 
     private final long IMMEDIATE_NOTIFICATION_THRESHOLD_MILLIS = 1000;
     private TimeMeasureNotifier timeMeasureNotifier = new TimeMeasureNotifier();
-
-    @Override
-    public void setUp() throws IOException, RepositoryException, RDFParseException {
-        super.setUp();
-    }
 
     @Test(timeout = 2000)
     public void immediateNotificationOnFirstChange() throws IOException {
@@ -68,7 +61,7 @@ public class MinTimePassedLocalNotificationTest extends LocalNotificationTest {
             // ignore
         }
 
-        performChange();
+        changePrefLabel();
         Assert.assertTrue(notificationReceivedWithinASecond());
     }
 
@@ -91,7 +84,7 @@ public class MinTimePassedLocalNotificationTest extends LocalNotificationTest {
         private long time = 0;
         private Long millisPassed = null;
 
-        void reset() {
+        private void reset() {
             millisPassed = null;
             time = System.currentTimeMillis();
         }

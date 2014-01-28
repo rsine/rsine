@@ -37,7 +37,7 @@
           factory-method="createRemoteNotificationService"/>
 
     <bean id="evaluationPolicy" class="eu.lod2.rsine.queryhandling.policies.MinTimePassedEvaluationPolicy">
-        <constructor-arg value="2000" />
+        <constructor-arg value="5000" />
     </bean>
 
     <bean id="postponedQueryHandler" class="eu.lod2.rsine.queryhandling.PostponedQueryHandler"/>

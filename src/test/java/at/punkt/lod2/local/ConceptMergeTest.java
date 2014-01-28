@@ -69,7 +69,7 @@ public class ConceptMergeTest {
         rsine.stop();
     }
 
-    @Test(timeout = 5000)
+    @Test(timeout = 10000)
     public void mergeDetection() throws IOException, RDFHandlerException, InterruptedException {
         String mainConcept = "http://reegle.info/glossary/440";
         String abandonedConcept = "http://reegle.info/glossary/422";

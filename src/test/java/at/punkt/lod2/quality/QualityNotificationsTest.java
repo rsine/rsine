@@ -9,7 +9,10 @@ import eu.lod2.rsine.Rsine;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
 import org.apache.jena.fuseki.Fuseki;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
@@ -111,21 +114,21 @@ public class QualityNotificationsTest {
         Assert.assertEquals(0, countingNotifier.waitForNotificationMaxTime(2000));
     }
 
-    @Test
+    @Test(timeout = 10000)
     public void disjointLabelViolations_withPrefLabel() throws RDFParseException, IOException, RDFHandlerException {
         subscribe("/quality/disjoint_labels_violation.ttl");
         helper.setAltLabel(datasetGraph, new URIImpl("http://reegle.info/glossary/682"), new LiteralImpl("energy efficiency", "en"));
         countingNotifier.waitForNotification();
     }
 
-    @Test
+    @Test(timeout = 10000)
     public void disjointLabelViolations_withAltLabel() throws RDFParseException, IOException, RDFHandlerException {
         subscribe("/quality/disjoint_labels_violation.ttl");
         helper.setAltLabel(datasetGraph, new URIImpl("http://reegle.info/glossary/1063"), new LiteralImpl("emission", "en"));
         countingNotifier.waitForNotification();
     }
 
-        @Test
+    @Test
     public void noDisjointLabelViolations() throws RDFParseException, IOException, RDFHandlerException {
         subscribe("/quality/disjoint_labels_violation.ttl");
         helper.setAltLabel(datasetGraph, new URIImpl("http://reegle.info/glossary/195"), new LiteralImpl("some other label", "en"));
@@ -175,7 +178,7 @@ public class QualityNotificationsTest {
         Assert.assertEquals(0, countingNotifier.waitForNotificationMaxTime(2000));
     }
 
-    @Test
+    @Test(timeout = 10000)
     public void overlappingLabels() throws RDFParseException, IOException, RDFHandlerException {
         subscribe("/quality/overlapping_labels.ttl");
 
@@ -183,7 +186,7 @@ public class QualityNotificationsTest {
         countingNotifier.waitForNotification();
     }
 
-    @Test
+    @Test(timeout = 10000)
     public void relationClashes() throws RDFParseException, IOException, RDFHandlerException {
         subscribe("/quality/relation_clashes.ttl");
 

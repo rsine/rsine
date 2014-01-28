@@ -1,6 +1,7 @@
 package eu.lod2.rsine;
 
 import eu.lod2.rsine.changesetservice.ChangeSetService;
+import eu.lod2.rsine.changesetservice.StopListener;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.rsine.remotenotification.RemoteNotificationServiceBase;
@@ -41,6 +42,11 @@ public class Rsine {
 
     public void stop() throws IOException, InterruptedException {
         changeSetService.stop();
+    }
+
+    public void stop(StopListener listener) throws IOException, InterruptedException {
+        changeSetService.setStopListener(listener);
+        stop();
     }
 
     public static void main(String[] args) {

@@ -105,7 +105,7 @@ public class Helper {
 
     private static void initFuseki(DatasetGraph datasetGraph, String datasetName) {
         ServerConfig serverConfig = FusekiConfig.defaultConfiguration(datasetName, datasetGraph, true) ;
-        SPARQLServer fusekiServer = new SPARQLServer(serverConfig) ;
+        SPARQLServer fusekiServer = new SPARQLServer(serverConfig);
         Fuseki.setServer(fusekiServer);
         fusekiServer.start();
     }

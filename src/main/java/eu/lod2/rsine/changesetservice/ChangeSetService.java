@@ -34,6 +34,7 @@ public class ChangeSetService implements ApplicationContextAware {
 
     private ApplicationContext applicationContext;
 
+    private StopListener stopListener;
     private ServerSocket serverSocket;
     private Thread requestListenerThread;
     private boolean shouldStop;
@@ -42,6 +43,10 @@ public class ChangeSetService implements ApplicationContextAware {
 
     public ChangeSetService(int port) {
         this.port = port;
+        stopListener = new StopListener() {
+            @Override
+            public void hasStopped() {}
+        };
     }
 
     public ChangeSetService(String context, int port) {
@@ -133,8 +138,12 @@ public class ChangeSetService implements ApplicationContextAware {
             }
 
             logger.info("service stopped");
+            stopListener.hasStopped();
         }
+    }
 
+    public void setStopListener(StopListener stopListener) {
+        this.stopListener = stopListener;
     }
 
     private class WorkerThread extends Thread {

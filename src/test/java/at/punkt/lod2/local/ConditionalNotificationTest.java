@@ -54,7 +54,7 @@ public class ConditionalNotificationTest {
         rsine.stop();
     }
 
-    @Test
+    @Test(timeout = 10000)
     public void propertyCreated()
         throws IOException, RepositoryException, MalformedQueryException, UpdateExecutionException
     {
@@ -123,7 +123,7 @@ public class ConditionalNotificationTest {
         helper.postChangeset(props);
     }
 
-    @Test
+    @Test(timeout = 10000)
     public void propertyChanged()
         throws IOException, MalformedQueryException, RepositoryException, UpdateExecutionException
     {
