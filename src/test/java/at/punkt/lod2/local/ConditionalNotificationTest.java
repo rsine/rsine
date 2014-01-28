@@ -1,7 +1,9 @@
 package at.punkt.lod2.local;
 
 import at.punkt.lod2.util.CountingNotifier;
+import at.punkt.lod2.util.ExpectedCountReached;
 import at.punkt.lod2.util.Helper;
+import com.jayway.awaitility.Awaitility;
 import eu.lod2.rsine.Rsine;
 import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
 import eu.lod2.rsine.dissemination.messageformatting.BindingSetFormatter;
@@ -13,7 +15,6 @@ import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.util.Namespaces;
 import org.apache.jena.fuseki.Fuseki;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openrdf.query.MalformedQueryException;
@@ -29,19 +30,21 @@ import org.springframework.test.annotation.DirtiesContext;
 
 import java.io.IOException;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class ConditionalNotificationTest {
 
     private Helper helper;
     private Rsine rsine;
-    private CountingNotifier countingNotifier = new CountingNotifier();
+    private CountingNotifier countingNotifier;
     private ApplicationContext applicationContext;
 
     @Before
     public void setUp() throws IOException, RepositoryException {
         Helper.initFuseki("dataset");
 
+        countingNotifier = new CountingNotifier();
         applicationContext = new ClassPathXmlApplicationContext("/at/punkt/lod2/local/LocalTest-context.xml");
         helper = applicationContext.getBean(Helper.class);
         rsine = applicationContext.getBean(Rsine.class);
@@ -66,7 +69,7 @@ public class ConditionalNotificationTest {
         postTripleChange();
         insertIntoManagedStore();
 
-        Assert.assertEquals(1, countingNotifier.waitForNotification());
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
     }
 
     private void registerSubscription(String query, BindingSetFormatter formatter, Condition condition) {
@@ -137,7 +140,7 @@ public class ConditionalNotificationTest {
         insertIntoManagedStore();
         postTripleChange(); // here we get the one and only notification
 
-        Assert.assertEquals(1, countingNotifier.waitForNotification());
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
     }
 
 }

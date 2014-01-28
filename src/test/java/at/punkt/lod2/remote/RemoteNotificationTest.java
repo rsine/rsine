@@ -1,6 +1,8 @@
 package at.punkt.lod2.remote;
 
 import at.punkt.lod2.util.CountingNotifier;
+import at.punkt.lod2.util.ExpectedCountReached;
+import com.jayway.awaitility.Awaitility;
 import eu.lod2.rsine.Rsine;
 import eu.lod2.rsine.dissemination.messageformatting.BindingSetFormatter;
 import eu.lod2.rsine.registrationservice.Subscription;
@@ -18,6 +20,7 @@ import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 public class RemoteNotificationTest {
 
@@ -89,7 +92,7 @@ public class RemoteNotificationTest {
             "remoteNotificationServiceBase",
             RemoteNotificationServiceBase.class);
         remoteNotificationServiceBase.announce(changeSet);
-        countingNotifier.waitForNotification();
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
     }
 
     private class RemoteReferencesFormatter implements BindingSetFormatter {

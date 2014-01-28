@@ -1,7 +1,9 @@
 package at.punkt.lod2.local;
 
 import at.punkt.lod2.util.CountingNotifier;
+import at.punkt.lod2.util.ExpectedCountReached;
 import at.punkt.lod2.util.Helper;
+import com.jayway.awaitility.Awaitility;
 import eu.lod2.rsine.Rsine;
 import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
 import eu.lod2.rsine.dissemination.messageformatting.BindingSetFormatter;
@@ -22,6 +24,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.IOException;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"LocalTest-context.xml"})
@@ -91,7 +94,7 @@ public class ManagedStoreNotificationTest {
     public void notificationDissemination() throws IOException {
         triggerQueryExecution();
 
-        Assert.assertEquals(1, countingNotifier.waitForNotification());
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
         Assert.assertEquals("blanching", scopeNoteCreationFormatter.prefLabel);
     }
 

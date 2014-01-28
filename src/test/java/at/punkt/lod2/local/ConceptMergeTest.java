@@ -1,10 +1,12 @@
 package at.punkt.lod2.local;
 
 import at.punkt.lod2.util.CountingNotifier;
+import at.punkt.lod2.util.ExpectedCountReached;
 import at.punkt.lod2.util.Helper;
 import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.sparql.core.DatasetGraph;
+import com.jayway.awaitility.Awaitility;
 import eu.lod2.rsine.Rsine;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
@@ -29,6 +31,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"LocalTest-context.xml"})
@@ -79,7 +82,7 @@ public class ConceptMergeTest {
         Thread.sleep(1000);
         removeConcept(new URIImpl(abandonedConcept));
 
-        countingNotifier.waitForNotification();
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
     }
 
     private void removeConcept(URI concept) throws IOException, RDFHandlerException {
@@ -92,14 +95,6 @@ public class ConceptMergeTest {
             concept,
             new URIImpl(OWL.NAMESPACE + "deprecated"),
             new BooleanLiteralImpl(true)));
-    }
-
-    @Test
-    public void noMerge() throws IOException, RDFHandlerException {
-        helper.setAltLabel(datasetGraph, new URIImpl("http://reegle.info/glossary/1059"), new LiteralImpl("test"));
-        removeConcept(new URIImpl("http://reegle.info/glossary/355"));
-
-        Assert.assertEquals(0, countingNotifier.waitForNotificationMaxTime(2000));
     }
 
 }

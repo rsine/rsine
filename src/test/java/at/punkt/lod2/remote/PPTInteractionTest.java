@@ -1,7 +1,9 @@
 package at.punkt.lod2.remote;
 
 import at.punkt.lod2.util.CountingNotifier;
+import at.punkt.lod2.util.ExpectedCountReached;
 import at.punkt.lod2.util.Helper;
+import com.jayway.awaitility.Awaitility;
 import eu.lod2.rsine.Rsine;
 import eu.lod2.rsine.dissemination.messageformatting.ToStringBindingSetFormatter;
 import eu.lod2.rsine.queryhandling.QueryEvaluator;
@@ -17,6 +19,7 @@ import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This test needs a running PPT instance hosting a project named "thesaurus" on localhost with an rsine
@@ -74,10 +77,10 @@ public class PPTInteractionTest {
                 "}";
     }
 
-    @Test(timeout = 5000)
+    @Test
     public void notifyRemotePPT() throws IOException, RDFHandlerException {
         referenceRemoteConcept();
-        countingNotifier.waitForNotification();
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
     }
 
     private void referenceRemoteConcept() throws IOException, RDFHandlerException {

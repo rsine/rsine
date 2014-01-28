@@ -9,14 +9,15 @@ public class CountingNotifier implements INotifier {
     private int notificationCount = 0;
 
     @Override
-    public void notify(Collection<String> messages) {
+    public synchronized  void notify(Collection<String> messages) {
         notificationCount++;
     }
 
-    public int getNotificationCount() {
+    public synchronized  int getNotificationCount() {
         return notificationCount;
     }
 
+    /*
     public int waitForNotification() {
         return waitForNotification(1, Long.MAX_VALUE);
     }
@@ -39,7 +40,10 @@ public class CountingNotifier implements INotifier {
             }
             Thread.yield();
         }
-        return notificationCount;
+        int count = notificationCount;
+        notificationCount = 0;
+        return count;
     }
+    */
 
 }
