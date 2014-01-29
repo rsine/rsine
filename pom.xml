@@ -6,7 +6,7 @@
 
     <groupId>rsine</groupId>
     <artifactId>rsine</artifactId>
-    <version>1.0.0-rc4</version>
+    <version>1.0.0</version>
 
     <name>rsine</name>
 
@@ -87,6 +87,12 @@
         <dependency>
             <groupId>org.openrdf.sesame</groupId>
             <artifactId>sesame-sail-memory</artifactId>
+            <version>${sesame.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.openrdf.sesame</groupId>
+            <artifactId>sesame-sail-nativerdf</artifactId>
             <version>${sesame.version}</version>
         </dependency>
 

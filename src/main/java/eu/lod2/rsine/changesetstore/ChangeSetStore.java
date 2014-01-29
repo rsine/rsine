@@ -8,7 +8,7 @@ import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.turtle.TurtleWriter;
-import org.openrdf.sail.memory.MemoryStore;
+import org.openrdf.sail.nativerdf.NativeStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -26,7 +26,7 @@ public class ChangeSetStore {
 
     public ChangeSetStore() {
         File tempDir = new File(createDataDirName());
-        repository = new SailRepository(new MemoryStore(tempDir));
+        repository = new SailRepository(new NativeStore(tempDir));
     }
 
     private String createDataDirName() {
