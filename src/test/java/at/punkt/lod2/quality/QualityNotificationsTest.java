@@ -103,7 +103,7 @@ public class QualityNotificationsTest {
             SKOS.BROADER,
             new URIImpl("http://reegle.info/glossary/1124"));
 
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 2));
     }
 
     @Test

@@ -17,33 +17,4 @@ public class CountingNotifier implements INotifier {
         return notificationCount;
     }
 
-    /*
-    public int waitForNotification() {
-        return waitForNotification(1, Long.MAX_VALUE);
-    }
-
-    public int waitForNotificationMaxTime(long maxMillis) {
-        return waitForNotification(1, maxMillis);
-    }
-
-    // waits for notification until either expectedCount is reached or maxMillis have passed
-    private int waitForNotification(int expectedCount, long maxMillis) {
-        long start = System.currentTimeMillis();
-        while (notificationCount < expectedCount) {
-            try {
-                Thread.sleep(200);
-                if ((System.currentTimeMillis() - start) > maxMillis) {
-                    break;
-                }
-            }
-            catch (InterruptedException e) {
-            }
-            Thread.yield();
-        }
-        int count = notificationCount;
-        notificationCount = 0;
-        return count;
-    }
-    */
-
 }
