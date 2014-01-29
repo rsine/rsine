@@ -90,13 +90,17 @@
             <version>${sesame.version}</version>
         </dependency>
 
-        <!--
         <dependency>
             <groupId>org.openrdf.sesame</groupId>
             <artifactId>sesame-queryresultio-sparqlxml</artifactId>
             <version>${sesame.version}</version>
         </dependency>
-        -->
+
+        <dependency>
+            <groupId>org.openrdf.sesame</groupId>
+            <artifactId>sesame-queryresultio-sparqljson</artifactId>
+            <version>${sesame.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.apache.jena</groupId>
