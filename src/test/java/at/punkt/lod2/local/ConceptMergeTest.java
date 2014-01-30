@@ -22,6 +22,7 @@ import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.model.impl.StatementImpl;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.OWL;
+import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParseException;
@@ -67,12 +68,12 @@ public class ConceptMergeTest {
     }
 
     @After
-    public void tearDown() throws IOException, InterruptedException {
+    public void tearDown() throws IOException, InterruptedException, RepositoryException {
         Fuseki.getServer().stop();
         rsine.stop();
     }
 
-    @Test(timeout = 10000)
+    @Test
     public void mergeDetection() throws IOException, RDFHandlerException, InterruptedException {
         String mainConcept = "http://reegle.info/glossary/440";
         String abandonedConcept = "http://reegle.info/glossary/422";
@@ -82,7 +83,7 @@ public class ConceptMergeTest {
         Thread.sleep(1000);
         removeConcept(new URIImpl(abandonedConcept));
 
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
+        Awaitility.await().atMost(10, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
     }
 
     private void removeConcept(URI concept) throws IOException, RDFHandlerException {

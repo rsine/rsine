@@ -70,7 +70,7 @@ public class QueryDispatcher implements IQueryDispatcher {
             throws RepositoryException
     {
         try {
-            List<String> messages = queryEvaluator.evaluate(
+            Collection<String> messages = queryEvaluator.evaluate(
                 query,
                 forceEvaluation ? new ImmediateEvaluationPolicy() : evaluationPolicy);
             sendNotifications(messages, query.getSubscription());

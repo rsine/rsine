@@ -23,7 +23,7 @@ public class ImmediateLocalNotificationTest extends LocalNotificationTest {
     @Test
     public void notificationDissemination() throws RDFParseException, IOException, RDFHandlerException {
         postEditChanges();
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
+        Awaitility.await().atMost(10, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
     }
 
     @Override

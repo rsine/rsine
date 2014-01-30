@@ -60,7 +60,7 @@ public class ManagedStoreNotificationTest {
     }
 
     @After
-    public void tearDown() throws IOException, InterruptedException {
+    public void tearDown() throws IOException, InterruptedException, RepositoryException {
         rsine.stop();
     }
 

@@ -1,5 +1,6 @@
 package eu.lod2.rsine.changesetstore;
 
+import org.apache.commons.io.FileUtils;
 import org.openrdf.model.Graph;
 import org.openrdf.model.Statement;
 import org.openrdf.repository.Repository;
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Iterator;
 
@@ -24,13 +26,23 @@ public class ChangeSetStore {
     private Repository repository;
     private boolean isInitialized;
 
-    public ChangeSetStore() {
-        File tempDir = new File(createDataDirName());
-        repository = new SailRepository(new NativeStore(tempDir));
+    public ChangeSetStore() throws IOException {
+        repository = new SailRepository(new NativeStore(createDataDir()));
     }
 
-    private String createDataDirName() {
-        return System.getProperty("java.io.tmpdir") + File.separator + System.currentTimeMillis();
+    public void shutdown() throws RepositoryException, IOException {
+        repository.shutDown();
+        FileUtils.deleteDirectory(createDataDir());
+    }
+
+    private File createDataDir() throws IOException {
+        File dataDir = new File(System.getProperty("java.io.tmpdir") + File.separator + "rsine");
+
+        if (dataDir.exists()) {
+            FileUtils.cleanDirectory(dataDir);
+        }
+
+        return dataDir;
     }
 
     public synchronized void persistChangeSet(Graph changeSet) throws RepositoryException {

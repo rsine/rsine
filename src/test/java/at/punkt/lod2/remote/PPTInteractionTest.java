@@ -14,6 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openrdf.model.impl.StatementImpl;
 import org.openrdf.model.impl.URIImpl;
+import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.RDFHandlerException;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -47,7 +48,7 @@ public class PPTInteractionTest {
     }
 
     @After
-    public void tearDown() throws IOException, InterruptedException {
+    public void tearDown() throws IOException, InterruptedException, RepositoryException {
         remotePptRsineInstance.stop();
         localRsineInstance.stop();
     }
