@@ -15,16 +15,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 
 @Component
 public class QueryEvaluator {
 
     private final Logger logger = LoggerFactory.getLogger(QueryEvaluator.class);
     public final static String QUERY_LAST_ISSUED = "QUERY_LAST_ISSUED";
-    public final static String MANAGED_STORE_SPARQL_ENDPOINT = "MANAGED_STORE_SPARQL_ENDPOINT";
     public final static String AUTH_URI = "AUTH_URI";
 
     @Autowired
@@ -46,7 +45,7 @@ public class QueryEvaluator {
         this.authoritativeUri = authoritativeUri;
     }
 
-    public List<String> evaluate(NotificationQuery query, IEvaluationPolicy usePolicy)
+    public Collection<String> evaluate(NotificationQuery query, IEvaluationPolicy usePolicy)
             throws RepositoryException, MalformedQueryException, QueryEvaluationException
     {
         usePolicy.checkEvaluationNeeded(query);
@@ -56,7 +55,7 @@ public class QueryEvaluator {
         try {
             String issuedQuery = fillInPlaceholders(query);
             long start = System.currentTimeMillis();
-            List<String> messages = createMessages(query, issuedQuery, changeSetCon, managedStoreCon);
+            Collection<String> messages = createMessages(query, issuedQuery, changeSetCon, managedStoreCon);
             queryProfiler.log(issuedQuery, System.currentTimeMillis() - start);
 
             return messages;
@@ -70,7 +69,6 @@ public class QueryEvaluator {
     private String fillInPlaceholders(NotificationQuery query) {
         String sparqlQuery;
         sparqlQuery = amendChangeSetsTimeConstraint(query);
-        sparqlQuery = sparqlQuery.replace(MANAGED_STORE_SPARQL_ENDPOINT, managedTripleStoreSparqlEndpoint);
         sparqlQuery = sparqlQuery.replace(AUTH_URI, authoritativeUri);
         return sparqlQuery;
     }
@@ -89,7 +87,7 @@ public class QueryEvaluator {
         return sparqlQuery.replace(QUERY_LAST_ISSUED, queryLastIssuedDate);
     }
 
-    private List<String> createMessages(NotificationQuery query,
+    private Collection<String> createMessages(NotificationQuery query,
                                         String issuedQuery,
                                         RepositoryConnection repCon,
                                         RepositoryConnection managedStoreCon)
@@ -98,7 +96,7 @@ public class QueryEvaluator {
         TupleQueryResult result = repCon.prepareTupleQuery(QueryLanguage.SPARQL, issuedQuery).evaluate();
         query.updateLastIssued();
 
-        List<String> messages = new ArrayList<String>();
+        Collection<String> messages = new HashSet<String>();
         while (result.hasNext()) {
             BindingSet bs = result.next();
 

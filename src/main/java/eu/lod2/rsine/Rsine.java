@@ -2,9 +2,11 @@ package eu.lod2.rsine;
 
 import eu.lod2.rsine.changesetservice.ChangeSetService;
 import eu.lod2.rsine.changesetservice.StopListener;
+import eu.lod2.rsine.changesetstore.ChangeSetStore;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.rsine.remotenotification.RemoteNotificationServiceBase;
+import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +28,9 @@ public class Rsine {
     private ChangeSetService changeSetService;
 
     @Autowired
+    private ChangeSetStore changeSetStore;
+
+    @Autowired
     private RegistrationService registrationService;
 
     @Autowired
@@ -40,11 +45,12 @@ public class Rsine {
         changeSetService.start();
     }
 
-    public void stop() throws IOException, InterruptedException {
+    public void stop() throws IOException, InterruptedException, RepositoryException {
         changeSetService.stop();
+        changeSetStore.shutdown();
     }
 
-    public void stop(StopListener listener) throws IOException, InterruptedException {
+    public void stop(StopListener listener) throws IOException, InterruptedException, RepositoryException {
         changeSetService.setStopListener(listener);
         stop();
     }

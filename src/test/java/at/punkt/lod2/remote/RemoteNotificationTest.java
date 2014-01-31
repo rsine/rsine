@@ -14,6 +14,7 @@ import org.junit.Test;
 import org.openrdf.model.Model;
 import org.openrdf.model.impl.TreeModel;
 import org.openrdf.query.BindingSet;
+import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.*;
 import org.openrdf.rio.helpers.StatementCollector;
 import org.springframework.context.support.AbstractApplicationContext;
@@ -37,7 +38,7 @@ public class RemoteNotificationTest {
     }
 
     @After
-    public void tearDown() throws IOException, InterruptedException {
+    public void tearDown() throws IOException, InterruptedException, RepositoryException {
         localRsine.stop();
         remoteRsine.stop();
     }

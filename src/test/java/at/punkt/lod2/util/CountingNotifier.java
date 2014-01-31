@@ -9,11 +9,12 @@ public class CountingNotifier implements INotifier {
     private int notificationCount = 0;
 
     @Override
-    public synchronized  void notify(Collection<String> messages) {
+    public void notify(Collection<String> messages) {
         notificationCount++;
+        System.out.println("notified");
     }
 
-    public synchronized  int getNotificationCount() {
+    public int getNotificationCount() {
         return notificationCount;
     }
 

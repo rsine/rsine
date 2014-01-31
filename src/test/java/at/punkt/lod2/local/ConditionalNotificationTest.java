@@ -126,7 +126,7 @@ public class ConditionalNotificationTest {
         helper.postChangeset(props);
     }
 
-    @Test(timeout = 10000)
+    @Test
     public void propertyChanged()
         throws IOException, MalformedQueryException, RepositoryException, UpdateExecutionException
     {

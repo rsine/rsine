@@ -19,18 +19,22 @@
                 ?addition rdf:predicate ?predicate .
                 ?addition rdf:object ?value .
 
-                SERVICE <MANAGED_STORE_SPARQL_ENDPOINT> {
-                    ?concept skos:broader*|skos:narrower* <http://vocabulary.semantic-web.at/semweb/93>
-                }
-
                 FILTER ((?csdate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime>) &&
                         (regex(str(?predicate), \"^http://www.w3.org/2004/02/skos/core#\"))
                         )
             }";
 
+        rsine:condition [
+            spin:text "PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+                ASK {
+                    ?concept skos:broader*|skos:narrower* <http://reegle.info/glossary/1124>
+                }";
+            rsine:expect true;
+        ];
+
         rsine:formatter [
             a rsine:vtlFormatter;
-            rsine:message "The property '$bindingSet.getValue('predicate')' of concept '$bindingSet.getValue('concept')' (which is member of a branch containing <http://vocabulary.semantic-web.at/semweb/93>) has been changed to '$bindingSet.getValue('value')'";
+            rsine:message "The property '$bindingSet.getValue('predicate')' of concept '$bindingSet.getValue('concept')' (which is member of a branch containing <http://reegle.info/glossary/1124>) has been changed to '$bindingSet.getValue('value')'";
         ];
       ];
 

@@ -21,6 +21,7 @@ import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.RepositoryResult;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -29,6 +30,7 @@ import java.util.Properties;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"LocalTest-context.xml"})
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class ChangesetServiceTest {
 
     @Autowired
@@ -46,8 +48,9 @@ public class ChangesetServiceTest {
     }
 
     @After
-    public void after() throws IOException, InterruptedException {
+    public void after() throws IOException, InterruptedException, RepositoryException {
         changeSetService.stop();
+        changeSetStore.getRepository().shutDown();
     }
 
     @Test
@@ -107,7 +110,7 @@ public class ChangesetServiceTest {
     /**
      * Posting an update results in creation of a changeset with both removal and addition statements
      */
-    @Test(timeout = 2000)
+    @Test
     public void postUpdate()
         throws IOException, RepositoryException, MalformedQueryException, QueryEvaluationException
     {

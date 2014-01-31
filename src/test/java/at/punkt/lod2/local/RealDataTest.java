@@ -85,7 +85,7 @@ public class RealDataTest {
     }
 
     @After
-    public void tearDown() throws IOException, InterruptedException {
+    public void tearDown() throws IOException, InterruptedException, RepositoryException {
         Fuseki.getServer().stop();
         rsine.stop();
     }
