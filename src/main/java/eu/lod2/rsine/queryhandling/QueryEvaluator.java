@@ -4,9 +4,11 @@ import eu.lod2.rsine.changesetstore.ChangeSetStore;
 import eu.lod2.rsine.queryhandling.policies.IEvaluationPolicy;
 import eu.lod2.rsine.registrationservice.Condition;
 import eu.lod2.rsine.registrationservice.NotificationQuery;
-import org.openrdf.query.*;
+import org.openrdf.OpenRDFException;
+import org.openrdf.query.BindingSet;
+import org.openrdf.query.BooleanQuery;
+import org.openrdf.query.QueryLanguage;
 import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sparql.SPARQLConnection;
 import org.openrdf.repository.sparql.SPARQLRepository;
 import org.slf4j.Logger;
@@ -45,23 +47,20 @@ public class QueryEvaluator {
         this.authoritativeUri = authoritativeUri;
     }
 
-    public Collection<String> evaluate(NotificationQuery query, IEvaluationPolicy usePolicy)
-            throws RepositoryException, MalformedQueryException, QueryEvaluationException
+    public Collection<String> evaluate(NotificationQuery query, IEvaluationPolicy usePolicy) throws OpenRDFException
     {
         usePolicy.checkEvaluationNeeded(query);
 
-        RepositoryConnection changeSetCon = changeSetStore.getRepository().getConnection();
         RepositoryConnection managedStoreCon = new SPARQLConnection(new SPARQLRepository(managedTripleStoreSparqlEndpoint));
         try {
             String issuedQuery = fillInPlaceholders(query);
             long start = System.currentTimeMillis();
-            Collection<String> messages = createMessages(query, issuedQuery, changeSetCon, managedStoreCon);
+            Collection<String> messages = createMessages(query, issuedQuery, managedStoreCon);
             queryProfiler.log(issuedQuery, System.currentTimeMillis() - start);
 
             return messages;
         }
         finally {
-            changeSetCon.close();
             managedStoreCon.close();
         }
     }
@@ -89,17 +88,13 @@ public class QueryEvaluator {
 
     private Collection<String> createMessages(NotificationQuery query,
                                         String issuedQuery,
-                                        RepositoryConnection repCon,
-                                        RepositoryConnection managedStoreCon)
-        throws MalformedQueryException, RepositoryException, QueryEvaluationException
+                                        RepositoryConnection managedStoreCon) throws OpenRDFException
     {
-        TupleQueryResult result = repCon.prepareTupleQuery(QueryLanguage.SPARQL, issuedQuery).evaluate();
+        Collection<BindingSet> results = changeSetStore.evaluateQuery(issuedQuery);
         query.updateLastIssued();
 
         Collection<String> messages = new HashSet<String>();
-        while (result.hasNext()) {
-            BindingSet bs = result.next();
-
+        for (BindingSet bs : results) {
             if (evaluateConditions(query.getConditions(), bs, managedStoreCon)) {
                 messages.add(query.getBindingSetFormatter().toMessage(bs));
             }

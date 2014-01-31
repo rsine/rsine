@@ -73,7 +73,7 @@ public class FollowBranchTest {
         //in reegle vocab: <http://reegle.info/glossary/676> skos:broader <http://reegle.info/glossary/1124>
 
         helper.setAltLabel(datasetGraph, new URIImpl("http://reegle.info/glossary/676"), new LiteralImpl("altlabel"));
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
+        Awaitility.await().atMost(20, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
     }
 
 }

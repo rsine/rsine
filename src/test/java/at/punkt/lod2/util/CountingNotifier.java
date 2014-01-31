@@ -11,7 +11,6 @@ public class CountingNotifier implements INotifier {
     @Override
     public void notify(Collection<String> messages) {
         notificationCount++;
-        System.out.println("notified");
     }
 
     public int getNotificationCount() {

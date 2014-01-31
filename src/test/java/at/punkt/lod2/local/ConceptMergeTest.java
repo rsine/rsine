@@ -80,10 +80,9 @@ public class ConceptMergeTest {
         Literal abandonedConceptPrefLabel = new LiteralImpl("combi storage tanks", "en");
 
         helper.setAltLabel(datasetGraph, new URIImpl(mainConcept), abandonedConceptPrefLabel);
-        Thread.sleep(1000);
         removeConcept(new URIImpl(abandonedConcept));
 
-        Awaitility.await().atMost(10, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
+        Awaitility.await().atMost(20, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
     }
 
     private void removeConcept(URI concept) throws IOException, RDFHandlerException {
