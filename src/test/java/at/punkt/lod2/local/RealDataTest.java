@@ -11,6 +11,7 @@ import eu.lod2.util.Namespaces;
 import org.apache.jena.fuseki.Fuseki;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openrdf.model.Statement;
@@ -90,6 +91,7 @@ public class RealDataTest {
         rsine.stop();
     }
 
+    @Ignore
     @Test
     public void randomAction() throws IOException, RDFHandlerException {
         registerUsers(SUBSCRIBER_COUNT);

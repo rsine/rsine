@@ -8,6 +8,7 @@ import com.jayway.awaitility.Awaitility;
 import eu.lod2.rsine.Rsine;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
+import org.apache.jena.fuseki.Fuseki;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -53,7 +54,8 @@ public class FollowBranchTest {
     }
 
     @After
-    public void tearDown() throws InterruptedException, RepositoryException, IOException {
+    public void tearDown() throws IOException, InterruptedException, RepositoryException {
+        Fuseki.getServer().stop();
         rsine.stop();
     }
 
