@@ -93,6 +93,7 @@ public class ChangeSetStore {
                 bindingSets.add(result.next());
             }
 
+            result.close();
             return bindingSets;
         }
         finally {
