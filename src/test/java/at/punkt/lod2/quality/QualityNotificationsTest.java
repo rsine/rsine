@@ -71,7 +71,7 @@ public class QualityNotificationsTest {
             SKOS.BROADER,
             new URIImpl("http://reegle.info/glossary/676"));
 
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
+        Awaitility.await().atMost(20, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
     }
 
     private void subscribe(String subscriptionFileLocation) throws RDFParseException, IOException, RDFHandlerException {
@@ -104,7 +104,7 @@ public class QualityNotificationsTest {
             SKOS.BROADER,
             new URIImpl("http://reegle.info/glossary/1124"));
 
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 2));
+        Awaitility.await().atMost(10, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 2));
     }
 
     @Test
@@ -112,14 +112,14 @@ public class QualityNotificationsTest {
         subscribe("/quality/disjoint_labels_violation.ttl");
         helper.setAltLabel(datasetGraph, new URIImpl("http://reegle.info/glossary/682"), new LiteralImpl("energy efficiency", "en"));
 
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
+        Awaitility.await().atMost(20, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
     }
 
     @Test
     public void disjointLabelViolations_withAltLabel() throws RDFParseException, IOException, RDFHandlerException {
         subscribe("/quality/disjoint_labels_violation.ttl");
         helper.setAltLabel(datasetGraph, new URIImpl("http://reegle.info/glossary/1063"), new LiteralImpl("emission", "en"));
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
+        Awaitility.await().atMost(20, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
     }
 
     @Test
@@ -129,7 +129,7 @@ public class QualityNotificationsTest {
         String sibling2 = "http://reegle.info/glossary/1252";
         addTriple(new URIImpl(sibling1), SKOS.RELATED, new URIImpl(sibling2));
 
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
+        Awaitility.await().atMost(20, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
     }
 
     @Test
@@ -141,7 +141,7 @@ public class QualityNotificationsTest {
         addTriple(new URIImpl(level3Concept), SKOS.BROADER, new URIImpl(level1Concept));
         addTriple(new URIImpl(level3Concept), SKOS.NARROWER, new URIImpl(level1Concept));
 
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
+        Awaitility.await().atMost(20, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
     }
 
     @Test
@@ -149,7 +149,7 @@ public class QualityNotificationsTest {
         subscribe("/quality/overlapping_labels.ttl");
 
         helper.setAltLabel(datasetGraph, new URIImpl("http://reegle.info/glossary/357"), new LiteralImpl("Biogas", "en"));
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
+        Awaitility.await().atMost(20, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
     }
 
     @Test
@@ -160,7 +160,7 @@ public class QualityNotificationsTest {
         String level3Concept = "http://reegle.info/glossary/196";
         addTriple(new URIImpl(level3Concept), SKOS.RELATED, new URIImpl(level1Concept));
 
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
+        Awaitility.await().atMost(20, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
     }
 
     @Test
@@ -179,7 +179,7 @@ public class QualityNotificationsTest {
         // ok
         addTriple(new URIImpl(concept), SKOS.BROAD_MATCH, new URIImpl("http://reegle.info/glossary/1674"));
 
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 2));
+        Awaitility.await().atMost(20, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 2));
     }
 
     @Test
@@ -188,7 +188,7 @@ public class QualityNotificationsTest {
         String[] conceptsInSameScheme = {"http://reegle.info/glossary/676", "http://reegle.info/glossary/1620"};
         addTriple(new URIImpl(conceptsInSameScheme[0]), SKOS.BROAD_MATCH, new URIImpl(conceptsInSameScheme[1]));
 
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
+        Awaitility.await().atMost(20, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
     }
 
     @Test
@@ -206,7 +206,7 @@ public class QualityNotificationsTest {
 
         addTriple(new URIImpl("http://some.completely.other.concept"), SKOS.BROADER, new URIImpl("http://some.completely.other.concept2"));
 
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
+        Awaitility.await().atMost(20, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
     }
 
 }

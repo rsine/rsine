@@ -1,5 +1,6 @@
 package at.punkt.lod2.local;
 
+import com.jayway.awaitility.Awaitility;
 import eu.lod2.rsine.dissemination.notifier.INotifier;
 import org.junit.Assert;
 import org.junit.Test;
@@ -10,6 +11,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"LocalTestMinTimePassed-context.xml"})
@@ -19,11 +22,11 @@ public class MinTimePassedLocalNotificationTest extends LocalNotificationTest {
     private final long IMMEDIATE_NOTIFICATION_THRESHOLD_MILLIS = 1000;
     private TimeMeasureNotifier timeMeasureNotifier = new TimeMeasureNotifier();
 
-    @Test(timeout = 2000)
+    @Test
     public void immediateNotificationOnFirstChange() throws IOException {
         performChange();
-        timeMeasureNotifier.waitForNotification();
 
+        Awaitility.await().atMost(2, TimeUnit.SECONDS).until(new NotificationDetector(timeMeasureNotifier));
         Assert.assertTrue(timeMeasureNotifier.millisPassed < IMMEDIATE_NOTIFICATION_THRESHOLD_MILLIS);
     }
 
@@ -35,7 +38,7 @@ public class MinTimePassedLocalNotificationTest extends LocalNotificationTest {
     @Test
     public void changeTooSoonForNotification() throws IOException {
         performChange();
-        timeMeasureNotifier.waitForNotification();
+        Awaitility.await().atMost(2, TimeUnit.SECONDS).until(new NotificationDetector(timeMeasureNotifier));
 
         performChange();
         Assert.assertFalse(notificationReceivedWithinASecond());
@@ -52,7 +55,7 @@ public class MinTimePassedLocalNotificationTest extends LocalNotificationTest {
     @Test
     public void changeLateEnoughForNotification() throws IOException {
         performChange();
-        timeMeasureNotifier.waitForNotification();
+        Awaitility.await().atMost(2, TimeUnit.SECONDS).until(new NotificationDetector(timeMeasureNotifier));
 
         try {
             Thread.sleep(15000);
@@ -65,18 +68,32 @@ public class MinTimePassedLocalNotificationTest extends LocalNotificationTest {
         Assert.assertTrue(notificationReceivedWithinASecond());
     }
 
-    @Test(timeout = 20000)
+    @Test
     public void lastChangeNotMissed() throws IOException {
         performChange();
-        timeMeasureNotifier.waitForNotification();
+        Awaitility.await().atMost(2, TimeUnit.SECONDS).until(new NotificationDetector(timeMeasureNotifier));
 
         performChange();
-        timeMeasureNotifier.waitForNotification();
+        Awaitility.await().atMost(20, TimeUnit.SECONDS).until(new NotificationDetector(timeMeasureNotifier));
     }
 
     @Override
     protected INotifier getNotifier() {
         return timeMeasureNotifier;
+    }
+
+    private class NotificationDetector implements Callable<Boolean> {
+
+        private TimeMeasureNotifier notifier;
+
+        private NotificationDetector(TimeMeasureNotifier notifier) {
+            this.notifier = notifier;
+        }
+
+        @Override
+        public Boolean call() throws Exception {
+            return notifier.getMillisPassed() != null;
+        }
     }
 
     private class TimeMeasureNotifier implements INotifier {
@@ -94,15 +111,8 @@ public class MinTimePassedLocalNotificationTest extends LocalNotificationTest {
             millisPassed = System.currentTimeMillis() - time;
         }
 
-        void waitForNotification() {
-            while (millisPassed == null) {
-                try {
-                    Thread.sleep(200);
-                }
-                catch (InterruptedException e) {
-                }
-                Thread.yield();
-            }
+        public Long getMillisPassed() {
+            return millisPassed;
         }
 
     }

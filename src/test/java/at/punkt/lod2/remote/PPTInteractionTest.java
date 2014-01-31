@@ -81,7 +81,7 @@ public class PPTInteractionTest {
     @Test
     public void notifyRemotePPT() throws IOException, RDFHandlerException {
         referenceRemoteConcept();
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
+        Awaitility.await().atMost(20, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
     }
 
     private void referenceRemoteConcept() throws IOException, RDFHandlerException {

@@ -6,15 +6,15 @@ import eu.lod2.rsine.queryhandling.policies.ImmediateEvaluationPolicy;
 import eu.lod2.rsine.registrationservice.NotificationQuery;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
+import org.openrdf.OpenRDFException;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -76,10 +76,7 @@ public class QueryDispatcher implements IQueryDispatcher {
             sendNotifications(messages, query.getSubscription());
             postponedQueryHandler.remove(query);
         }
-        catch (MalformedQueryException e) {
-            logger.error("NotificationQuery malformed", e);
-        }
-        catch (QueryEvaluationException e) {
+        catch (OpenRDFException e) {
             logger.error("Could not evaluate query", e);
         }
         catch (EvaluationPostponedException e) {
@@ -89,9 +86,11 @@ public class QueryDispatcher implements IQueryDispatcher {
 
     private void sendNotifications(Collection<String> messages, Subscription subscription) {
         Iterator<INotifier> notifierIt = subscription.getNotifierIterator();
+
         while (!messages.isEmpty() && notifierIt.hasNext()) {
-            notificationExecutor.execute(new Notification(notifierIt.next(), messages));
-        }        
+            INotifier notifier = notifierIt.next();
+            notificationExecutor.execute(new Notification(notifier, messages));
+        }
     }
 
     private class Notification implements Runnable {

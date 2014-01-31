@@ -93,7 +93,7 @@ public class RemoteNotificationTest {
             "remoteNotificationServiceBase",
             RemoteNotificationServiceBase.class);
         remoteNotificationServiceBase.announce(changeSet);
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
+        Awaitility.await().atMost(20, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
     }
 
     private class RemoteReferencesFormatter implements BindingSetFormatter {

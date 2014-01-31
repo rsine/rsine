@@ -57,7 +57,7 @@ public class ConditionalNotificationTest {
         rsine.stop();
     }
 
-    @Test(timeout = 10000)
+    @Test
     public void propertyCreated()
         throws IOException, RepositoryException, MalformedQueryException, UpdateExecutionException
     {
@@ -69,7 +69,7 @@ public class ConditionalNotificationTest {
         postTripleChange();
         insertIntoManagedStore();
 
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
+        Awaitility.await().atMost(20, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
     }
 
     private void registerSubscription(String query, BindingSetFormatter formatter, Condition condition) {
@@ -126,7 +126,7 @@ public class ConditionalNotificationTest {
         helper.postChangeset(props);
     }
 
-    @Test(timeout = 10000)
+    @Test
     public void propertyChanged()
         throws IOException, MalformedQueryException, RepositoryException, UpdateExecutionException
     {
@@ -140,7 +140,7 @@ public class ConditionalNotificationTest {
         insertIntoManagedStore();
         postTripleChange(); // here we get the one and only notification
 
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
+        Awaitility.await().atMost(20, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
     }
 
 }
