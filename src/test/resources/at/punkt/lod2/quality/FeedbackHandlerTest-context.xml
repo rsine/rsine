@@ -24,10 +24,6 @@
         <constructor-arg value="2221"/>
     </bean>
 
-    <bean id="helper" class="at.punkt.lod2.util.Helper">
-        <constructor-arg value="2221"/>
-    </bean>
-
     <bean id="queryEvaluator" class="eu.lod2.rsine.queryhandling.QueryEvaluator">
         <constructor-arg index="0" ref="managedServerSparqlQuery" />
         <constructor-arg index="1" value="" />

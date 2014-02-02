@@ -2,7 +2,9 @@ package at.punkt.lod2.local;
 
 import at.punkt.lod2.util.Helper;
 import eu.lod2.rsine.Rsine;
+import eu.lod2.rsine.changesetservice.ChangeSetCreator;
 import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
+import eu.lod2.rsine.changesetservice.PersistAndNotifyProvider;
 import eu.lod2.rsine.dissemination.messageformatting.DummyBindingSetFormatter;
 import eu.lod2.rsine.dissemination.notifier.INotifier;
 import eu.lod2.rsine.dissemination.notifier.logging.LoggingNotifier;
@@ -11,6 +13,11 @@ import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.util.Namespaces;
 import org.junit.After;
 import org.junit.Before;
+import org.openrdf.model.Model;
+import org.openrdf.model.Value;
+import org.openrdf.model.impl.LiteralImpl;
+import org.openrdf.model.impl.StatementImpl;
+import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.RDFParseException;
 import org.springframework.beans.BeansException;
@@ -19,7 +26,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 import java.io.IOException;
-import java.util.Properties;
 
 public abstract class LocalNotificationTest implements ApplicationContextAware  {
 
@@ -28,6 +34,12 @@ public abstract class LocalNotificationTest implements ApplicationContextAware  
 
     @Autowired
     private Helper helper;
+
+    @Autowired
+    private PersistAndNotifyProvider persistAndNotifyProvider;
+
+    @Autowired
+    private ChangeSetCreator changeSetCreator;
 
     protected ApplicationContext applicationContext;
 
@@ -83,56 +95,69 @@ public abstract class LocalNotificationTest implements ApplicationContextAware  
     }
 
     private void addConcept() throws IOException {
-        Properties props = new Properties();
-        props.setProperty(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD);
-        props.setProperty(
-                ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
-                "<http://reegle.info/glossary/1111> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2004/02/skos/core#Concept> .");
-
-        helper.postChangeset(props);
+        persistAndNotifyProvider.persistAndNotify(
+                createChangeSetModel("http://reegle.info/glossary/1111",
+                        "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                        new URIImpl("http://www.w3.org/2004/02/skos/core#Concept"),
+                        ChangeTripleHandler.CHANGETYPE_ADD),
+                true);
     }
 
-    private void setPrefLabel() throws IOException {
-        Properties props = new Properties();
-        props.setProperty(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD);
-        props.setProperty(
-            ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
-            "<http://reegle.info/glossary/1111> <http://www.w3.org/2004/02/skos/core#prefLabel> \"Ottakringer Helles\"@en .");
+    public Model createChangeSetModel(String subjUri, String predUri, Value obj, String changeType) {
+        return changeSetCreator.assembleChangeset(
+            new StatementImpl(new URIImpl(subjUri), new URIImpl(predUri), obj),
+            null,
+            changeType);
+    }
 
-        helper.postChangeset(props);
+    public Model createChangeSetModel(String subjUri1, String predUri1, Value obj1,
+                                      String subjUri2, String predUri2, Value obj2,
+                                      String changeType)
+    {
+        return changeSetCreator.assembleChangeset(
+                new StatementImpl(new URIImpl(subjUri1), new URIImpl(predUri1), obj1),
+                new StatementImpl(new URIImpl(subjUri2), new URIImpl(predUri2), obj2),
+                changeType);
+    }
+
+
+    private void setPrefLabel() throws IOException {
+        persistAndNotifyProvider.persistAndNotify(
+                createChangeSetModel("http://reegle.info/glossary/1111",
+                        "http://www.w3.org/2004/02/skos/core#prefLabel",
+                        new LiteralImpl("Ottakringer Helles", "en"),
+                        ChangeTripleHandler.CHANGETYPE_ADD),
+                true);
     }
 
     protected void changePrefLabel() throws IOException {
-        Properties props = new Properties();
-        props.setProperty(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_UPDATE);
-        props.setProperty(
-            ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
-            "<http://reegle.info/glossary/1111> <http://www.w3.org/2004/02/skos/core#prefLabel> \"Ottakringer Helles\"@en .");
-        props.setProperty(
-            ChangeTripleHandler.POST_BODY_SECONDARYTRIPLE,
-            "<http://reegle.info/glossary/1111> <http://www.w3.org/2004/02/skos/core#prefLabel> \"Schremser Edelmärzen\"@en .");
-
-        helper.postChangeset(props);
+        persistAndNotifyProvider.persistAndNotify(
+                createChangeSetModel("http://reegle.info/glossary/1111",
+                        "http://www.w3.org/2004/02/skos/core#prefLabel",
+                        new LiteralImpl("Ottakringer Helles", "en"),
+                        "http://reegle.info/glossary/1111",
+                        "http://www.w3.org/2004/02/skos/core#prefLabel",
+                        new LiteralImpl("Schremser Edelmärzen", "en"),
+                        ChangeTripleHandler.CHANGETYPE_UPDATE),
+                true);
     }
 
     private void addOtherConcept() throws IOException {
-        Properties props = new Properties();
-        props.setProperty(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD);
-        props.setProperty(
-            ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
-            "<http://reegle.info/glossary/1112> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2004/02/skos/core#Concept> .");
-
-        helper.postChangeset(props);
+        persistAndNotifyProvider.persistAndNotify(
+                createChangeSetModel("http://reegle.info/glossary/1112",
+                        "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                        new URIImpl("http://www.w3.org/2004/02/skos/core#Concept"),
+                        ChangeTripleHandler.CHANGETYPE_ADD),
+                true);
     }
 
     private void linkConcepts() throws IOException {
-        Properties props = new Properties();
-        props.setProperty(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD);
-        props.setProperty(
-            ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
-            "<http://reegle.info/glossary/1111> <http://www.w3.org/2004/02/skos/core#related> <http://reegle.info/glossary/1112> .");
-
-        helper.postChangeset(props);
+        persistAndNotifyProvider.persistAndNotify(
+                createChangeSetModel("http://reegle.info/glossary/1111",
+                        "http://www.w3.org/2004/02/skos/core#related",
+                        new URIImpl("http://reegle.info/glossary/1112"),
+                        ChangeTripleHandler.CHANGETYPE_ADD),
+                true);
     }
 
     @Override

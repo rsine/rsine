@@ -77,7 +77,7 @@ public class FeedbackHandlerTest {
     }
 
     private int sendFeedbackRequest(String issueId, String rating, String messageId) throws IOException {
-        HttpGet httpGet = new HttpGet("http://localhost:" +helper.getChangeSetListeningPort()+
+        HttpGet httpGet = new HttpGet("http://localhost:2221"+
                 "/feedback?issueId=" +issueId+
                 "&rating=" +rating+
                 "&msgId=" +messageId);

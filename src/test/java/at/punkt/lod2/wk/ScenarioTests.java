@@ -6,6 +6,11 @@ import eu.lod2.rsine.Rsine;
 import eu.lod2.rsine.dissemination.notifier.INotifier;
 import eu.lod2.rsine.queryhandling.QueryProfiler;
 import eu.lod2.rsine.registrationservice.Subscription;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.jena.fuseki.Fuseki;
 import org.junit.*;
 import org.junit.runner.RunWith;
@@ -27,6 +32,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -77,8 +84,20 @@ public class ScenarioTests {
 
     private void initRsine() throws IOException {
         rsine.start();
-        helper.postSubscriptionTtl("/wk/subscription_dm_all_doc_metadata.ttl.bak");
+        postSubscriptionTtl("/wk/subscription_dm_all_doc_metadata.ttl.bak");
         installStatisticsNotifier();
+    }
+
+    public int postSubscriptionTtl(String fileName) throws IOException {
+        InputStream subscriptionRdfContent = Rsine.class.getResourceAsStream(fileName);
+        StringWriter writer = new StringWriter();
+        IOUtils.copy(subscriptionRdfContent, writer);
+
+        HttpPost httpPost = new HttpPost("http://localhost:8991/register");
+        httpPost.setEntity(new StringEntity(writer.toString()));
+        httpPost.setHeader("Content-Type", "text/turtle");
+        HttpResponse response = new DefaultHttpClient().execute(httpPost);
+        return response.getStatusLine().getStatusCode();
     }
 
     private void installStatisticsNotifier() {

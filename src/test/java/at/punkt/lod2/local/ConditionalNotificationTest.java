@@ -5,7 +5,9 @@ import at.punkt.lod2.util.ExpectedCountReached;
 import at.punkt.lod2.util.Helper;
 import com.jayway.awaitility.Awaitility;
 import eu.lod2.rsine.Rsine;
+import eu.lod2.rsine.changesetservice.ChangeSetCreator;
 import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
+import eu.lod2.rsine.changesetservice.PersistAndNotifyProvider;
 import eu.lod2.rsine.dissemination.messageformatting.BindingSetFormatter;
 import eu.lod2.rsine.dissemination.messageformatting.ToStringBindingSetFormatter;
 import eu.lod2.rsine.dissemination.notifier.logging.LoggingNotifier;
@@ -17,6 +19,12 @@ import org.apache.jena.fuseki.Fuseki;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.openrdf.model.Literal;
+import org.openrdf.model.Model;
+import org.openrdf.model.URI;
+import org.openrdf.model.impl.LiteralImpl;
+import org.openrdf.model.impl.StatementImpl;
+import org.openrdf.model.impl.URIImpl;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.UpdateExecutionException;
@@ -29,7 +37,6 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
 
 import java.io.IOException;
-import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -39,6 +46,9 @@ public class ConditionalNotificationTest {
     private Rsine rsine;
     private CountingNotifier countingNotifier;
     private ApplicationContext applicationContext;
+    private URI tripleSubject = new URIImpl("http://reegle.info/glossary/someConcept"),
+                triplePredicate = new URIImpl("http://www.w3.org/2004/02/skos/core#prefLabel");
+    private Literal tripleLiteral = new LiteralImpl("some preflabel", "en");
 
     @Before
     public void setUp() throws IOException, RepositoryException {
@@ -113,10 +123,11 @@ public class ConditionalNotificationTest {
     }
 
     private String getPrefLabelTriple() {
-        return "<http://reegle.info/glossary/someConcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"some preflabel\"@en .";
+        return "<"+ tripleSubject.stringValue() +"> <"+ triplePredicate.stringValue() +"> " +tripleLiteral.stringValue() +" .";
     }
 
     private void postTripleChange() throws IOException {
+        /*
         Properties props = new Properties();
         props.setProperty(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD);
         props.setProperty(
@@ -124,6 +135,15 @@ public class ConditionalNotificationTest {
             getPrefLabelTriple());
 
         helper.postChangeset(props);
+        */
+
+        PersistAndNotifyProvider persistAndNotifyProvider = applicationContext.getBean(PersistAndNotifyProvider.class);
+        ChangeSetCreator csc = applicationContext.getBean(ChangeSetCreator.class);
+        Model changeSet = csc.assembleChangeset(
+            new StatementImpl(tripleSubject, triplePredicate, tripleLiteral),
+            null,
+            ChangeTripleHandler.CHANGETYPE_ADD);
+        persistAndNotifyProvider.persistAndNotify(changeSet, true);
     }
 
     @Test

@@ -24,10 +24,6 @@
         <constructor-arg value="8991"/>
     </bean>
 
-    <bean id="helper" class="at.punkt.lod2.util.Helper">
-        <constructor-arg value="8991"/>
-    </bean>
-
     <bean id="queryEvaluator" class="eu.lod2.rsine.queryhandling.QueryEvaluator">
         <constructor-arg index="0" ref="managedServerSparqlQuery" />
         <constructor-arg index="1" value="" />
@@ -35,5 +31,6 @@
 
     <bean id="remoteServiceDetector" class="eu.lod2.rsine.remotenotification.UnavailableRemoteServiceDetector"/>
     <bean id="remoteNotificationServiceBase" class="eu.lod2.rsine.remotenotification.NullRemoteNotificationService"/>
+    <bean id="helper" class="at.punkt.lod2.util.Helper"/>
 
 </beans>
