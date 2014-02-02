@@ -11,9 +11,7 @@ import eu.lod2.rsine.Rsine;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
 import org.apache.jena.fuseki.Fuseki;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
@@ -48,19 +46,27 @@ public class QualityNotificationsTest {
     @Autowired
     private RegistrationService registrationService;
 
-    private DatasetGraph datasetGraph;
+    private static DatasetGraph datasetGraph;
     private CountingNotifier countingNotifier;
+
+    @BeforeClass
+    public static void setUpBeforeClass() {
+        datasetGraph = Helper.initFuseki(Rsine.class.getResource("/reegle.rdf"), "dataset");
+    }
+
+    @AfterClass
+    public static void tearDownAfterClass() {
+        Fuseki.getServer().stop();
+    }
 
     @Before
     public void setUp() throws IOException, RDFParseException, RDFHandlerException {
-        datasetGraph = Helper.initFuseki(Rsine.class.getResource("/reegle.rdf"), "dataset");
         countingNotifier = new CountingNotifier();
         rsine.start();
     }
 
     @After
     public void tearDown() throws IOException, InterruptedException, RepositoryException {
-        Fuseki.getServer().stop();
         rsine.stop();
     }
 
@@ -94,9 +100,10 @@ public class QualityNotificationsTest {
     @Test
     public void multiHierarchicalCycles() throws IOException, RDFHandlerException, RDFParseException {
         subscribe("/quality/cyclic_hierarchical_relations.ttl");
+
         addTriple(new URIImpl("http://reegle.info/glossary/1124"),
-            SKOS.BROADER,
-            new URIImpl("http://reegle.info/newConcept"));
+                SKOS.BROADER,
+                new URIImpl("http://reegle.info/newConcept"));
         addTriple(new URIImpl("http://reegle.info/newConcept"),
             SKOS.BROADER,
             new URIImpl("http://reegle.info/glossary/676"));

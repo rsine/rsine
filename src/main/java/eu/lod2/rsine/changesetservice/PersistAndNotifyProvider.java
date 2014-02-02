@@ -24,7 +24,7 @@ public class PersistAndNotifyProvider {
     @Autowired
     private RemoteNotificationServiceBase remoteNotificationService;
 
-    public void persistAndNotify(Model changeSet, boolean notifyOnlyLocal) {
+    public synchronized void persistAndNotify(Model changeSet, boolean notifyOnlyLocal) {
         try {
             changeSetStore.persistChangeSet(changeSet);
         }

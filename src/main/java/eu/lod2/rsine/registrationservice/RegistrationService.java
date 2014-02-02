@@ -19,7 +19,7 @@ public class RegistrationService {
     public RegistrationService() {
     }
 
-    public void register(Subscription subscription, boolean deleteOthers) {
+    public synchronized void register(Subscription subscription, boolean deleteOthers) {
         if (deleteOthers) {
             subscriptions.clear();
         }
@@ -38,11 +38,11 @@ public class RegistrationService {
         return subscription.getSubscriptionId();
     }
 
-    public void unregister(Resource subscriptionId) {
+    public synchronized void unregister(Resource subscriptionId) {
         subscriptions.remove(getSubscriptionById(subscriptionId));
     }
 
-    private Subscription getSubscriptionById(Resource subscriptionId){
+    private synchronized Subscription getSubscriptionById(Resource subscriptionId){
         for (Subscription subscription : subscriptions){
             if(subscription.getSubscriptionId().equals(subscriptionId)){
                 return subscription;
@@ -51,11 +51,11 @@ public class RegistrationService {
         throw new SubscriptionNotFoundException();
     }
 
-    public Iterator<Subscription> getSubscriptionIterator() {
+    public synchronized Iterator<Subscription> getSubscriptionIterator() {
         return subscriptions.iterator();
     }
 
-    public Subscription getSubscription(Resource subscriptionId) {
+    public synchronized Subscription getSubscription(Resource subscriptionId) {
         for (Subscription subscription : subscriptions) {
             if (subscription.getSubscriptionId().equals(subscriptionId)) return subscription;
         }
