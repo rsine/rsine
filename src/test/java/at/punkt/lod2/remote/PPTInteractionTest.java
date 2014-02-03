@@ -11,9 +11,8 @@ import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.util.Namespaces;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
-import org.openrdf.model.impl.StatementImpl;
-import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.RDFHandlerException;
 import org.springframework.context.support.AbstractApplicationContext;
@@ -78,6 +77,7 @@ public class PPTInteractionTest {
                 "}";
     }
 
+    @Ignore
     @Test
     public void notifyRemotePPT() throws IOException, RDFHandlerException {
         referenceRemoteConcept();
@@ -85,11 +85,13 @@ public class PPTInteractionTest {
     }
 
     private void referenceRemoteConcept() throws IOException, RDFHandlerException {
+        /*
         localHelper.postStatementAdded(new StatementImpl(
             new URIImpl("http://localhost/myThesaurus/myLocalConcept"),
             new URIImpl(Namespaces.SKOS_NAMESPACE.getName() + "exactMatch"),
             new URIImpl("http://localhost/thesaurus/3")
         ));
+        */
     }
 
 }

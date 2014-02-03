@@ -3,23 +3,23 @@ package at.punkt.lod2.quality;
 import at.punkt.lod2.util.CountingNotifier;
 import at.punkt.lod2.util.ExpectedCountReached;
 import at.punkt.lod2.util.Helper;
-import com.hp.hpl.jena.graph.NodeFactory;
-import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.sparql.core.DatasetGraph;
 import com.jayway.awaitility.Awaitility;
 import eu.lod2.rsine.Rsine;
+import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
+import eu.lod2.rsine.changesetservice.PersistAndNotifyProvider;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
-import org.apache.jena.fuseki.Fuseki;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.LiteralImpl;
-import org.openrdf.model.impl.StatementImpl;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.SKOS;
+import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFHandlerException;
@@ -41,23 +41,15 @@ public class QualityNotificationsTest {
     private Rsine rsine;
 
     @Autowired
-    private Helper helper;
-
-    @Autowired
     private RegistrationService registrationService;
 
-    private static DatasetGraph datasetGraph;
+    @Autowired
+    private PersistAndNotifyProvider persistAndNotifyProvider;
+
+    @Autowired
+    private RepositoryConnection managedStoreCon;
+
     private CountingNotifier countingNotifier;
-
-    @BeforeClass
-    public static void setUpBeforeClass() {
-        datasetGraph = Helper.initFuseki(Rsine.class.getResource("/reegle.rdf"), "dataset");
-    }
-
-    @AfterClass
-    public static void tearDownAfterClass() {
-        Fuseki.getServer().stop();
-    }
 
     @Before
     public void setUp() throws IOException, RDFParseException, RDFHandlerException {
@@ -71,7 +63,7 @@ public class QualityNotificationsTest {
     }
 
     @Test
-    public void hierarchicalCycles() throws RDFParseException, IOException, RDFHandlerException {
+    public void hierarchicalCycles() throws RDFParseException, IOException, RDFHandlerException, RepositoryException {
         subscribe("/quality/cyclic_hierarchical_relations.ttl");
         addTriple(new URIImpl("http://reegle.info/glossary/1124"),
             SKOS.BROADER,
@@ -81,24 +73,27 @@ public class QualityNotificationsTest {
     }
 
     private void subscribe(String subscriptionFileLocation) throws RDFParseException, IOException, RDFHandlerException {
-        Model subscriptionModel = helper.createModelFromResourceFile(subscriptionFileLocation, RDFFormat.TURTLE);
+        Model subscriptionModel = Helper.createModelFromResourceFile(subscriptionFileLocation, RDFFormat.TURTLE);
         Resource subscriptionId = registrationService.register(subscriptionModel);
         Subscription subscription = registrationService.getSubscription(subscriptionId);
         subscription.addNotifier(countingNotifier);
     }
 
-    public void addTriple(URI subject, URI predicate, URI object)
-            throws IOException, RDFHandlerException
-    {
-        datasetGraph.getDefaultGraph().add(new Triple(
-                NodeFactory.createURI(subject.toString()),
-                NodeFactory.createURI(predicate.toString()),
-                NodeFactory.createURI(object.toString())));
-        helper.postStatementAdded(new StatementImpl(subject, predicate, object));
+    public void addTriple(URI subject, URI predicate, URI object) throws RepositoryException {
+        managedStoreCon.add(subject, predicate, object);
+
+        persistAndNotifyProvider.persistAndNotify(
+                Helper.createChangeSetModel(subject.stringValue(),
+                        predicate.stringValue(),
+                        object,
+                        ChangeTripleHandler.CHANGETYPE_ADD),
+                true);
     }
 
     @Test
-    public void multiHierarchicalCycles() throws IOException, RDFHandlerException, RDFParseException {
+    public void multiHierarchicalCycles()
+        throws RDFParseException, IOException, RDFHandlerException, RepositoryException
+    {
         subscribe("/quality/cyclic_hierarchical_relations.ttl");
 
         addTriple(new URIImpl("http://reegle.info/glossary/1124"),
@@ -115,22 +110,34 @@ public class QualityNotificationsTest {
     }
 
     @Test
-    public void disjointLabelViolations_withPrefLabel() throws RDFParseException, IOException, RDFHandlerException {
+    public void disjointLabelViolations_withPrefLabel()
+        throws RDFParseException, IOException, RDFHandlerException, RepositoryException
+    {
         subscribe("/quality/disjoint_labels_violation.ttl");
-        helper.setAltLabel(datasetGraph, new URIImpl("http://reegle.info/glossary/682"), new LiteralImpl("energy efficiency", "en"));
+        Helper.setAltLabel(managedStoreCon,
+            new URIImpl("http://reegle.info/glossary/682"),
+            new LiteralImpl("energy efficiency", "en"),
+            persistAndNotifyProvider);
 
         Awaitility.await().atMost(20, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
     }
 
     @Test
-    public void disjointLabelViolations_withAltLabel() throws RDFParseException, IOException, RDFHandlerException {
+    public void disjointLabelViolations_withAltLabel()
+        throws RDFParseException, IOException, RDFHandlerException, RepositoryException
+    {
         subscribe("/quality/disjoint_labels_violation.ttl");
-        helper.setAltLabel(datasetGraph, new URIImpl("http://reegle.info/glossary/1063"), new LiteralImpl("emission", "en"));
+        Helper.setAltLabel(managedStoreCon,
+            new URIImpl("http://reegle.info/glossary/1063"),
+            new LiteralImpl("emission", "en"),
+            persistAndNotifyProvider);
         Awaitility.await().atMost(20, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
     }
 
     @Test
-    public void valuelessAssociativeRelations() throws RDFParseException, IOException, RDFHandlerException {
+    public void valuelessAssociativeRelations()
+        throws RDFParseException, IOException, RDFHandlerException, RepositoryException
+    {
         subscribe("/quality/valueless_associative_relations.ttl");
         String sibling1 = "http://reegle.info/glossary/1676";
         String sibling2 = "http://reegle.info/glossary/1252";
@@ -140,7 +147,9 @@ public class QualityNotificationsTest {
     }
 
     @Test
-    public void hierarchicalRedundancies() throws RDFParseException, IOException, RDFHandlerException {
+    public void hierarchicalRedundancies()
+        throws RDFParseException, IOException, RDFHandlerException, RepositoryException
+    {
         subscribe("/quality/hierarchical_redundancy.ttl");
 
         String level1Concept = "http://reegle.info/glossary/1056";
@@ -152,15 +161,18 @@ public class QualityNotificationsTest {
     }
 
     @Test
-    public void overlappingLabels() throws RDFParseException, IOException, RDFHandlerException {
+    public void overlappingLabels() throws RDFParseException, IOException, RDFHandlerException, RepositoryException {
         subscribe("/quality/overlapping_labels.ttl");
 
-        helper.setAltLabel(datasetGraph, new URIImpl("http://reegle.info/glossary/357"), new LiteralImpl("Biogas", "en"));
+        Helper.setAltLabel(managedStoreCon,
+            new URIImpl("http://reegle.info/glossary/357"),
+            new LiteralImpl("Biogas", "en"),
+            persistAndNotifyProvider);
         Awaitility.await().atMost(20, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
     }
 
     @Test
-    public void relationClashes() throws RDFParseException, IOException, RDFHandlerException {
+    public void relationClashes() throws RDFParseException, IOException, RDFHandlerException, RepositoryException {
         subscribe("/quality/relation_clashes.ttl");
 
         String level1Concept = "http://reegle.info/glossary/1056";
@@ -171,7 +183,7 @@ public class QualityNotificationsTest {
     }
 
     @Test
-    public void mappingClashes() throws RDFParseException, IOException, RDFHandlerException {
+    public void mappingClashes() throws RDFParseException, IOException, RDFHandlerException, RepositoryException {
         subscribe("/quality/mapping_clashes.ttl");
 
         String concept = "http://reegle.info/glossary/1912";
@@ -190,7 +202,9 @@ public class QualityNotificationsTest {
     }
 
     @Test
-    public void mappingMisues_sameScheme() throws IOException, RDFHandlerException, RDFParseException {
+    public void mappingMisues_sameScheme()
+        throws IOException, RDFHandlerException, RDFParseException, RepositoryException
+    {
         subscribe("/quality/mapping_relations_misuse.ttl");
         String[] conceptsInSameScheme = {"http://reegle.info/glossary/676", "http://reegle.info/glossary/1620"};
         addTriple(new URIImpl(conceptsInSameScheme[0]), SKOS.BROAD_MATCH, new URIImpl(conceptsInSameScheme[1]));
@@ -199,7 +213,9 @@ public class QualityNotificationsTest {
     }
 
     @Test
-    public void topConceptsHavingBroaderConcepts() throws RDFParseException, IOException, RDFHandlerException {
+    public void topConceptsHavingBroaderConcepts()
+        throws RDFParseException, IOException, RDFHandlerException, RepositoryException
+    {
         subscribe("/quality/top_concepts_having_broader_concepts.ttl");
 
         String topConcept = "http://reegle.info/glossary/1127";

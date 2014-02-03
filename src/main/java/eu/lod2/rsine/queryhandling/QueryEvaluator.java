@@ -9,8 +9,6 @@ import org.openrdf.query.BindingSet;
 import org.openrdf.query.BooleanQuery;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.sparql.SPARQLConnection;
-import org.openrdf.repository.sparql.SPARQLRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,16 +32,16 @@ public class QueryEvaluator {
     @Autowired
     private QueryProfiler queryProfiler;
 
-    private String managedTripleStoreSparqlEndpoint, authoritativeUri;
+    @Autowired
+    private RepositoryConnection managedStoreCon;
+
+    private String authoritativeUri = "";
 
     public QueryEvaluator() {
-        managedTripleStoreSparqlEndpoint = "";
-        authoritativeUri = "";
+
     }
 
-    public QueryEvaluator(String sparqlEndpoint, String authoritativeUri) {
-        this();
-        this.managedTripleStoreSparqlEndpoint = sparqlEndpoint;
+    public QueryEvaluator(String authoritativeUri) {
         this.authoritativeUri = authoritativeUri;
     }
 
@@ -51,18 +49,14 @@ public class QueryEvaluator {
     {
         usePolicy.checkEvaluationNeeded(query);
 
-        RepositoryConnection managedStoreCon = new SPARQLConnection(new SPARQLRepository(managedTripleStoreSparqlEndpoint));
-        try {
-            String issuedQuery = fillInPlaceholders(query);
-            long start = System.currentTimeMillis();
-            Collection<String> messages = createMessages(query, issuedQuery, managedStoreCon);
-            queryProfiler.log(issuedQuery, System.currentTimeMillis() - start);
+        //RepositoryConnection managedStoreCon = new SPARQLConnection(new SPARQLRepository(managedTripleStoreSparqlEndpoint));
 
-            return messages;
-        }
-        finally {
-            managedStoreCon.close();
-        }
+        String issuedQuery = fillInPlaceholders(query);
+        long start = System.currentTimeMillis();
+        Collection<String> messages = createMessages(query, issuedQuery, managedStoreCon);
+        queryProfiler.log(issuedQuery, System.currentTimeMillis() - start);
+
+        return messages;
     }
 
     private String fillInPlaceholders(NotificationQuery query) {

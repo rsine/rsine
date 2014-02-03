@@ -38,15 +38,19 @@ public class ChangeSetService implements ApplicationContextAware {
     private ServerSocket serverSocket;
     private Thread requestListenerThread;
     private boolean shouldStop;
-    private int port;
+    private int port = 2221;
     private String context = "";
 
-    public ChangeSetService(int port) {
-        this.port = port;
+    public ChangeSetService() {
         stopListener = new StopListener() {
             @Override
             public void hasStopped() {}
         };
+    }
+
+    public ChangeSetService(int port) {
+        this();
+        this.port = port;
     }
 
     public ChangeSetService(String context, int port) {

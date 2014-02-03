@@ -15,7 +15,6 @@ import eu.lod2.rsine.queryhandling.QueryEvaluator;
 import eu.lod2.rsine.registrationservice.Condition;
 import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.util.Namespaces;
-import org.apache.jena.fuseki.Fuseki;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -52,8 +51,6 @@ public class ConditionalNotificationTest {
 
     @Before
     public void setUp() throws IOException, RepositoryException {
-        Helper.initFuseki("dataset");
-
         countingNotifier = new CountingNotifier();
         applicationContext = new ClassPathXmlApplicationContext("/at/punkt/lod2/local/LocalTest-context.xml");
         helper = applicationContext.getBean(Helper.class);
@@ -63,7 +60,6 @@ public class ConditionalNotificationTest {
 
     @After
     public void tearDown() throws Exception {
-        Fuseki.getServer().stop();
         rsine.stop();
     }
 
