@@ -1,14 +1,13 @@
 package at.punkt.lod2.local;
 
 import at.punkt.lod2.util.CountingNotifier;
-import at.punkt.lod2.util.ExpectedCountReached;
 import at.punkt.lod2.util.Helper;
-import com.jayway.awaitility.Awaitility;
 import eu.lod2.rsine.Rsine;
 import eu.lod2.rsine.changesetservice.PersistAndNotifyProvider;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,7 +26,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"LocalTest-context.xml"})
@@ -49,7 +47,8 @@ public class FollowBranchTest {
     private CountingNotifier countingNotifier;
 
     @Before
-    public void setUp() throws IOException, RDFParseException, RDFHandlerException {
+    public void setUp() throws IOException, RDFParseException, RDFHandlerException, RepositoryException {
+        managedStoreCon.add(Rsine.class.getResource("/reegle.rdf"), "", RDFFormat.RDFXML);
         subscribe();
         rsine.start();
     }
@@ -76,7 +75,8 @@ public class FollowBranchTest {
                 new URIImpl("http://reegle.info/glossary/676"),
                 new LiteralImpl("altlabel"),
                 persistAndNotifyProvider);
-        Awaitility.await().atMost(20, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
+
+        Assert.assertEquals(1, countingNotifier.getNotificationCount());
     }
 
 }

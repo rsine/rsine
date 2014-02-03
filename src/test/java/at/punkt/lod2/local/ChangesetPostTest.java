@@ -26,7 +26,7 @@ import java.util.Properties;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"LocalTest-context.xml"})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-public class ChangesetServiceTest {
+public class ChangesetPostTest {
 
     @Autowired
     private ChangeSetService changeSetService;
@@ -53,16 +53,6 @@ public class ChangesetServiceTest {
 
         Assert.assertEquals(200, postChangeset(props));
     }    
-
-    @Test
-    public void postManuallyAssembledProperties() throws IOException {
-        String entityContent = ChangeTripleHandler.POST_BODY_CHANGETYPE +"=add\n" +ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE+ "=<http://example.org/myconcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"somelabel\"@en .";
-        HttpPost httpPost = new HttpPost("http://localhost:8991");
-        httpPost.setEntity(new StringEntity(entityContent));
-        HttpResponse response = new DefaultHttpClient().execute(httpPost);
-
-        Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-    }
 
     @Test
     public void postEmptyTriple() throws IOException {
@@ -138,7 +128,7 @@ public class ChangesetServiceTest {
     }
 
     private int postChangeset(Properties properties) throws IOException {
-        HttpPost httpPost = new HttpPost("http://localhost:8991");
+        HttpPost httpPost = new HttpPost("http://localhost:2221");
         StringWriter sw = new StringWriter();
         properties.store(sw, null);
         httpPost.setEntity(new StringEntity(sw.toString()));

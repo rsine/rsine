@@ -29,9 +29,6 @@ public abstract class LocalNotificationTest implements ApplicationContextAware  
     private Rsine rsine;
 
     @Autowired
-    private Helper helper;
-
-    @Autowired
     private PersistAndNotifyProvider persistAndNotifyProvider;
 
     protected ApplicationContext applicationContext;

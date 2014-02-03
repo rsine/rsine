@@ -12,14 +12,6 @@
 
     <context:component-scan base-package="eu.lod2.rsine"/>
 
-    <bean id="changeSetService" class="eu.lod2.rsine.changesetservice.ChangeSetService">
-        <constructor-arg value="8991"/>
-    </bean>
-
-    <bean id="helper" class="at.punkt.lod2.util.Helper">
-        <constructor-arg value="8991"/>
-    </bean>
-
     <bean id="queryEvaluator" class="eu.lod2.rsine.queryhandling.QueryEvaluator"/>
 
     <bean id="evaluationPolicy" class="eu.lod2.rsine.queryhandling.policies.MinTimePassedEvaluationPolicy">
