@@ -12,7 +12,6 @@ import org.openrdf.model.Model;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParseException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -22,12 +21,9 @@ import java.io.IOException;
 @ContextConfiguration(locations = {"LocalTest-context.xml"})
 public class SubscriptionParserTest {
 
-    @Autowired
-    private Helper helper;
-
     @Test
     public void emailNotificationSubscription() throws RDFParseException, IOException, RDFHandlerException {
-        Model rdfSubscription = helper.createModelFromResourceFile("/internal/emailNotifierSubscription.ttl", RDFFormat.TURTLE);
+        Model rdfSubscription = Helper.createModelFromResourceFile("/internal/emailNotifierSubscription.ttl", RDFFormat.TURTLE);
         Subscription subscription = new SubscriptionParser(rdfSubscription).createSubscription();
 
         Assert.assertTrue(subscription.getNotifierIterator().hasNext());
@@ -36,7 +32,7 @@ public class SubscriptionParserTest {
 
     @Test
     public void customFormatter() throws RDFParseException, IOException, RDFHandlerException {
-        Model rdfSubscription = helper.createModelFromResourceFile("/internal/labelChangeSubscriptionFormatted.ttl", RDFFormat.TURTLE);
+        Model rdfSubscription = Helper.createModelFromResourceFile("/internal/labelChangeSubscriptionFormatted.ttl", RDFFormat.TURTLE);
         Subscription subscription = new SubscriptionParser(rdfSubscription).createSubscription();
 
         NotificationQuery notificationQuery = subscription.getQueries().next();
@@ -46,7 +42,7 @@ public class SubscriptionParserTest {
 
     @Test
     public void queryWithCondition() throws RDFParseException, IOException, RDFHandlerException {
-        Model rdfSubscription = helper.createModelFromResourceFile("/internal/subscriptionWithCondition.ttl", RDFFormat.TURTLE);
+        Model rdfSubscription = Helper.createModelFromResourceFile("/internal/subscriptionWithCondition.ttl", RDFFormat.TURTLE);
         Subscription subscription = new SubscriptionParser(rdfSubscription).createSubscription();
 
         NotificationQuery notificationQuery = subscription.getQueries().next();

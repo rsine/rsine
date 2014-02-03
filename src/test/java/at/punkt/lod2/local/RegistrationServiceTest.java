@@ -14,7 +14,6 @@ import org.openrdf.model.impl.URIImpl;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParseException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -24,9 +23,6 @@ import java.util.Iterator;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"LocalTest-context.xml"})
 public class RegistrationServiceTest {
-
-    @Autowired
-    private Helper helper;
 
     private RegistrationService registrationService;
 
@@ -39,7 +35,7 @@ public class RegistrationServiceTest {
     public void registerSingleSubscription() throws RDFParseException, IOException, RDFHandlerException {
         int subscriptionsBeforeRegister = countSubscriptions();
 
-        Model rdfSubscription = helper.createModelFromResourceFile("/internal/emailNotifierSubscription.ttl", RDFFormat.TURTLE);
+        Model rdfSubscription = Helper.createModelFromResourceFile("/internal/emailNotifierSubscription.ttl", RDFFormat.TURTLE);
         registrationService.register(rdfSubscription);
 
         int subscriptionsAfterRegister = countSubscriptions();
@@ -62,7 +58,7 @@ public class RegistrationServiceTest {
 
         int subscriptionCount = 5;
         for (int i = 0; i < subscriptionCount; i++) {
-            Model rdfSubscription = helper.createModelFromResourceFile("/internal/emailNotifierSubscription.ttl", RDFFormat.TURTLE);
+            Model rdfSubscription = Helper.createModelFromResourceFile("/internal/emailNotifierSubscription.ttl", RDFFormat.TURTLE);
             registrationService.register(rdfSubscription);
         }
 
@@ -71,8 +67,8 @@ public class RegistrationServiceTest {
 
     @Test(expected = SubscriptionExistsException.class)
     public void multipleSubscriptionWithSameId() throws RDFParseException, IOException, RDFHandlerException {
-        Model subscription = helper.createModelFromResourceFile("/internal/subscriptionWithUri.ttl", RDFFormat.TURTLE);
-        Model identicalSubscription = helper.createModelFromResourceFile("/internal/subscriptionWithUri.ttl", RDFFormat.TURTLE);
+        Model subscription = Helper.createModelFromResourceFile("/internal/subscriptionWithUri.ttl", RDFFormat.TURTLE);
+        Model identicalSubscription = Helper.createModelFromResourceFile("/internal/subscriptionWithUri.ttl", RDFFormat.TURTLE);
 
         registrationService.register(subscription);
         registrationService.register(identicalSubscription);
@@ -82,7 +78,7 @@ public class RegistrationServiceTest {
     public void unregister() throws RDFParseException, IOException, RDFHandlerException {
         int subscriptionsBeforeRegister = countSubscriptions();
 
-        Model subscription = helper.createModelFromResourceFile("/internal/subscriptionWithUri.ttl", RDFFormat.TURTLE);
+        Model subscription = Helper.createModelFromResourceFile("/internal/subscriptionWithUri.ttl", RDFFormat.TURTLE);
         registrationService.register(subscription);
 
         int subscriptionsAfterRegister = countSubscriptions();
@@ -98,7 +94,7 @@ public class RegistrationServiceTest {
     @Test(expected = SubscriptionNotFoundException.class)
     public void unregisterNonExistingSubscription() throws RDFParseException, IOException, RDFHandlerException
     {
-        Model subscription = helper.createModelFromResourceFile("/internal/emailNotifierSubscription.ttl", RDFFormat.TURTLE);
+        Model subscription = Helper.createModelFromResourceFile("/internal/emailNotifierSubscription.ttl", RDFFormat.TURTLE);
         registrationService.register(subscription);
         registrationService.unregister(new URIImpl("http://example.org/someSubscription"));
     }

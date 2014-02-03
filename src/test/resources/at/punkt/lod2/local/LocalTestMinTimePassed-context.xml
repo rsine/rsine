@@ -14,6 +14,14 @@
 
     <bean id="queryEvaluator" class="eu.lod2.rsine.queryhandling.QueryEvaluator"/>
 
+    <bean name="managedStoreRepo" class="org.openrdf.repository.sail.SailRepository" init-method="initialize">
+        <constructor-arg>
+            <bean class="org.openrdf.sail.memory.MemoryStore"/>
+        </constructor-arg>
+    </bean>
+
+    <bean id="managedStoreCon" factory-bean="managedStoreRepo" factory-method="getConnection"/>
+
     <bean id="evaluationPolicy" class="eu.lod2.rsine.queryhandling.policies.MinTimePassedEvaluationPolicy">
         <constructor-arg value="2000" />
     </bean>

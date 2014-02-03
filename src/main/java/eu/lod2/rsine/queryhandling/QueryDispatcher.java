@@ -37,6 +37,15 @@ public class QueryDispatcher implements IQueryDispatcher {
     private IEvaluationPolicy evaluationPolicy;
 
     private ExecutorService notificationExecutor = Executors.newFixedThreadPool(NUM_NOTIFY_THREADS);
+    private boolean asyncNotification;
+
+    public QueryDispatcher() {
+
+    }
+
+    public QueryDispatcher(boolean asyncNotification) {
+        this.asyncNotification = asyncNotification;
+    }
 
     @Override
     public void trigger() {
@@ -89,7 +98,13 @@ public class QueryDispatcher implements IQueryDispatcher {
 
         while (!messages.isEmpty() && notifierIt.hasNext()) {
             INotifier notifier = notifierIt.next();
-            notificationExecutor.execute(new Notification(notifier, messages));
+
+            if (asyncNotification) {
+                notificationExecutor.execute(new Notification(notifier, messages));
+            }
+            else {
+                notifier.notify(messages);
+            }
         }
     }
 

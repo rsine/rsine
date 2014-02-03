@@ -59,7 +59,6 @@ public class ChangeSetStore {
     public synchronized void persistChangeSet(Graph changeSet) throws RepositoryException {
         RepositoryConnection repCon = repository.getConnection();
         repCon.add(changeSet);
-
         repCon.close();
         logger.debug("created changeset: " +formatChangeSet(changeSet));
     }
