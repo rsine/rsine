@@ -142,7 +142,7 @@ public class MinTimePassedEvaluationPolicyTest  {
         Awaitility.await().atMost(2, TimeUnit.SECONDS).until(new NotificationDetector(timeMeasureNotifier));
 
         performChange();
-        Awaitility.await().atMost(10, TimeUnit.SECONDS).until(new NotificationDetector(timeMeasureNotifier));
+        Awaitility.await().atMost(20, TimeUnit.SECONDS).until(new NotificationDetector(timeMeasureNotifier));
     }
 
     private class NotificationDetector implements Callable<Boolean> {
