@@ -1,5 +1,6 @@
 package at.punkt.lod2.local;
 
+import com.jayway.awaitility.Awaitility;
 import eu.lod2.rsine.changesetservice.ChangeSetService;
 import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
 import eu.lod2.rsine.changesetstore.ChangeSetStore;
@@ -7,25 +8,23 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.openrdf.OpenRDFException;
 import org.openrdf.repository.RepositoryException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Properties;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"LocalTest-context.xml"})
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+//@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class ChangesetPostTest {
 
     @Autowired
@@ -33,17 +32,6 @@ public class ChangesetPostTest {
 
     @Autowired
     private ChangeSetStore changeSetStore;
-
-    @Before
-    public void setUp() throws IOException, RepositoryException {
-        changeSetService.start();
-    }
-
-    @After
-    public void after() throws IOException, InterruptedException, RepositoryException {
-        changeSetService.stop();
-        changeSetStore.shutdown();
-    }
 
     @Test
     public void postTripleChange() throws IOException {
@@ -89,6 +77,14 @@ public class ChangesetPostTest {
         Assert.assertEquals(400, postChangeset(props));
     }
 
+    @Test
+    public void postMissingChangeType() throws IOException {
+        Properties props = new Properties();
+        props.setProperty(ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE, "<http://example.org/myconcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"somelabel\"@en .");
+
+        Assert.assertEquals(400, postChangeset(props));
+    }
+
     /**
      * Posting an update results in creation of a changeset with both removal and addition statements
      */
@@ -102,18 +98,9 @@ public class ChangesetPostTest {
 
         int countBefore = changeSetStore.getChangeSetCount();
         postChangeset(props);
-        int countAfter = changeSetStore.getChangeSetCount();
 
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(new ChangeSetCountEquals(1));
         Assert.assertEquals(0, countBefore);
-        Assert.assertEquals(1, countAfter);
-    }
-
-    @Test
-    public void postMissingChangeType() throws IOException {
-        Properties props = new Properties();
-        props.setProperty(ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE, "<http://example.org/myconcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"somelabel\"@en .");
-
-        Assert.assertEquals(400, postChangeset(props));
     }
 
     @Test
@@ -124,7 +111,8 @@ public class ChangesetPostTest {
 
         int changeSetsBefore = changeSetStore.getChangeSetCount();
         postChangeset(props);
-        Assert.assertEquals(changeSetsBefore + 1, changeSetStore.getChangeSetCount());
+
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(new ChangeSetCountEquals(changeSetsBefore + 1));
     }
 
     private int postChangeset(Properties properties) throws IOException {
@@ -135,6 +123,21 @@ public class ChangesetPostTest {
         HttpResponse response = new DefaultHttpClient().execute(httpPost);
 
         return response.getStatusLine().getStatusCode();
+    }
+
+    private class ChangeSetCountEquals implements Callable<Boolean> {
+
+        private int targetValue;
+
+        private ChangeSetCountEquals(int targetValue) {
+            this.targetValue = targetValue;
+        }
+
+        @Override
+        public Boolean call() throws Exception {
+            return changeSetStore.getChangeSetCount() == targetValue;
+        }
+
     }
 
 }

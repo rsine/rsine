@@ -48,19 +48,28 @@ public class Helper {
                 changeType);
     }
 
+    public static void setLabel(RepositoryConnection repCon,
+                                org.openrdf.model.URI concept,
+                                org.openrdf.model.URI labelType,
+                                Literal newlabel,
+                                PersistAndNotifyProvider persistAndNotifyProvider) throws RepositoryException
+    {
+        repCon.add(concept, labelType, newlabel);
+
+        persistAndNotifyProvider.persistAndNotify(
+                Helper.createChangeSetModel(concept.stringValue(),
+                        labelType.stringValue(),
+                        newlabel,
+                        ChangeTripleHandler.CHANGETYPE_ADD),
+                true);
+    }
+
     public static void setAltLabel(RepositoryConnection repCon,
                             org.openrdf.model.URI concept,
                             Literal newAltLabel,
                             PersistAndNotifyProvider persistAndNotifyProvider) throws RepositoryException
     {
-        repCon.add(concept, SKOS.ALT_LABEL, newAltLabel);
-
-        persistAndNotifyProvider.persistAndNotify(
-                Helper.createChangeSetModel(concept.stringValue(),
-                        SKOS.ALT_LABEL.stringValue(),
-                        newAltLabel,
-                        ChangeTripleHandler.CHANGETYPE_ADD),
-                true);
+        setLabel(repCon, concept, SKOS.ALT_LABEL, newAltLabel, persistAndNotifyProvider);
     }
 
 }

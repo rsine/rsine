@@ -47,7 +47,6 @@ public class Rsine {
 
     public void stop() throws IOException, InterruptedException, RepositoryException {
         changeSetService.stop();
-        changeSetStore.shutdown();
     }
 
     public void stop(StopListener listener) throws IOException, InterruptedException, RepositoryException {

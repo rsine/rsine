@@ -20,13 +20,13 @@ import org.openrdf.model.impl.BooleanLiteralImpl;
 import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.OWL;
+import org.openrdf.model.vocabulary.SKOS;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParseException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -34,7 +34,6 @@ import java.io.IOException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"LocalTest-context.xml"})
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class ConceptMergeTest {
 
     @Autowired
@@ -78,13 +77,11 @@ public class ConceptMergeTest {
         String abandonedConcept = "http://reegle.info/glossary/422";
         Literal abandonedConceptPrefLabel = new LiteralImpl("combi storage tanks", "en");
 
-        persistAndNotifyProvider.persistAndNotify(
-                Helper.createChangeSetModel("http://reegle.info/glossary/1111",
-                        "http://www.w3.org/2004/02/skos/core#prefLabel",
-                        new LiteralImpl("Ottakringer Helles", "en"),
-                        ChangeTripleHandler.CHANGETYPE_ADD),
-                true);
-
+        Helper.setLabel(managedStoreCon,
+                new URIImpl("http://reegle.info/glossary/1111"),
+                SKOS.PREF_LABEL,
+                new LiteralImpl("Ottakringer Helles", "en"),
+                persistAndNotifyProvider);
         Helper.setAltLabel(managedStoreCon, new URIImpl(mainConcept), abandonedConceptPrefLabel, persistAndNotifyProvider);
         removeConcept(new URIImpl(abandonedConcept));
 

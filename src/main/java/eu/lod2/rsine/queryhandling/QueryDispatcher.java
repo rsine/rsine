@@ -75,13 +75,13 @@ public class QueryDispatcher implements IQueryDispatcher {
         issueQueryAndNotify(query, false);
     }
 
-    public synchronized void issueQueryAndNotify(NotificationQuery query, boolean forceEvaluation)
+    public synchronized void issueQueryAndNotify(NotificationQuery query, boolean evaluateImmediately)
             throws RepositoryException
     {
         try {
             Collection<String> messages = queryEvaluator.evaluate(
                 query,
-                forceEvaluation ? new ImmediateEvaluationPolicy() : evaluationPolicy);
+                evaluateImmediately ? new ImmediateEvaluationPolicy() : evaluationPolicy);
             sendNotifications(messages, query.getSubscription());
             postponedQueryHandler.remove(query);
         }

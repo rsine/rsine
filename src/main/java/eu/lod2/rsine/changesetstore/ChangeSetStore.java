@@ -2,7 +2,6 @@ package eu.lod2.rsine.changesetstore;
 
 import eu.lod2.util.Namespaces;
 import info.aduna.iteration.Iterations;
-import org.apache.commons.io.FileUtils;
 import org.openrdf.OpenRDFException;
 import org.openrdf.model.Graph;
 import org.openrdf.model.Statement;
@@ -15,16 +14,13 @@ import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.RepositoryResult;
-import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.turtle.TurtleWriter;
-import org.openrdf.sail.nativerdf.NativeStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,30 +30,12 @@ import java.util.Iterator;
 public class ChangeSetStore {
 
     private final Logger logger = LoggerFactory.getLogger(ChangeSetStore.class);
-    private Repository repository;
 
-    public ChangeSetStore() throws IOException, RepositoryException {
-        repository = new SailRepository(new NativeStore(createDataDir()));
-        repository.initialize();
-    }
-
-    public synchronized void shutdown() throws RepositoryException, IOException {
-        repository.shutDown();
-        FileUtils.deleteDirectory(createDataDir());
-    }
-
-    private File createDataDir() throws IOException {
-        File dataDir = new File(System.getProperty("java.io.tmpdir") + File.separator + "rsine");
-
-        if (dataDir.exists()) {
-            FileUtils.cleanDirectory(dataDir);
-        }
-
-        return dataDir;
-    }
+    @Autowired
+    private Repository changeSetRepo;
 
     public synchronized void persistChangeSet(Graph changeSet) throws RepositoryException {
-        RepositoryConnection repCon = repository.getConnection();
+        RepositoryConnection repCon = changeSetRepo.getConnection();
         repCon.add(changeSet);
         repCon.close();
         logger.debug("created changeset: " +formatChangeSet(changeSet));
@@ -84,7 +62,7 @@ public class ChangeSetStore {
     public synchronized Collection<BindingSet> evaluateQuery(String query) throws OpenRDFException {
         Collection<BindingSet> bindingSets = new ArrayList<BindingSet>();
 
-        RepositoryConnection repCon = repository.getConnection();
+        RepositoryConnection repCon = changeSetRepo.getConnection();
         try {
             TupleQueryResult result = repCon.prepareTupleQuery(QueryLanguage.SPARQL, query).evaluate();
 
@@ -100,8 +78,8 @@ public class ChangeSetStore {
         }
     }
 
-    public synchronized int getChangeSetCount() throws RepositoryException {
-        RepositoryConnection repCon = repository.getConnection();
+    public int getChangeSetCount() throws RepositoryException {
+        RepositoryConnection repCon = changeSetRepo.getConnection();
 
         try {
             RepositoryResult<Statement> result = repCon.getStatements(
