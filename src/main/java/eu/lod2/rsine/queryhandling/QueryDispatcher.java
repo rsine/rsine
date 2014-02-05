@@ -103,6 +103,7 @@ public class QueryDispatcher implements IQueryDispatcher {
                 notificationExecutor.execute(new Notification(notifier, messages));
             }
             else {
+                System.out.println("notify: " +messages.toString());
                 notifier.notify(messages);
             }
         }

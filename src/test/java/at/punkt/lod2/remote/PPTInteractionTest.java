@@ -4,9 +4,10 @@ import at.punkt.lod2.util.CountingNotifier;
 import at.punkt.lod2.util.ExpectedCountReached;
 import at.punkt.lod2.util.Helper;
 import com.jayway.awaitility.Awaitility;
-import eu.lod2.rsine.Rsine;
+import eu.lod2.rsine.changesetservice.ChangeSetService;
 import eu.lod2.rsine.dissemination.messageformatting.ToStringBindingSetFormatter;
 import eu.lod2.rsine.queryhandling.QueryEvaluator;
+import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.util.Namespaces;
 import org.junit.After;
@@ -28,18 +29,19 @@ import java.util.concurrent.TimeUnit;
  */
 public class PPTInteractionTest {
 
-    private Rsine remotePptRsineInstance, localRsineInstance;
+    private ChangeSetService remotePptRsineInstance, localRsineInstance;
+    private AbstractApplicationContext remoteContext;
     private Helper localHelper;
     private CountingNotifier countingNotifier;
 
     @Before
     public void setUp() throws IOException {
-        remotePptRsineInstance = new ClassPathXmlApplicationContext("/at/punkt/lod2/remote/PPTInteractionTest-PPTcontext.xml")
-            .getBean(Rsine.class);
+        remoteContext = new ClassPathXmlApplicationContext("/at/punkt/lod2/remote/PPTInteractionTest-PPTcontext.xml");
+        remotePptRsineInstance = remoteContext.getBean(ChangeSetService.class);
         remotePptRsineInstance.start();
 
         AbstractApplicationContext localContext = new ClassPathXmlApplicationContext("/at/punkt/lod2/remote/PPTInteractionTest-localContext.xml");
-        localRsineInstance = localContext.getBean(Rsine.class);
+        localRsineInstance = localContext.getBean(ChangeSetService.class);
         localRsineInstance.start();
         localHelper = localContext.getBean(Helper.class);
 
@@ -56,7 +58,11 @@ public class PPTInteractionTest {
         Subscription subscription = new Subscription();
         subscription.addQuery(createMappingQuery(), new ToStringBindingSetFormatter());
         subscription.addNotifier(countingNotifier = new CountingNotifier());
-        remotePptRsineInstance.registerSubscription(subscription);
+
+        RegistrationService remoteRegistrationService = remoteContext.getBean(
+                "remoteRegistrationService",
+                RegistrationService.class);
+        remoteRegistrationService.register(subscription, false);
     }
 
     private String createMappingQuery() {

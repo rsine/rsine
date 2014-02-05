@@ -7,7 +7,6 @@ import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
 import eu.lod2.rsine.changesetservice.PersistAndNotifyProvider;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,7 +20,7 @@ import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.OWL;
 import org.openrdf.model.vocabulary.SKOS;
-import org.openrdf.repository.RepositoryConnection;
+import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFHandlerException;
@@ -37,24 +36,20 @@ import java.io.IOException;
 public class ConceptMergeTest {
 
     @Autowired
-    private Rsine rsine;
-
-    @Autowired
     private RegistrationService registrationService;
 
     @Autowired
     private PersistAndNotifyProvider persistAndNotifyProvider;
 
     @Autowired
-    private RepositoryConnection managedStoreCon;
+    private Repository managedStoreRepo;
 
     private CountingNotifier countingNotifier;
 
     @Before
     public void setUp() throws IOException, RDFParseException, RDFHandlerException, RepositoryException {
-        managedStoreCon.add(Rsine.class.getResource("/reegle.rdf"), "", RDFFormat.RDFXML);
+        managedStoreRepo.getConnection().add(Rsine.class.getResource("/reegle.rdf"), "", RDFFormat.RDFXML);
         subscribe();
-        rsine.start();
     }
 
     private void subscribe() throws RDFParseException, IOException, RDFHandlerException {
@@ -66,30 +61,28 @@ public class ConceptMergeTest {
         subscription.addNotifier(countingNotifier);
     }
 
-    @After
-    public void tearDown() throws IOException, InterruptedException, RepositoryException {
-        rsine.stop();
-    }
-
     @Test
     public void mergeDetection() throws RepositoryException {
         String mainConcept = "http://reegle.info/glossary/440";
         String abandonedConcept = "http://reegle.info/glossary/422";
         Literal abandonedConceptPrefLabel = new LiteralImpl("combi storage tanks", "en");
 
-        Helper.setLabel(managedStoreCon,
+        Helper.setLabel(managedStoreRepo.getConnection(),
                 new URIImpl("http://reegle.info/glossary/1111"),
                 SKOS.PREF_LABEL,
                 new LiteralImpl("Ottakringer Helles", "en"),
                 persistAndNotifyProvider);
-        Helper.setAltLabel(managedStoreCon, new URIImpl(mainConcept), abandonedConceptPrefLabel, persistAndNotifyProvider);
+        Helper.setAltLabel(managedStoreRepo.getConnection(),
+                new URIImpl(mainConcept),
+                abandonedConceptPrefLabel,
+                persistAndNotifyProvider);
         removeConcept(new URIImpl(abandonedConcept));
 
         Assert.assertEquals(1, countingNotifier.getNotificationCount());
     }
 
     private void removeConcept(URI concept) throws RepositoryException {
-        managedStoreCon.add(concept, new URIImpl(OWL.NAMESPACE + "deprecated"), new BooleanLiteralImpl(true));
+        managedStoreRepo.getConnection().add(concept, new URIImpl(OWL.NAMESPACE + "deprecated"), new BooleanLiteralImpl(true));
 
         persistAndNotifyProvider.persistAndNotify(
                 Helper.createChangeSetModel(concept.stringValue(),

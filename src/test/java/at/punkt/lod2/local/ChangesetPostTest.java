@@ -24,7 +24,6 @@ import java.util.concurrent.TimeUnit;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"LocalTest-context.xml"})
-//@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class ChangesetPostTest {
 
     @Autowired
@@ -99,8 +98,7 @@ public class ChangesetPostTest {
         int countBefore = changeSetStore.getChangeSetCount();
         postChangeset(props);
 
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(new ChangeSetCountEquals(1));
-        Assert.assertEquals(0, countBefore);
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(new ChangeSetCountEquals(countBefore + 1));
     }
 
     @Test

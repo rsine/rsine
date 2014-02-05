@@ -1,17 +1,13 @@
 package at.punkt.lod2.quality;
 
 import at.punkt.lod2.util.Helper;
-import eu.lod2.rsine.Rsine;
 import eu.lod2.rsine.changesetservice.FeedbackHandler;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.openrdf.repository.RepositoryException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -27,23 +23,10 @@ import java.io.IOException;
 public class FeedbackHandlerTest {
 
     @Autowired
-    public Rsine rsine;
-
-    @Autowired
     private Helper helper;
 
     @Autowired
     private FeedbackHandler feedbackHandler;
-
-    @Before
-    public void setUp() throws IOException {
-        rsine.start();
-    }
-
-    @After
-    public void tearDown() throws IOException, InterruptedException, RepositoryException {
-        rsine.stop();
-    }
 
     @Test
     public void feedbackLogged() throws IOException {

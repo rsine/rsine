@@ -8,6 +8,7 @@ import org.openrdf.OpenRDFException;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.BooleanQuery;
 import org.openrdf.query.QueryLanguage;
+import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +34,7 @@ public class QueryEvaluator {
     private QueryProfiler queryProfiler;
 
     @Autowired
-    private RepositoryConnection managedStoreCon;
+    private Repository managedStoreRepo;
 
     private String authoritativeUri = "";
 
@@ -53,7 +54,7 @@ public class QueryEvaluator {
 
         String issuedQuery = fillInPlaceholders(query);
         long start = System.currentTimeMillis();
-        Collection<String> messages = createMessages(query, issuedQuery, managedStoreCon);
+        Collection<String> messages = createMessages(query, issuedQuery, managedStoreRepo.getConnection());
         queryProfiler.log(issuedQuery, System.currentTimeMillis() - start);
 
         return messages;

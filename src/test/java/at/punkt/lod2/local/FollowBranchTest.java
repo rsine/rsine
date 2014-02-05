@@ -6,7 +6,6 @@ import eu.lod2.rsine.Rsine;
 import eu.lod2.rsine.changesetservice.PersistAndNotifyProvider;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,13 +14,12 @@ import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
 import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.model.impl.URIImpl;
-import org.openrdf.repository.RepositoryConnection;
+import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParseException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -29,11 +27,7 @@ import java.io.IOException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"LocalTest-context.xml"})
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class FollowBranchTest {
-
-    @Autowired
-    private Rsine rsine;
 
     @Autowired
     private RegistrationService registrationService;
@@ -42,20 +36,14 @@ public class FollowBranchTest {
     private PersistAndNotifyProvider persistAndNotifyProvider;
 
     @Autowired
-    private RepositoryConnection managedStoreCon;
+    private Repository managedStoreRepo;
 
     private CountingNotifier countingNotifier;
 
     @Before
     public void setUp() throws IOException, RDFParseException, RDFHandlerException, RepositoryException {
-        managedStoreCon.add(Rsine.class.getResource("/reegle.rdf"), "", RDFFormat.RDFXML);
+        managedStoreRepo.getConnection().add(Rsine.class.getResource("/reegle.rdf"), "", RDFFormat.RDFXML);
         subscribe();
-        rsine.start();
-    }
-
-    @After
-    public void tearDown() throws IOException, InterruptedException, RepositoryException {
-        rsine.stop();
     }
 
     private void subscribe() throws RDFParseException, IOException, RDFHandlerException {
@@ -71,7 +59,7 @@ public class FollowBranchTest {
     public void followBranch() throws RepositoryException {
         //in reegle vocab: <http://reegle.info/glossary/676> skos:broader <http://reegle.info/glossary/1124>
 
-        Helper.setAltLabel(managedStoreCon,
+        Helper.setAltLabel(managedStoreRepo.getConnection(),
                 new URIImpl("http://reegle.info/glossary/676"),
                 new LiteralImpl("altlabel"),
                 persistAndNotifyProvider);

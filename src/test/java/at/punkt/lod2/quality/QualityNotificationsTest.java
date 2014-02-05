@@ -4,12 +4,10 @@ import at.punkt.lod2.util.CountingNotifier;
 import at.punkt.lod2.util.ExpectedCountReached;
 import at.punkt.lod2.util.Helper;
 import com.jayway.awaitility.Awaitility;
-import eu.lod2.rsine.Rsine;
 import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
 import eu.lod2.rsine.changesetservice.PersistAndNotifyProvider;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,7 +17,7 @@ import org.openrdf.model.URI;
 import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.SKOS;
-import org.openrdf.repository.RepositoryConnection;
+import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFHandlerException;
@@ -38,28 +36,19 @@ import java.util.concurrent.TimeUnit;
 public class QualityNotificationsTest {
 
     @Autowired
-    private Rsine rsine;
-
-    @Autowired
     private RegistrationService registrationService;
 
     @Autowired
     private PersistAndNotifyProvider persistAndNotifyProvider;
 
     @Autowired
-    private RepositoryConnection managedStoreCon;
+    private Repository managedStoreRepo;
 
     private CountingNotifier countingNotifier;
 
     @Before
     public void setUp() throws IOException, RDFParseException, RDFHandlerException {
         countingNotifier = new CountingNotifier();
-        rsine.start();
-    }
-
-    @After
-    public void tearDown() throws IOException, InterruptedException, RepositoryException {
-        rsine.stop();
     }
 
     @Test
@@ -80,7 +69,7 @@ public class QualityNotificationsTest {
     }
 
     public void addTriple(URI subject, URI predicate, URI object) throws RepositoryException {
-        managedStoreCon.add(subject, predicate, object);
+        managedStoreRepo.getConnection().add(subject, predicate, object);
 
         persistAndNotifyProvider.persistAndNotify(
                 Helper.createChangeSetModel(subject.stringValue(),
@@ -114,7 +103,7 @@ public class QualityNotificationsTest {
         throws RDFParseException, IOException, RDFHandlerException, RepositoryException
     {
         subscribe("/quality/disjoint_labels_violation.ttl");
-        Helper.setAltLabel(managedStoreCon,
+        Helper.setAltLabel(managedStoreRepo.getConnection(),
             new URIImpl("http://reegle.info/glossary/682"),
             new LiteralImpl("energy efficiency", "en"),
             persistAndNotifyProvider);
@@ -127,7 +116,7 @@ public class QualityNotificationsTest {
         throws RDFParseException, IOException, RDFHandlerException, RepositoryException
     {
         subscribe("/quality/disjoint_labels_violation.ttl");
-        Helper.setAltLabel(managedStoreCon,
+        Helper.setAltLabel(managedStoreRepo.getConnection(),
             new URIImpl("http://reegle.info/glossary/1063"),
             new LiteralImpl("emission", "en"),
             persistAndNotifyProvider);
@@ -164,7 +153,7 @@ public class QualityNotificationsTest {
     public void overlappingLabels() throws RDFParseException, IOException, RDFHandlerException, RepositoryException {
         subscribe("/quality/overlapping_labels.ttl");
 
-        Helper.setAltLabel(managedStoreCon,
+        Helper.setAltLabel(managedStoreRepo.getConnection(),
             new URIImpl("http://reegle.info/glossary/357"),
             new LiteralImpl("Biogas", "en"),
             persistAndNotifyProvider);

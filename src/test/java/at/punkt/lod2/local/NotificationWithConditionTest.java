@@ -1,7 +1,6 @@
 package at.punkt.lod2.local;
 
 import at.punkt.lod2.util.CountingNotifier;
-import eu.lod2.rsine.Rsine;
 import eu.lod2.rsine.changesetservice.ChangeSetCreator;
 import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
 import eu.lod2.rsine.changesetservice.PersistAndNotifyProvider;
@@ -13,7 +12,6 @@ import eu.lod2.rsine.registrationservice.Condition;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.util.Namespaces;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,10 +23,9 @@ import org.openrdf.model.impl.StatementImpl;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.UpdateExecutionException;
-import org.openrdf.repository.RepositoryConnection;
+import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -36,11 +33,7 @@ import java.io.IOException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"LocalTest-context.xml"})
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class NotificationWithConditionTest {
-
-    @Autowired
-    private Rsine rsine;
 
     @Autowired
     private RegistrationService registrationService;
@@ -49,7 +42,7 @@ public class NotificationWithConditionTest {
     private PersistAndNotifyProvider persistAndNotifyProvider;
 
     @Autowired
-    private RepositoryConnection managedStoreCon;
+    private Repository managedStoreRepo;
 
     private CountingNotifier countingNotifier;
 
@@ -60,13 +53,8 @@ public class NotificationWithConditionTest {
 
     @Before
     public void setUp() throws IOException, RepositoryException {
+        managedStoreRepo.getConnection().clear();
         countingNotifier = new CountingNotifier();
-        rsine.start();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        rsine.stop();
     }
 
     @Test
@@ -79,7 +67,7 @@ public class NotificationWithConditionTest {
                 new Condition(createPrefLabelCondition(), false)); // triple did not exist before
 
         persistChangeSet();
-        managedStoreCon.add(prefLabelStatement);
+        managedStoreRepo.getConnection().add(prefLabelStatement);
 
         Assert.assertEquals(1, countingNotifier.getNotificationCount());
     }
@@ -89,7 +77,7 @@ public class NotificationWithConditionTest {
         subscription.addQuery(query, formatter, condition);
         subscription.addNotifier(new LoggingNotifier());
         subscription.addNotifier(countingNotifier);
-        rsine.registerSubscription(subscription);
+        registrationService.register(subscription, true);
     }
 
     private String createPropertyCreatedQuery() {
@@ -134,7 +122,7 @@ public class NotificationWithConditionTest {
 
         persistChangeSet(); // no notification should occur here because condition is not fulfilled
 
-        managedStoreCon.add(prefLabelStatement);
+        managedStoreRepo.getConnection().add(prefLabelStatement);
         persistChangeSet(); // here we get the one and only notification
 
         Assert.assertEquals(1, countingNotifier.getNotificationCount());

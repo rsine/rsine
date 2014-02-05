@@ -4,7 +4,9 @@ import at.punkt.lod2.util.CountingNotifier;
 import at.punkt.lod2.util.ExpectedCountReached;
 import com.jayway.awaitility.Awaitility;
 import eu.lod2.rsine.Rsine;
+import eu.lod2.rsine.changesetservice.ChangeSetService;
 import eu.lod2.rsine.dissemination.messageformatting.BindingSetFormatter;
+import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.rsine.remotenotification.RemoteNotificationServiceBase;
 import eu.lod2.util.Namespaces;
@@ -25,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 
 public class RemoteNotificationTest {
 
-    private Rsine localRsine, remoteRsine;
+    private ChangeSetService localRsine, remoteRsine;
 
     private Model changeSet;
     private CountingNotifier countingNotifier = new CountingNotifier();
@@ -45,10 +47,10 @@ public class RemoteNotificationTest {
 
     private void initServices() throws IOException {
         localContext = new ClassPathXmlApplicationContext("/at/punkt/lod2/remote/RemoteTest-localContext.xml");
-        localRsine = localContext.getBean("localRsine", Rsine.class);
+        localRsine = localContext.getBean("changeSetService", ChangeSetService.class);
 
         remoteRsine = new ClassPathXmlApplicationContext("/at/punkt/lod2/remote/RemoteTest-remoteContext.xml").
-            getBean("remoteRsine", Rsine.class);
+            getBean("changeSetService", ChangeSetService.class);
 
         registerRemoteChangeSubscriber();
         localRsine.start();
@@ -59,7 +61,11 @@ public class RemoteNotificationTest {
         Subscription subscription = new Subscription();
         subscription.addQuery(createRemoteReferencesDetectionQuery(), new RemoteReferencesFormatter());
         subscription.addNotifier(countingNotifier);
-        remoteRsine.registerSubscription(subscription);
+
+        RegistrationService remoteRegistrationService = localContext.getBean(
+            "remoteRegistrationService",
+            RegistrationService.class);
+        remoteRegistrationService.register(subscription, false);
     }
 
     private String createRemoteReferencesDetectionQuery() {

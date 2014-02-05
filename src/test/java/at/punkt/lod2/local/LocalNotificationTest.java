@@ -1,19 +1,19 @@
 package at.punkt.lod2.local;
 
 import at.punkt.lod2.util.Helper;
-import eu.lod2.rsine.Rsine;
 import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
 import eu.lod2.rsine.changesetservice.PersistAndNotifyProvider;
-import eu.lod2.rsine.dissemination.messageformatting.DummyBindingSetFormatter;
+import eu.lod2.rsine.dissemination.messageformatting.ToStringBindingSetFormatter;
 import eu.lod2.rsine.dissemination.notifier.INotifier;
 import eu.lod2.rsine.dissemination.notifier.logging.LoggingNotifier;
 import eu.lod2.rsine.queryhandling.QueryEvaluator;
+import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.util.Namespaces;
-import org.junit.After;
 import org.junit.Before;
 import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.model.impl.URIImpl;
+import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.RDFParseException;
 import org.springframework.beans.BeansException;
@@ -26,29 +26,27 @@ import java.io.IOException;
 public abstract class LocalNotificationTest implements ApplicationContextAware  {
 
     @Autowired
-    private Rsine rsine;
+    private PersistAndNotifyProvider persistAndNotifyProvider;
 
     @Autowired
-    private PersistAndNotifyProvider persistAndNotifyProvider;
+    private RegistrationService registrationService;
+
+    @Autowired
+    private Repository changeSetRepo;
 
     protected ApplicationContext applicationContext;
 
     @Before
     public void setUp() throws IOException, RepositoryException, RDFParseException {
+        changeSetRepo.getConnection().clear();
         registerUser();
-        rsine.start();
-    }
-
-    @After
-    public void tearDown() throws IOException, InterruptedException, RepositoryException {
-        rsine.stop();
     }
 
     private void registerUser() {
         Subscription subscription = new Subscription();
-        subscription.addQuery(createQuery(), new DummyBindingSetFormatter());
+        subscription.addQuery(createQuery(), new ToStringBindingSetFormatter());
         subscription.addNotifier(getNotifier());
-        rsine.registerSubscription(subscription);
+        registrationService.register(subscription, false);
     }
 
     protected INotifier getNotifier() {

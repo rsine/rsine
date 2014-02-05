@@ -5,7 +5,6 @@ import eu.lod2.rsine.dissemination.notifier.INotifier;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -16,7 +15,6 @@ import java.util.concurrent.TimeUnit;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"LocalTestMinTimePassed-context.xml"})
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class MinTimePassedLocalNotificationTest extends LocalNotificationTest {
 
     private final long IMMEDIATE_NOTIFICATION_THRESHOLD_MILLIS = 1000;
