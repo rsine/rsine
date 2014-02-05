@@ -12,9 +12,13 @@
 
     <context:component-scan base-package="eu.lod2.rsine"/>
 
-    <bean id="queryEvaluator" class="eu.lod2.rsine.queryhandling.QueryEvaluator"/>
-
     <bean name="managedStoreRepo" class="org.openrdf.repository.sail.SailRepository" init-method="initialize">
+        <constructor-arg>
+            <bean class="org.openrdf.sail.memory.MemoryStore"/>
+        </constructor-arg>
+    </bean>
+
+    <bean name="changeSetRepo" class="org.openrdf.repository.sail.SailRepository" init-method="initialize" destroy-method="shutDown">
         <constructor-arg>
             <bean class="org.openrdf.sail.memory.MemoryStore"/>
         </constructor-arg>
@@ -30,6 +34,12 @@
     </task:scheduled-tasks>
     <task:scheduler id="taskScheduler" pool-size="1"/>
 
+    <bean name="queryDispatcher" class="eu.lod2.rsine.queryhandling.QueryDispatcher">
+        <constructor-arg value="false"/>
+    </bean>
+
+    <bean id="changeSetService" class="eu.lod2.rsine.changesetservice.ChangeSetService" init-method="start" destroy-method="stop"/>
+    <bean id="queryEvaluator" class="eu.lod2.rsine.queryhandling.QueryEvaluator"/>
     <bean id="remoteServiceDetector" class="eu.lod2.rsine.remotenotification.UnavailableRemoteServiceDetector"/>
     <bean id="remoteNotificationServiceBase" class="eu.lod2.rsine.remotenotification.NullRemoteNotificationService"/>
 
