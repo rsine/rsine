@@ -15,7 +15,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openrdf.model.impl.LiteralImpl;
-import org.openrdf.repository.Repository;
+import org.openrdf.query.MalformedQueryException;
+import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.RDFParseException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,7 @@ import java.util.concurrent.TimeUnit;
 public class MinTimePassedEvaluationPolicyTest  {
 
     private final long IMMEDIATE_NOTIFICATION_THRESHOLD_MILLIS = 1000;
+
     private TimeMeasureNotifier timeMeasureNotifier = new TimeMeasureNotifier();
 
     @Autowired
@@ -40,21 +42,12 @@ public class MinTimePassedEvaluationPolicyTest  {
     @Autowired
     private RegistrationService registrationService;
 
-    @Autowired
-    private Repository changeSetRepo, managedStoreRepo;
-
     @Before
-    public void setUp() throws IOException, RepositoryException, RDFParseException {
-        changeSetRepo.getConnection().clear();
-        managedStoreRepo.getConnection().clear();
-        registerUser();
-    }
-
-    private void registerUser() {
+    public void setUp() throws IOException, RepositoryException, RDFParseException, QueryEvaluationException, MalformedQueryException {
         Subscription subscription = new Subscription();
         subscription.addQuery(createQuery(), new ToStringBindingSetFormatter());
         subscription.addNotifier(timeMeasureNotifier);
-        registrationService.register(subscription, false);
+        registrationService.register(subscription, true);
     }
 
     private String createQuery() {
@@ -109,37 +102,30 @@ public class MinTimePassedEvaluationPolicyTest  {
         Awaitility.await().atMost(2, TimeUnit.SECONDS).until(new NotificationDetector(timeMeasureNotifier));
 
         performChange();
-        Assert.assertFalse(notificationReceivedWithinASecond());
-    }
-
-    private boolean notificationReceivedWithinASecond() {
-        long start = System.currentTimeMillis();
-        while (timeMeasureNotifier.millisPassed == null) {
-            if (System.currentTimeMillis() - start > 1000) return false;
-        }
-        return true;
+        Awaitility.await().atMost(10, TimeUnit.SECONDS).until(new NotificationDetector(timeMeasureNotifier));
+        Assert.assertTrue(timeMeasureNotifier.getMillisPassed() > IMMEDIATE_NOTIFICATION_THRESHOLD_MILLIS);
     }
 
     @Test
     public void changeLateEnoughForNotification() throws IOException {
         performChange();
-        Awaitility.await().atMost(2, TimeUnit.SECONDS).until(new NotificationDetector(timeMeasureNotifier));
+        Awaitility.await().atMost(1, TimeUnit.SECONDS).until(new NotificationDetector(timeMeasureNotifier));
 
         try {
-            Thread.sleep(15000);
+            Thread.sleep(6000);
         }
         catch (InterruptedException e) {
             // ignore
         }
 
-        changePrefLabel();
-        Assert.assertTrue(notificationReceivedWithinASecond());
+        performChange();
+        Awaitility.await().atMost(1, TimeUnit.SECONDS).until(new NotificationDetector(timeMeasureNotifier));
     }
 
     @Test
     public void lastChangeNotMissed() throws IOException {
         performChange();
-        Awaitility.await().atMost(2, TimeUnit.SECONDS).until(new NotificationDetector(timeMeasureNotifier));
+        Awaitility.await().atMost(1, TimeUnit.SECONDS).until(new NotificationDetector(timeMeasureNotifier));
 
         performChange();
         Awaitility.await().atMost(20, TimeUnit.SECONDS).until(new NotificationDetector(timeMeasureNotifier));
@@ -170,12 +156,12 @@ public class MinTimePassedEvaluationPolicyTest  {
         }
 
         @Override
-        public void notify(Collection<String> messages) {
+        public synchronized void notify(Collection<String> messages) {
             System.out.println("notified");
             millisPassed = System.currentTimeMillis() - time;
         }
 
-        public Long getMillisPassed() {
+        public synchronized Long getMillisPassed() {
             return millisPassed;
         }
 
