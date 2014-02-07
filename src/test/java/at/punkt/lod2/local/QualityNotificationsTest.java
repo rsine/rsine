@@ -1,9 +1,8 @@
 package at.punkt.lod2.local;
 
 import at.punkt.lod2.util.CountingNotifier;
-import at.punkt.lod2.util.ExpectedCountReached;
 import at.punkt.lod2.util.Helper;
-import com.jayway.awaitility.Awaitility;
+import com.hp.hpl.jena.sparql.core.DatasetGraph;
 import eu.lod2.rsine.Rsine;
 import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
 import eu.lod2.rsine.changesetservice.PersistAndNotifyProvider;
@@ -29,7 +28,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"LocalTest-context.xml"})
@@ -45,10 +43,10 @@ public class QualityNotificationsTest {
     private Repository managedStoreRepo;
 
     private CountingNotifier countingNotifier;
+    private DatasetGraph datasetGraph;
 
     @Before
-    public void setUp() throws IOException, RDFParseException, RDFHandlerException, RepositoryException {
-        countingNotifier = new CountingNotifier();
+    public void setUp() throws RepositoryException, IOException, RDFParseException {
         if (managedStoreRepo.getConnection().isEmpty()) {
             managedStoreRepo.getConnection().add(Rsine.class.getResource("/reegle.rdf"), "", RDFFormat.RDFXML);
         }
@@ -65,8 +63,9 @@ public class QualityNotificationsTest {
     }
 
     private void subscribe(String subscriptionFileLocation) throws RDFParseException, IOException, RDFHandlerException {
+        countingNotifier = new CountingNotifier();
         Model subscriptionModel = Helper.createModelFromResourceFile(subscriptionFileLocation, RDFFormat.TURTLE);
-        Resource subscriptionId = registrationService.register(subscriptionModel);
+        Resource subscriptionId = registrationService.register(subscriptionModel, true);
         Subscription subscription = registrationService.getSubscription(subscriptionId);
         subscription.addNotifier(countingNotifier);
     }
@@ -75,11 +74,11 @@ public class QualityNotificationsTest {
         managedStoreRepo.getConnection().add(subject, predicate, object);
 
         persistAndNotifyProvider.persistAndNotify(
-                Helper.createChangeSetModel(subject.stringValue(),
-                        predicate.stringValue(),
-                        object,
-                        ChangeTripleHandler.CHANGETYPE_ADD),
-                true);
+            Helper.createChangeSetModel(subject.stringValue(),
+                    predicate.stringValue(),
+                    object,
+                    ChangeTripleHandler.CHANGETYPE_ADD),
+            true);
     }
 
     @Test
@@ -98,7 +97,7 @@ public class QualityNotificationsTest {
             SKOS.BROADER,
             new URIImpl("http://reegle.info/glossary/1124"));
 
-        Awaitility.await().atMost(10, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 2));
+        Assert.assertEquals(2, countingNotifier.getNotificationCount());
     }
 
     @Test
@@ -111,7 +110,7 @@ public class QualityNotificationsTest {
             new LiteralImpl("energy efficiency", "en"),
             persistAndNotifyProvider);
 
-        Awaitility.await().atMost(20, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
+        Assert.assertEquals(1, countingNotifier.getNotificationCount());
     }
 
     @Test
@@ -123,7 +122,8 @@ public class QualityNotificationsTest {
             new URIImpl("http://reegle.info/glossary/1063"),
             new LiteralImpl("emission", "en"),
             persistAndNotifyProvider);
-        Awaitility.await().atMost(20, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
+
+        Assert.assertEquals(1, countingNotifier.getNotificationCount());
     }
 
     @Test
@@ -135,7 +135,7 @@ public class QualityNotificationsTest {
         String sibling2 = "http://reegle.info/glossary/1252";
         addTriple(new URIImpl(sibling1), SKOS.RELATED, new URIImpl(sibling2));
 
-        Awaitility.await().atMost(20, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
+        Assert.assertEquals(1, countingNotifier.getNotificationCount());
     }
 
     @Test
@@ -149,7 +149,7 @@ public class QualityNotificationsTest {
         addTriple(new URIImpl(level3Concept), SKOS.BROADER, new URIImpl(level1Concept));
         addTriple(new URIImpl(level3Concept), SKOS.NARROWER, new URIImpl(level1Concept));
 
-        Awaitility.await().atMost(20, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
+        Assert.assertEquals(1, countingNotifier.getNotificationCount());
     }
 
     @Test
@@ -160,7 +160,7 @@ public class QualityNotificationsTest {
             new URIImpl("http://reegle.info/glossary/357"),
             new LiteralImpl("Biogas", "en"),
             persistAndNotifyProvider);
-        Awaitility.await().atMost(20, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
+        Assert.assertEquals(1, countingNotifier.getNotificationCount());
     }
 
     @Test
@@ -171,7 +171,7 @@ public class QualityNotificationsTest {
         String level3Concept = "http://reegle.info/glossary/196";
         addTriple(new URIImpl(level3Concept), SKOS.RELATED, new URIImpl(level1Concept));
 
-        Awaitility.await().atMost(20, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
+        Assert.assertEquals(1, countingNotifier.getNotificationCount());
     }
 
     @Test
@@ -190,7 +190,7 @@ public class QualityNotificationsTest {
         // ok
         addTriple(new URIImpl(concept), SKOS.BROAD_MATCH, new URIImpl("http://reegle.info/glossary/1674"));
 
-        Awaitility.await().atMost(20, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 2));
+        Assert.assertEquals(2, countingNotifier.getNotificationCount());
     }
 
     @Test
@@ -201,7 +201,7 @@ public class QualityNotificationsTest {
         String[] conceptsInSameScheme = {"http://reegle.info/glossary/676", "http://reegle.info/glossary/1620"};
         addTriple(new URIImpl(conceptsInSameScheme[0]), SKOS.BROAD_MATCH, new URIImpl(conceptsInSameScheme[1]));
 
-        Awaitility.await().atMost(20, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
+        Assert.assertEquals(1, countingNotifier.getNotificationCount());
     }
 
     @Test
@@ -221,7 +221,7 @@ public class QualityNotificationsTest {
 
         addTriple(new URIImpl("http://some.completely.other.concept"), SKOS.BROADER, new URIImpl("http://some.completely.other.concept2"));
 
-        Awaitility.await().atMost(20, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
+        Assert.assertEquals(1, countingNotifier.getNotificationCount());
     }
 
 }

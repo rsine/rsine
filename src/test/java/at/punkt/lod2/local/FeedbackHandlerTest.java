@@ -1,6 +1,5 @@
-package at.punkt.lod2.quality;
+package at.punkt.lod2.local;
 
-import at.punkt.lod2.util.Helper;
 import eu.lod2.rsine.changesetservice.FeedbackHandler;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -18,12 +17,9 @@ import java.io.FileReader;
 import java.io.IOException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"FeedbackHandlerTest-context.xml"})
+@ContextConfiguration(locations = {"LocalTest-context.xml"})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class FeedbackHandlerTest {
-
-    @Autowired
-    private Helper helper;
 
     @Autowired
     private FeedbackHandler feedbackHandler;

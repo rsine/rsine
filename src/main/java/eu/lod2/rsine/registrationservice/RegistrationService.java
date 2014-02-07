@@ -27,10 +27,17 @@ public class RegistrationService {
     }
 
     public synchronized Resource register(Model subscriptionData) {
+        return register(subscriptionData, false);
+    }
+
+    public synchronized Resource register(Model subscriptionData, boolean overwriteIfExisting) {
         Subscription subscription = new SubscriptionParser(subscriptionData).createSubscription();
 
         if (subscriptions.contains(subscription)) {
-            throw new SubscriptionExistsException();
+            if (overwriteIfExisting) {
+                subscriptions.remove(subscription);
+            }
+            else throw new SubscriptionExistsException();
         }
 
         subscriptions.add(subscription);
@@ -39,16 +46,7 @@ public class RegistrationService {
     }
 
     public synchronized void unregister(Resource subscriptionId) {
-        subscriptions.remove(getSubscriptionById(subscriptionId));
-    }
-
-    private synchronized Subscription getSubscriptionById(Resource subscriptionId){
-        for (Subscription subscription : subscriptions){
-            if(subscription.getSubscriptionId().equals(subscriptionId)){
-                return subscription;
-            }
-        }        
-        throw new SubscriptionNotFoundException();
+        subscriptions.remove(getSubscription(subscriptionId));
     }
 
     public synchronized Iterator<Subscription> getSubscriptionIterator() {

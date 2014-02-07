@@ -24,7 +24,7 @@
         rsine:condition [
             spin:text "PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
                 ASK {
-                    ?concept (skos:broader){2,10} ?otherConcept .
+                    ?concept skos:broader/skos:broader+ ?otherConcept .
                 }";
             rsine:expect true;
         ];
