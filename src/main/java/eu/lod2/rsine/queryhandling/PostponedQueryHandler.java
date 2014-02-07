@@ -28,7 +28,11 @@ public class PostponedQueryHandler {
     }
 
     private String inQueue() {
-        return postponedQueries.size()+ " pending";
+        return getQueueSize() + " pending";
+    }
+
+    public synchronized int getQueueSize() {
+        return postponedQueries.size();
     }
 
     public synchronized void remove(NotificationQuery notificationQuery) {

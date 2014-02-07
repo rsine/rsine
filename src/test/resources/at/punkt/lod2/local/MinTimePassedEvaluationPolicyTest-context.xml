@@ -12,7 +12,7 @@
 
     <context:component-scan base-package="eu.lod2.rsine"/>
 
-    <bean name="managedStoreRepo" class="org.openrdf.repository.sail.SailRepository" init-method="initialize">
+    <bean name="managedStoreRepo" class="org.openrdf.repository.sail.SailRepository" init-method="initialize" destroy-method="shutDown">
         <constructor-arg>
             <bean class="org.openrdf.sail.memory.MemoryStore"/>
         </constructor-arg>
@@ -30,7 +30,7 @@
 
     <bean id="postponedQueryHandler" class="eu.lod2.rsine.queryhandling.PostponedQueryHandler"/>
     <task:scheduled-tasks scheduler="taskScheduler">
-        <task:scheduled ref="postponedQueryHandler" method="cleanUp" fixed-rate="5000"/>
+        <task:scheduled ref="postponedQueryHandler" method="cleanUp" fixed-delay="5000"/>
     </task:scheduled-tasks>
     <task:scheduler id="taskScheduler" pool-size="1"/>
 

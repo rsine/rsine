@@ -6,6 +6,7 @@ import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
 import eu.lod2.rsine.changesetservice.PersistAndNotifyProvider;
 import eu.lod2.rsine.dissemination.messageformatting.ToStringBindingSetFormatter;
 import eu.lod2.rsine.dissemination.notifier.INotifier;
+import eu.lod2.rsine.queryhandling.PostponedQueryHandler;
 import eu.lod2.rsine.queryhandling.QueryEvaluator;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
@@ -42,12 +43,17 @@ public class MinTimePassedEvaluationPolicyTest  {
     @Autowired
     private RegistrationService registrationService;
 
+    @Autowired
+    private PostponedQueryHandler postponedQueryHandler;
+
     @Before
     public void setUp() throws IOException, RepositoryException, RDFParseException, QueryEvaluationException, MalformedQueryException {
         Subscription subscription = new Subscription();
         subscription.addQuery(createQuery(), new ToStringBindingSetFormatter());
         subscription.addNotifier(timeMeasureNotifier);
         registrationService.register(subscription, true);
+
+        Awaitility.await().atMost(10, TimeUnit.SECONDS).until(new CleanupSyncer());
     }
 
     private String createQuery() {
@@ -129,6 +135,17 @@ public class MinTimePassedEvaluationPolicyTest  {
 
         performChange();
         Awaitility.await().atMost(20, TimeUnit.SECONDS).until(new NotificationDetector(timeMeasureNotifier));
+    }
+
+    private class CleanupSyncer implements Callable<Boolean> {
+
+        @Override
+        public Boolean call() throws Exception {
+            boolean synced = (postponedQueryHandler.getQueueSize() == 0);
+            if (synced) System.out.println("synced");
+            return synced;
+        }
+
     }
 
     private class NotificationDetector implements Callable<Boolean> {

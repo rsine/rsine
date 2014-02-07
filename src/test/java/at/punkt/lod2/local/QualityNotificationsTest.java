@@ -1,13 +1,15 @@
-package at.punkt.lod2.quality;
+package at.punkt.lod2.local;
 
 import at.punkt.lod2.util.CountingNotifier;
 import at.punkt.lod2.util.ExpectedCountReached;
 import at.punkt.lod2.util.Helper;
 import com.jayway.awaitility.Awaitility;
+import eu.lod2.rsine.Rsine;
 import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
 import eu.lod2.rsine.changesetservice.PersistAndNotifyProvider;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,7 +25,6 @@ import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParseException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -31,8 +32,7 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"QualityNotificationsTest-context.xml"})
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@ContextConfiguration(locations = {"LocalTest-context.xml"})
 public class QualityNotificationsTest {
 
     @Autowired
@@ -47,8 +47,11 @@ public class QualityNotificationsTest {
     private CountingNotifier countingNotifier;
 
     @Before
-    public void setUp() throws IOException, RDFParseException, RDFHandlerException {
+    public void setUp() throws IOException, RDFParseException, RDFHandlerException, RepositoryException {
         countingNotifier = new CountingNotifier();
+        if (managedStoreRepo.getConnection().isEmpty()) {
+            managedStoreRepo.getConnection().add(Rsine.class.getResource("/reegle.rdf"), "", RDFFormat.RDFXML);
+        }
     }
 
     @Test
@@ -58,7 +61,7 @@ public class QualityNotificationsTest {
             SKOS.BROADER,
             new URIImpl("http://reegle.info/glossary/676"));
 
-        Awaitility.await().atMost(20, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
+        Assert.assertEquals(1, countingNotifier.getNotificationCount());
     }
 
     private void subscribe(String subscriptionFileLocation) throws RDFParseException, IOException, RDFHandlerException {

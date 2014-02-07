@@ -42,8 +42,10 @@ public class FollowBranchTest {
 
     @Before
     public void setUp() throws IOException, RDFParseException, RDFHandlerException, RepositoryException {
-        managedStoreRepo.getConnection().add(Rsine.class.getResource("/reegle.rdf"), "", RDFFormat.RDFXML);
-        subscribe();
+        if (managedStoreRepo.getConnection().isEmpty()) {
+            managedStoreRepo.getConnection().add(Rsine.class.getResource("/reegle.rdf"), "", RDFFormat.RDFXML);
+            subscribe();
+        }
     }
 
     private void subscribe() throws RDFParseException, IOException, RDFHandlerException {
