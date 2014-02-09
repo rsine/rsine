@@ -1,4 +1,4 @@
-package at.punkt.lod2.local;
+package at.punkt.lod2.sparqlEndpoint;
 
 import at.punkt.lod2.util.CountingNotifier;
 import at.punkt.lod2.util.Helper;
@@ -8,9 +8,8 @@ import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
 import eu.lod2.rsine.changesetservice.PersistAndNotifyProvider;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.apache.jena.fuseki.Fuseki;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
@@ -30,7 +29,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import java.io.IOException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"LocalTest-context.xml"})
+@ContextConfiguration(locations = {"SparqlEndpointTest-context.xml"})
 public class QualityNotificationsTest {
 
     @Autowired
@@ -43,13 +42,17 @@ public class QualityNotificationsTest {
     private Repository managedStoreRepo;
 
     private CountingNotifier countingNotifier;
-    private DatasetGraph datasetGraph;
+    private static DatasetGraph datasetGraph;
 
-    @Before
-    public void setUp() throws RepositoryException, IOException, RDFParseException {
-        if (managedStoreRepo.getConnection().isEmpty()) {
-            managedStoreRepo.getConnection().add(Rsine.class.getResource("/reegle.rdf"), "", RDFFormat.RDFXML);
-        }
+    @BeforeClass
+    public static void initFuseki() {
+        datasetGraph = Helper.initFuseki(Rsine.class.getResource("/reegle.rdf"), "dataset");
+
+    }
+
+    @AfterClass
+    public static void shutdownFuseki() {
+        Fuseki.getServer().stop();
     }
 
     @Test

@@ -30,7 +30,7 @@ import java.net.URL;
 
 public class Helper {
 
-    private DatasetGraph initFuseki(URL rdfFile, String datasetName) {
+    public static DatasetGraph initFuseki(URL rdfFile, String datasetName) {
         URI rdfFileUri = new File(rdfFile.getFile()).toURI();
         DatasetGraph datasetGraph = DatasetGraphFactory.createMem();
         RDFDataMgr.read(datasetGraph, rdfFileUri.toString());
