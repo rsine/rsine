@@ -1,9 +1,16 @@
 package at.punkt.lod2.util;
 
+import com.hp.hpl.jena.sparql.core.DatasetGraph;
+import com.hp.hpl.jena.sparql.core.DatasetGraphFactory;
 import eu.lod2.rsine.Rsine;
 import eu.lod2.rsine.changesetservice.ChangeSetCreator;
 import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
 import eu.lod2.rsine.changesetservice.PersistAndNotifyProvider;
+import org.apache.jena.fuseki.Fuseki;
+import org.apache.jena.fuseki.server.FusekiConfig;
+import org.apache.jena.fuseki.server.SPARQLServer;
+import org.apache.jena.fuseki.server.ServerConfig;
+import org.apache.jena.riot.RDFDataMgr;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Model;
 import org.openrdf.model.Value;
@@ -16,9 +23,23 @@ import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.*;
 import org.openrdf.rio.helpers.StatementCollector;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URL;
 
 public class Helper {
+
+    private DatasetGraph initFuseki(URL rdfFile, String datasetName) {
+        URI rdfFileUri = new File(rdfFile.getFile()).toURI();
+        DatasetGraph datasetGraph = DatasetGraphFactory.createMem();
+        RDFDataMgr.read(datasetGraph, rdfFileUri.toString());
+        ServerConfig serverConfig = FusekiConfig.defaultConfiguration(datasetName, datasetGraph, true) ;
+        SPARQLServer fusekiServer = new SPARQLServer(serverConfig);
+        Fuseki.setServer(fusekiServer);
+        fusekiServer.start();
+        return datasetGraph;
+    }
 
     public static Model createModelFromResourceFile(String fileName, RDFFormat format)
         throws RDFParseException, IOException, RDFHandlerException
