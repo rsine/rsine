@@ -49,9 +49,6 @@ public class QueryEvaluator {
     public Collection<String> evaluate(NotificationQuery query, IEvaluationPolicy usePolicy) throws OpenRDFException
     {
         usePolicy.checkEvaluationNeeded(query);
-
-        //RepositoryConnection managedStoreCon = new SPARQLConnection(new SPARQLRepository(managedTripleStoreSparqlEndpoint));
-
         String issuedQuery = fillInPlaceholders(query);
         long start = System.currentTimeMillis();
         Collection<String> messages = createMessages(query, issuedQuery, managedStoreRepo.getConnection());

@@ -13,6 +13,7 @@ import org.apache.jena.fuseki.server.ServerConfig;
 import org.apache.jena.riot.RDFDataMgr;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Model;
+import org.openrdf.model.Statement;
 import org.openrdf.model.Value;
 import org.openrdf.model.impl.StatementImpl;
 import org.openrdf.model.impl.TreeModel;
@@ -91,6 +92,21 @@ public class Helper {
                             PersistAndNotifyProvider persistAndNotifyProvider) throws RepositoryException
     {
         setLabel(repCon, concept, SKOS.ALT_LABEL, newAltLabel, persistAndNotifyProvider);
+    }
+
+    public static void addToDatasetAndPersist(Statement statement,
+                                              DatasetGraph datasetGraph,
+                                              PersistAndNotifyProvider persistAndNotifyProvider)
+    {
+        datasetGraph.add();
+
+        persistAndNotifyProvider.persistAndNotify(
+                Helper.createChangeSetModel(statement.getSubject().stringValue(),
+                        statement.getPredicate().stringValue(),
+                        statement.getObject(),
+                        ChangeTripleHandler.CHANGETYPE_ADD),
+                true);
+
     }
 
 }

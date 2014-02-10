@@ -4,24 +4,24 @@ import at.punkt.lod2.util.CountingNotifier;
 import at.punkt.lod2.util.Helper;
 import com.hp.hpl.jena.sparql.core.DatasetGraph;
 import eu.lod2.rsine.Rsine;
-import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
 import eu.lod2.rsine.changesetservice.PersistAndNotifyProvider;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
 import org.apache.jena.fuseki.Fuseki;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.LiteralImpl;
+import org.openrdf.model.impl.StatementImpl;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.SKOS;
 import org.openrdf.repository.Repository;
-import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.sparql.SPARQLConnection;
-import org.openrdf.repository.sparql.SPARQLRepository;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParseException;
@@ -50,7 +50,6 @@ public class QualityNotificationsTest {
     @BeforeClass
     public static void initFuseki() {
         datasetGraph = Helper.initFuseki(Rsine.class.getResource("/reegle.rdf"), "dataset");
-
     }
 
     @AfterClass
@@ -77,16 +76,9 @@ public class QualityNotificationsTest {
     }
 
     public void addTriple(URI subject, URI predicate, URI object) throws RepositoryException {
-        RepositoryConnection con = new SPARQLConnection(new SPARQLRepository("http://localhost:3030/dataset/query"));
-        con.add(subject, predicate, object);
-        //managedStoreRepo.getConnection().add(subject, predicate, object);
-
-        persistAndNotifyProvider.persistAndNotify(
-            Helper.createChangeSetModel(subject.stringValue(),
-                    predicate.stringValue(),
-                    object,
-                    ChangeTripleHandler.CHANGETYPE_ADD),
-            true);
+        Helper.addToDatasetAndPersist(new StatementImpl(subject, predicate, object),
+                datasetGraph,
+                persistAndNotifyProvider);
     }
 
     @Test
