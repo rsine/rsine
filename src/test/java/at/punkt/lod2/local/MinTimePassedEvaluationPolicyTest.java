@@ -2,7 +2,7 @@ package at.punkt.lod2.local;
 
 import at.punkt.lod2.util.Helper;
 import com.jayway.awaitility.Awaitility;
-import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
+import eu.lod2.rsine.changesetservice.ChangeTripleService;
 import eu.lod2.rsine.changesetservice.PersistAndNotifyProvider;
 import eu.lod2.rsine.dissemination.messageformatting.ToStringBindingSetFormatter;
 import eu.lod2.rsine.dissemination.notifier.INotifier;
@@ -85,7 +85,7 @@ public class MinTimePassedEvaluationPolicyTest  {
                         "http://reegle.info/glossary/1111",
                         "http://www.w3.org/2004/02/skos/core#prefLabel",
                         new LiteralImpl("Schremser Edelmärzen", "en"),
-                        ChangeTripleHandler.CHANGETYPE_UPDATE),
+                        ChangeTripleService.CHANGETYPE_UPDATE),
                 true);
     }
 

@@ -4,7 +4,7 @@ import at.punkt.lod2.util.CountingNotifier;
 import at.punkt.lod2.util.ExpectedCountReached;
 import at.punkt.lod2.util.Helper;
 import com.jayway.awaitility.Awaitility;
-import eu.lod2.rsine.changesetservice.ChangeSetService;
+import eu.lod2.rsine.changesetservice.RsineController;
 import eu.lod2.rsine.dissemination.messageformatting.ToStringBindingSetFormatter;
 import eu.lod2.rsine.queryhandling.QueryEvaluator;
 import eu.lod2.rsine.registrationservice.RegistrationService;
@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class PPTInteractionTest {
 
-    private ChangeSetService remotePptRsineInstance, localRsineInstance;
+    private RsineController remotePptRsineInstance, localRsineInstance;
     private AbstractApplicationContext remoteContext;
     private Helper localHelper;
     private CountingNotifier countingNotifier;
@@ -37,11 +37,11 @@ public class PPTInteractionTest {
     @Before
     public void setUp() throws IOException {
         remoteContext = new ClassPathXmlApplicationContext("/at/punkt/lod2/remote/PPTInteractionTest-PPTcontext.xml");
-        remotePptRsineInstance = remoteContext.getBean(ChangeSetService.class);
+        remotePptRsineInstance = remoteContext.getBean(RsineController.class);
         remotePptRsineInstance.start();
 
         AbstractApplicationContext localContext = new ClassPathXmlApplicationContext("/at/punkt/lod2/remote/PPTInteractionTest-localContext.xml");
-        localRsineInstance = localContext.getBean(ChangeSetService.class);
+        localRsineInstance = localContext.getBean(RsineController.class);
         localRsineInstance.start();
         localHelper = localContext.getBean(Helper.class);
 

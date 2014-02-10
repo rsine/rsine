@@ -4,7 +4,7 @@ import at.punkt.lod2.util.CountingNotifier;
 import at.punkt.lod2.util.ExpectedCountReached;
 import com.jayway.awaitility.Awaitility;
 import eu.lod2.rsine.Rsine;
-import eu.lod2.rsine.changesetservice.ChangeSetService;
+import eu.lod2.rsine.changesetservice.RsineController;
 import eu.lod2.rsine.dissemination.messageformatting.BindingSetFormatter;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 
 public class RemoteNotificationTest {
 
-    private ChangeSetService localRsine, remoteRsine;
+    private RsineController localRsine, remoteRsine;
 
     private Model changeSet;
     private CountingNotifier countingNotifier = new CountingNotifier();
@@ -47,10 +47,10 @@ public class RemoteNotificationTest {
 
     private void initServices() throws IOException {
         localContext = new ClassPathXmlApplicationContext("/at/punkt/lod2/remote/RemoteTest-localContext.xml");
-        localRsine = localContext.getBean("changeSetService", ChangeSetService.class);
+        localRsine = localContext.getBean("changeSetService", RsineController.class);
 
         remoteRsine = new ClassPathXmlApplicationContext("/at/punkt/lod2/remote/RemoteTest-remoteContext.xml").
-            getBean("changeSetService", ChangeSetService.class);
+            getBean("changeSetService", RsineController.class);
 
         registerRemoteChangeSubscriber();
         localRsine.start();

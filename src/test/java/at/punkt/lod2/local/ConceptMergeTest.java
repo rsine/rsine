@@ -3,7 +3,7 @@ package at.punkt.lod2.local;
 import at.punkt.lod2.util.CountingNotifier;
 import at.punkt.lod2.util.Helper;
 import eu.lod2.rsine.Rsine;
-import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
+import eu.lod2.rsine.changesetservice.ChangeTripleService;
 import eu.lod2.rsine.changesetservice.PersistAndNotifyProvider;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
@@ -88,7 +88,7 @@ public class ConceptMergeTest {
                 Helper.createChangeSetModel(concept.stringValue(),
                         OWL.NAMESPACE + "deprecated",
                         new BooleanLiteralImpl(true),
-                        ChangeTripleHandler.CHANGETYPE_ADD),
+                        ChangeTripleService.CHANGETYPE_ADD),
                 true);
     }
 

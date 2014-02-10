@@ -6,7 +6,7 @@ import com.hp.hpl.jena.sparql.core.DatasetGraph;
 import com.hp.hpl.jena.sparql.core.DatasetGraphFactory;
 import eu.lod2.rsine.Rsine;
 import eu.lod2.rsine.changesetservice.ChangeSetCreator;
-import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
+import eu.lod2.rsine.changesetservice.ChangeTripleService;
 import eu.lod2.rsine.changesetservice.PersistAndNotifyProvider;
 import org.apache.jena.fuseki.Fuseki;
 import org.apache.jena.fuseki.server.FusekiConfig;
@@ -84,7 +84,7 @@ public class Helper {
                 Helper.createChangeSetModel(concept.stringValue(),
                         labelType.stringValue(),
                         newlabel,
-                        ChangeTripleHandler.CHANGETYPE_ADD),
+                        ChangeTripleService.CHANGETYPE_ADD),
                 true);
     }
 
@@ -109,7 +109,7 @@ public class Helper {
                 Helper.createChangeSetModel(statement.getSubject().stringValue(),
                         statement.getPredicate().stringValue(),
                         statement.getObject(),
-                        ChangeTripleHandler.CHANGETYPE_ADD),
+                        ChangeTripleService.CHANGETYPE_ADD),
                 true);
 
     }

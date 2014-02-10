@@ -15,7 +15,7 @@
 
     <context:component-scan base-package="eu.lod2.rsine"/>
 
-    <bean id="changeSetService" class="eu.lod2.rsine.changesetservice.ChangeSetService">
+    <bean id="changeSetService" class="eu.lod2.rsine.changesetservice.RsineController">
         <constructor-arg value="2221"/>
     </bean>
 

@@ -1,8 +1,8 @@
 package at.punkt.lod2.local;
 
 import com.jayway.awaitility.Awaitility;
-import eu.lod2.rsine.changesetservice.ChangeSetService;
-import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
+import eu.lod2.rsine.changesetservice.ChangeTripleService;
+import eu.lod2.rsine.changesetservice.RsineController;
 import eu.lod2.rsine.changesetstore.ChangeSetStore;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 public class ChangesetPostTest {
 
     @Autowired
-    private ChangeSetService changeSetService;
+    private RsineController rsineController;
 
     @Autowired
     private ChangeSetStore changeSetStore;
@@ -35,8 +35,8 @@ public class ChangesetPostTest {
     @Test
     public void postTripleChange() throws IOException {
         Properties props = new Properties();
-        props.setProperty(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD);
-        props.setProperty(ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE, "<http://example.org/myconcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"somelabel\"@en .");
+        props.setProperty(ChangeTripleService.POST_BODY_CHANGETYPE, ChangeTripleService.CHANGETYPE_ADD);
+        props.setProperty(ChangeTripleService.POST_BODY_AFFECTEDTRIPLE, "<http://example.org/myconcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"somelabel\"@en .");
 
         Assert.assertEquals(200, postChangeset(props));
     }    
@@ -44,8 +44,8 @@ public class ChangesetPostTest {
     @Test
     public void postEmptyTriple() throws IOException {
         Properties props = new Properties();
-        props.setProperty(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD);
-        props.setProperty(ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE, "");
+        props.setProperty(ChangeTripleService.POST_BODY_CHANGETYPE, ChangeTripleService.CHANGETYPE_ADD);
+        props.setProperty(ChangeTripleService.POST_BODY_AFFECTEDTRIPLE, "");
 
         Assert.assertEquals(400, postChangeset(props));
     }
@@ -53,8 +53,8 @@ public class ChangesetPostTest {
     @Test
     public void postIllegalTriple() throws IOException {
         Properties props = new Properties();
-        props.setProperty(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD);
-        props.setProperty(ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE, "http://www.example.org/someconcept a skos:Concept .");
+        props.setProperty(ChangeTripleService.POST_BODY_CHANGETYPE, ChangeTripleService.CHANGETYPE_ADD);
+        props.setProperty(ChangeTripleService.POST_BODY_AFFECTEDTRIPLE, "http://www.example.org/someconcept a skos:Concept .");
 
         Assert.assertEquals(400, postChangeset(props));
     }
@@ -62,8 +62,8 @@ public class ChangesetPostTest {
     @Test
     public void postInvalidEofTriple() throws IOException {
         Properties props = new Properties();
-        props.setProperty(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD);
-        props.setProperty(ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE, "<http://example.org/myconcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"somelabel\"@en");
+        props.setProperty(ChangeTripleService.POST_BODY_CHANGETYPE, ChangeTripleService.CHANGETYPE_ADD);
+        props.setProperty(ChangeTripleService.POST_BODY_AFFECTEDTRIPLE, "<http://example.org/myconcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"somelabel\"@en");
 
         Assert.assertEquals(400, postChangeset(props));
     }
@@ -71,7 +71,7 @@ public class ChangesetPostTest {
     @Test
     public void postMissingTriple() throws IOException {
         Properties props = new Properties();
-        props.setProperty(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD);
+        props.setProperty(ChangeTripleService.POST_BODY_CHANGETYPE, ChangeTripleService.CHANGETYPE_ADD);
 
         Assert.assertEquals(400, postChangeset(props));
     }
@@ -79,7 +79,7 @@ public class ChangesetPostTest {
     @Test
     public void postMissingChangeType() throws IOException {
         Properties props = new Properties();
-        props.setProperty(ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE, "<http://example.org/myconcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"somelabel\"@en .");
+        props.setProperty(ChangeTripleService.POST_BODY_AFFECTEDTRIPLE, "<http://example.org/myconcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"somelabel\"@en .");
 
         Assert.assertEquals(400, postChangeset(props));
     }
@@ -91,9 +91,9 @@ public class ChangesetPostTest {
     public void postUpdate() throws OpenRDFException, IOException
     {
         Properties props = new Properties();
-        props.setProperty(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_UPDATE);
-        props.setProperty(ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE, "<http://example.org/myconcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"somelabel\"@en .");
-        props.setProperty(ChangeTripleHandler.POST_BODY_SECONDARYTRIPLE, "<http://example.org/myconcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"updatedlabel\"@en .");
+        props.setProperty(ChangeTripleService.POST_BODY_CHANGETYPE, ChangeTripleService.CHANGETYPE_UPDATE);
+        props.setProperty(ChangeTripleService.POST_BODY_AFFECTEDTRIPLE, "<http://example.org/myconcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"somelabel\"@en .");
+        props.setProperty(ChangeTripleService.POST_BODY_SECONDARYTRIPLE, "<http://example.org/myconcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"updatedlabel\"@en .");
 
         int countBefore = changeSetStore.getChangeSetCount();
         postChangeset(props);
@@ -104,8 +104,8 @@ public class ChangesetPostTest {
     @Test
     public void tripleChangeToRepo() throws IOException, RepositoryException {
         Properties props = new Properties();
-        props.setProperty(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD);
-        props.setProperty(ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE, "<http://example.org/myconcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"somelabel\"@en .");
+        props.setProperty(ChangeTripleService.POST_BODY_CHANGETYPE, ChangeTripleService.CHANGETYPE_ADD);
+        props.setProperty(ChangeTripleService.POST_BODY_AFFECTEDTRIPLE, "<http://example.org/myconcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"somelabel\"@en .");
 
         int changeSetsBefore = changeSetStore.getChangeSetCount();
         postChangeset(props);

@@ -31,13 +31,13 @@ public class ChangeSetCreator {
             valueFactory.createURI(Namespaces.CS_NAMESPACE.getName(), "createdDate"),
             valueFactory.createLiteral(new Date())));
 
-        if (changeType.equals(ChangeTripleHandler.CHANGETYPE_REMOVE)) {
+        if (changeType.equals(ChangeTripleService.CHANGETYPE_REMOVE)) {
             addActionStatement(model, changeSet, affectedStatement, "removal");
         }
-        else if (changeType.equals(ChangeTripleHandler.CHANGETYPE_ADD)) {
+        else if (changeType.equals(ChangeTripleService.CHANGETYPE_ADD)) {
             addActionStatement(model, changeSet, affectedStatement, "addition");
         }
-        else if (changeType.equals(ChangeTripleHandler.CHANGETYPE_UPDATE)) {
+        else if (changeType.equals(ChangeTripleService.CHANGETYPE_UPDATE)) {
             addActionStatement(model, changeSet, affectedStatement, "removal");
             addActionStatement(model, changeSet, secondaryStatement, "addition");
         }

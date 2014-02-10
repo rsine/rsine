@@ -24,9 +24,9 @@ import java.util.List;
 import java.util.Properties;
 
 @Component
-public class ChangeTripleHandler extends PostRequestHandler {
+public class ChangeTripleService extends PostRequestHandler {
 
-    private final Logger logger = LoggerFactory.getLogger(ChangeTripleHandler.class);
+    private final Logger logger = LoggerFactory.getLogger(ChangeTripleService.class);
 
     public static String POST_BODY_AFFECTEDTRIPLE = "affectedTriple";
     public static String POST_BODY_SECONDARYTRIPLE = "secondaryTriple";
