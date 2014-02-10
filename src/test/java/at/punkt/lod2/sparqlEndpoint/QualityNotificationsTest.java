@@ -97,7 +97,7 @@ public class QualityNotificationsTest {
             SKOS.BROADER,
             new URIImpl("http://reegle.info/glossary/1124"));
 
-        Assert.assertEquals(2, countingNotifier.getNotificationCount());
+        Assert.assertEquals(3, countingNotifier.getNotificationCount());
     }
 
     @Test
@@ -105,10 +105,13 @@ public class QualityNotificationsTest {
         throws RDFParseException, IOException, RDFHandlerException, RepositoryException
     {
         subscribe("/quality/disjoint_labels_violation.ttl");
-        Helper.setAltLabel(managedStoreRepo.getConnection(),
-            new URIImpl("http://reegle.info/glossary/682"),
-            new LiteralImpl("energy efficiency", "en"),
-            persistAndNotifyProvider);
+
+        Helper.addToDatasetAndPersist(
+                new StatementImpl(new URIImpl("http://reegle.info/glossary/682"),
+                        SKOS.ALT_LABEL,
+                        new LiteralImpl("energy efficiency", "en")),
+                datasetGraph,
+                persistAndNotifyProvider);
 
         Assert.assertEquals(1, countingNotifier.getNotificationCount());
     }
@@ -118,10 +121,13 @@ public class QualityNotificationsTest {
         throws RDFParseException, IOException, RDFHandlerException, RepositoryException
     {
         subscribe("/quality/disjoint_labels_violation.ttl");
-        Helper.setAltLabel(managedStoreRepo.getConnection(),
-            new URIImpl("http://reegle.info/glossary/1063"),
-            new LiteralImpl("emission", "en"),
-            persistAndNotifyProvider);
+
+        Helper.addToDatasetAndPersist(
+                new StatementImpl(new URIImpl("http://reegle.info/glossary/1063"),
+                        SKOS.ALT_LABEL,
+                        new LiteralImpl("emission", "en")),
+                datasetGraph,
+                persistAndNotifyProvider);
 
         Assert.assertEquals(1, countingNotifier.getNotificationCount());
     }
@@ -156,10 +162,11 @@ public class QualityNotificationsTest {
     public void overlappingLabels() throws RDFParseException, IOException, RDFHandlerException, RepositoryException {
         subscribe("/quality/overlapping_labels.ttl");
 
-        Helper.setAltLabel(managedStoreRepo.getConnection(),
-            new URIImpl("http://reegle.info/glossary/357"),
-            new LiteralImpl("Biogas", "en"),
+        Helper.addToDatasetAndPersist(
+            new StatementImpl(new URIImpl("http://reegle.info/glossary/357"), SKOS.ALT_LABEL, new LiteralImpl("Biogas", "en")),
+            datasetGraph,
             persistAndNotifyProvider);
+
         Assert.assertEquals(1, countingNotifier.getNotificationCount());
     }
 

@@ -1,5 +1,7 @@
 package at.punkt.lod2.util;
 
+import com.hp.hpl.jena.graph.NodeFactory;
+import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.sparql.core.DatasetGraph;
 import com.hp.hpl.jena.sparql.core.DatasetGraphFactory;
 import eu.lod2.rsine.Rsine;
@@ -98,7 +100,10 @@ public class Helper {
                                               DatasetGraph datasetGraph,
                                               PersistAndNotifyProvider persistAndNotifyProvider)
     {
-        datasetGraph.add();
+        datasetGraph.getDefaultGraph().add(new Triple(
+                NodeFactory.createURI(statement.getSubject().toString()),
+                NodeFactory.createURI(statement.getPredicate().toString()),
+                NodeFactory.createURI(statement.getObject().toString())));
 
         persistAndNotifyProvider.persistAndNotify(
                 Helper.createChangeSetModel(statement.getSubject().stringValue(),
