@@ -18,7 +18,10 @@ import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.SKOS;
 import org.openrdf.repository.Repository;
+import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.sparql.SPARQLConnection;
+import org.openrdf.repository.sparql.SPARQLRepository;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParseException;
@@ -74,7 +77,9 @@ public class QualityNotificationsTest {
     }
 
     public void addTriple(URI subject, URI predicate, URI object) throws RepositoryException {
-        managedStoreRepo.getConnection().add(subject, predicate, object);
+        RepositoryConnection con = new SPARQLConnection(new SPARQLRepository("http://localhost:3030/dataset/query"));
+        con.add(subject, predicate, object);
+        //managedStoreRepo.getConnection().add(subject, predicate, object);
 
         persistAndNotifyProvider.persistAndNotify(
             Helper.createChangeSetModel(subject.stringValue(),
