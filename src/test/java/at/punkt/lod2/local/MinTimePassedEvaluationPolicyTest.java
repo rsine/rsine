@@ -141,9 +141,7 @@ public class MinTimePassedEvaluationPolicyTest  {
 
         @Override
         public Boolean call() throws Exception {
-            boolean synced = (postponedQueryHandler.getQueueSize() == 0);
-            if (synced) System.out.println("synced");
-            return synced;
+            return postponedQueryHandler.getQueueSize() == 0;
         }
 
     }
@@ -174,7 +172,6 @@ public class MinTimePassedEvaluationPolicyTest  {
 
         @Override
         public synchronized void notify(Collection<String> messages) {
-            System.out.println("notified");
             millisPassed = System.currentTimeMillis() - time;
         }
 

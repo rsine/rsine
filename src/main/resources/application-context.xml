@@ -16,13 +16,18 @@
     <context:component-scan base-package="eu.lod2.rsine"/>
     <util:constant id="cmdParams" static-field="eu.lod2.rsine.Rsine.cmdParams"/>
 
-    <bean id="changeSetService" class="eu.lod2.rsine.changesetservice.ChangeSetService">
-        <constructor-arg value="#{cmdParams.context}"/>
-        <constructor-arg value="#{cmdParams.changesListeningPort}"/>
+    <bean name="managedStoreRepo" class="org.openrdf.repository.sparql.SPARQLRepository" init-method="initialize" destroy-method="shutDown">
+        <constructor-arg value="#{cmdParams.managedStoreSparqlEndpoint}" />
     </bean>
 
+    <bean name="changeSetRepo" class="org.openrdf.repository.sail.SailRepository" init-method="initialize" destroy-method="shutDown">
+        <constructor-arg>
+            <bean class="org.openrdf.sail.memory.MemoryStore"/>
+        </constructor-arg>
+    </bean>
+
+    <bean id="changeSetService" class="eu.lod2.rsine.changesetservice.ChangeSetService" init-method="start" destroy-method="stop"/>
     <bean id="queryEvaluator" class="eu.lod2.rsine.queryhandling.QueryEvaluator">
-        <constructor-arg value="#{cmdParams.managedStoreSparqlEndpoint}" />
         <constructor-arg value="#{cmdParams.authoritativeUri}" />
     </bean>
 
