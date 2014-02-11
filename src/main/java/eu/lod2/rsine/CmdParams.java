@@ -26,8 +26,8 @@ class CmdParams {
     @Parameter(names = {"-s", "--sparql-endpoint"}, description = "URI of managed store SPARQL endpoint")
     public String managedStoreSparqlEndpoint;
 
-    @Parameter(names = {"-c", "--changes-port"}, description = "Port where rsine listens for incoming triple store changes")
-    public Integer changesListeningPort;
+    @Parameter(names = {"-p", "--port"}, description = "Port where rsine listens for incoming connections")
+    public Integer port;
 
     @Parameter(names = {"-x", "--context"}, description = "Context appended to the service uri, e.g. http://localhost/{context}")
     public String context = "";
@@ -66,12 +66,12 @@ class CmdParams {
         authoritativeUri = getFromPropsIfNull(authoritativeUri, "managedstore.authUri");
         managedStoreSparqlEndpoint = getFromPropsIfNull(managedStoreSparqlEndpoint, "managedstore.endpoint");
 
-        if (changesListeningPort == null) {
+        if (port == null) {
             try {
-                this.changesListeningPort = Integer.parseInt(properties.getProperty("changes.port"));
+                this.port = Integer.parseInt(properties.getProperty("port"));
             }
             catch (Exception e) {
-                changesListeningPort = null;
+                port = null;
             }
         }
 
@@ -95,7 +95,7 @@ class CmdParams {
             logger.error("No SPARQL endpoint of the managed triple store provided");
             incompleteParams = true;
         }
-        if (changesListeningPort == null) {
+        if (port == null) {
             logger.error("No change listening port provided");
             incompleteParams = true;
         }
@@ -106,7 +106,7 @@ class CmdParams {
     }
 
     private void logParamValues() {
-        logger.info("Listening for changeset from managed store on port " +changesListeningPort);
+        logger.info("Listening for changeset from managed store on port " + port);
         logger.info("SPARQL endpoint of managed store is set to " +managedStoreSparqlEndpoint);
         if (!context.isEmpty()) {
             logger.info("Service context is set to " +context);

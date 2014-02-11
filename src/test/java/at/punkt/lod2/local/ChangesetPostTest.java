@@ -1,8 +1,8 @@
 package at.punkt.lod2.local;
 
 import com.jayway.awaitility.Awaitility;
-import eu.lod2.rsine.changesetservice.ChangeTripleService;
-import eu.lod2.rsine.changesetservice.RsineController;
+import eu.lod2.rsine.service.ChangeTripleService;
+import eu.lod2.rsine.service.RsineController;
 import eu.lod2.rsine.changesetstore.ChangeSetStore;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;

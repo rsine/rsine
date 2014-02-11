@@ -2,8 +2,8 @@ package at.punkt.lod2.local;
 
 import at.punkt.lod2.util.Helper;
 import com.jayway.awaitility.Awaitility;
-import eu.lod2.rsine.changesetservice.ChangeTripleService;
-import eu.lod2.rsine.changesetservice.PersistAndNotifyProvider;
+import eu.lod2.rsine.service.ChangeTripleService;
+import eu.lod2.rsine.service.PersistAndNotifyProvider;
 import eu.lod2.rsine.dissemination.messageformatting.ToStringBindingSetFormatter;
 import eu.lod2.rsine.dissemination.notifier.INotifier;
 import eu.lod2.rsine.queryhandling.PostponedQueryHandler;

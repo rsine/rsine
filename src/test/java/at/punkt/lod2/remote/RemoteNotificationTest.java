@@ -4,19 +4,17 @@ import at.punkt.lod2.util.CountingNotifier;
 import at.punkt.lod2.util.ExpectedCountReached;
 import com.jayway.awaitility.Awaitility;
 import eu.lod2.rsine.Rsine;
-import eu.lod2.rsine.changesetservice.RsineController;
 import eu.lod2.rsine.dissemination.messageformatting.BindingSetFormatter;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.rsine.remotenotification.RemoteNotificationServiceBase;
+import eu.lod2.rsine.service.RsineController;
 import eu.lod2.util.Namespaces;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.openrdf.model.Model;
 import org.openrdf.model.impl.TreeModel;
 import org.openrdf.query.BindingSet;
-import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.*;
 import org.openrdf.rio.helpers.StatementCollector;
 import org.springframework.context.support.AbstractApplicationContext;
@@ -39,12 +37,6 @@ public class RemoteNotificationTest {
         readChangeSet();
     }
 
-    @After
-    public void tearDown() throws IOException, InterruptedException, RepositoryException {
-        localRsine.stop();
-        remoteRsine.stop();
-    }
-
     private void initServices() throws IOException {
         localContext = new ClassPathXmlApplicationContext("/at/punkt/lod2/remote/RemoteTest-localContext.xml");
         localRsine = localContext.getBean("changeSetService", RsineController.class);
@@ -53,8 +45,6 @@ public class RemoteNotificationTest {
             getBean("changeSetService", RsineController.class);
 
         registerRemoteChangeSubscriber();
-        localRsine.start();
-        remoteRsine.start();
     }
 
     private void registerRemoteChangeSubscriber() {

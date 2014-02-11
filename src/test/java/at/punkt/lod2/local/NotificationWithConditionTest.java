@@ -1,9 +1,9 @@
 package at.punkt.lod2.local;
 
 import at.punkt.lod2.util.CountingNotifier;
-import eu.lod2.rsine.changesetservice.ChangeSetCreator;
-import eu.lod2.rsine.changesetservice.ChangeTripleService;
-import eu.lod2.rsine.changesetservice.PersistAndNotifyProvider;
+import eu.lod2.rsine.service.ChangeSetCreator;
+import eu.lod2.rsine.service.ChangeTripleService;
+import eu.lod2.rsine.service.PersistAndNotifyProvider;
 import eu.lod2.rsine.dissemination.messageformatting.BindingSetFormatter;
 import eu.lod2.rsine.dissemination.messageformatting.ToStringBindingSetFormatter;
 import eu.lod2.rsine.dissemination.notifier.logging.LoggingNotifier;

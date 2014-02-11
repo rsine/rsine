@@ -4,17 +4,15 @@ import at.punkt.lod2.util.CountingNotifier;
 import at.punkt.lod2.util.ExpectedCountReached;
 import at.punkt.lod2.util.Helper;
 import com.jayway.awaitility.Awaitility;
-import eu.lod2.rsine.changesetservice.RsineController;
 import eu.lod2.rsine.dissemination.messageformatting.ToStringBindingSetFormatter;
 import eu.lod2.rsine.queryhandling.QueryEvaluator;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
+import eu.lod2.rsine.service.RsineController;
 import eu.lod2.util.Namespaces;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.RDFHandlerException;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -37,21 +35,11 @@ public class PPTInteractionTest {
     @Before
     public void setUp() throws IOException {
         remoteContext = new ClassPathXmlApplicationContext("/at/punkt/lod2/remote/PPTInteractionTest-PPTcontext.xml");
-        remotePptRsineInstance = remoteContext.getBean(RsineController.class);
-        remotePptRsineInstance.start();
 
         AbstractApplicationContext localContext = new ClassPathXmlApplicationContext("/at/punkt/lod2/remote/PPTInteractionTest-localContext.xml");
         localRsineInstance = localContext.getBean(RsineController.class);
-        localRsineInstance.start();
-        localHelper = localContext.getBean(Helper.class);
 
         subscribeForRemoteReferencesAtRemoteRsine();
-    }
-
-    @After
-    public void tearDown() throws IOException, InterruptedException, RepositoryException {
-        remotePptRsineInstance.stop();
-        localRsineInstance.stop();
     }
 
     private void subscribeForRemoteReferencesAtRemoteRsine() {

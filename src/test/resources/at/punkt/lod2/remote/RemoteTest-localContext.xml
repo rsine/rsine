@@ -16,7 +16,7 @@
         <constructor-arg value="8991"/>
     </bean>
 
-    <bean id="changeSetService" class="eu.lod2.rsine.changesetservice.RsineController">
+    <bean id="changeSetService" class="eu.lod2.rsine.service.RsineController">
         <constructor-arg ref="listeningPort"/>
     </bean>
 

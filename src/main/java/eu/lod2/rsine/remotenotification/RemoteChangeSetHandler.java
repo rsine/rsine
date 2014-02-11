@@ -1,7 +1,7 @@
 package eu.lod2.rsine.remotenotification;
 
-import eu.lod2.rsine.changesetservice.PersistAndNotifyProvider;
-import eu.lod2.rsine.changesetservice.PostRequestHandler;
+import eu.lod2.rsine.service.PersistAndNotifyProvider;
+import eu.lod2.rsine.service.PostRequestHandler;
 import org.apache.http.HttpResponse;
 import org.apache.http.message.BasicHttpEntityEnclosingRequest;
 import org.openrdf.OpenRDFException;

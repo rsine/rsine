@@ -1,4 +1,4 @@
-package eu.lod2.rsine.changesetservice;
+package eu.lod2.rsine.service;
 
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.SubscriptionNotFoundException;
