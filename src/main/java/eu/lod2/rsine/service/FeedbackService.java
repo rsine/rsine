@@ -9,10 +9,9 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
-import org.apache.http.protocol.HttpRequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.net.URI;
@@ -22,15 +21,15 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
-@Component
-public class FeedbackHandler implements HttpRequestHandler {
+@Service
+public class FeedbackService {
 
-    private final Logger logger = LoggerFactory.getLogger(FeedbackHandler.class);
+    private final Logger logger = LoggerFactory.getLogger(FeedbackService.class);
 
     private Set<String> msgIdsWithReceivedFeedback = new HashSet<String>();
     private String feedbackFileName;
 
-    public FeedbackHandler() throws IOException {
+    public FeedbackService() throws IOException {
         feedbackFileName = determineFeedbackFileName();
     }
 
@@ -43,12 +42,7 @@ public class FeedbackHandler implements HttpRequestHandler {
         return (String) properties.get("feedback.filename");
     }
 
-    @Override
-    public void handle(HttpRequest request, HttpResponse response, HttpContext context) throws HttpException {
-        int statusCode = Integer.MAX_VALUE;
-        String responseText = "";
-
-        try {
+    public void handleFeedback() {
             RequestParameters reqParams = new RequestParameters();
             reqParams.parse(request);
 
@@ -62,25 +56,6 @@ public class FeedbackHandler implements HttpRequestHandler {
                 feedbackWriter.close();
                 msgIdsWithReceivedFeedback.add(reqParams.msgId);
             }
-
-            statusCode = 200;
-            responseText = "Thank you for your feedback!";
-        }
-        catch (URISyntaxException e) {
-            responseText = "Invalid feedback request";
-            statusCode = 500;
-
-            logger.error(responseText, e);
-        }
-        catch (IOException e) {
-            responseText = "Could not access feedback file";
-            statusCode = 500;
-
-            logger.error(responseText, e);
-        }
-        finally {
-            setResponseData(response, statusCode, responseText);
-        }
     }
 
     private void setResponseData(HttpResponse response, int statusCode, String responseText) {

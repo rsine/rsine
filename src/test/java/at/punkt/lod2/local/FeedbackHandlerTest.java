@@ -1,6 +1,6 @@
 package at.punkt.lod2.local;
 
-import eu.lod2.rsine.service.FeedbackHandler;
+import eu.lod2.rsine.service.FeedbackService;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -22,7 +22,7 @@ import java.io.IOException;
 public class FeedbackHandlerTest {
 
     @Autowired
-    private FeedbackHandler feedbackHandler;
+    private FeedbackService feedbackService;
 
     @Test
     public void feedbackLogged() throws IOException {
@@ -48,7 +48,7 @@ public class FeedbackHandlerTest {
     }
 
     private long getFeedbackFileLines() throws IOException {
-        BufferedReader reader = new BufferedReader(new FileReader(feedbackHandler.getOrCreateFeedbackFile()));
+        BufferedReader reader = new BufferedReader(new FileReader(feedbackService.getOrCreateFeedbackFile()));
         int lines = 0;
         while (reader.readLine() != null) lines++;
         reader.close();
