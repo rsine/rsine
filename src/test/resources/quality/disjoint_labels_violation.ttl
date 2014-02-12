@@ -44,5 +44,5 @@
 
     rsine:notifier [
         a rsine:emailNotifier;
-        foaf:mbox <mailto:c.mader@semantic-web.at>
+        foaf:mbox <mailto:keck@wolterskluwer.de>
     ].
