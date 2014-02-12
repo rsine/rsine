@@ -56,7 +56,7 @@ public class RsineController {
         }
     }
 
-    @RequestMapping(value = "register", method = RequestMethod.POST)
+    @RequestMapping(value = "/register", method = RequestMethod.POST)
     @ResponseBody
     public void register(@RequestHeader("content-type") String contentType,
                          @RequestBody String rdfRegistration,
@@ -76,7 +76,7 @@ public class RsineController {
         }
     }
 
-    @RequestMapping(value = "unregister", method = RequestMethod.POST)
+    @RequestMapping(value = "/unregister", method = RequestMethod.POST)
     @ResponseBody
     public void unregister(@RequestBody String resource,
                            HttpServletResponse response) throws IOException
@@ -89,7 +89,7 @@ public class RsineController {
         }
     }
 
-    @RequestMapping(value = "remote", method = RequestMethod.POST)
+    @RequestMapping(value = "/remote", method = RequestMethod.POST)
     @ResponseBody
     public void remote(@RequestHeader("content-type") String contentType,
                        @RequestBody String rdfChangeSet,
@@ -103,7 +103,7 @@ public class RsineController {
         }
     }
 
-    @RequestMapping(value = "feedback", method = RequestMethod.POST)
+    @RequestMapping(value = "/feedback", method = RequestMethod.GET)
     @ResponseBody
     public void feedback(HttpServletResponse response,
                          @RequestParam String issueId,

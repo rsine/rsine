@@ -18,9 +18,11 @@ public class Rsine {
     public final static String propertiesFileName = "application.properties";
     private final static Logger logger = LoggerFactory.getLogger(Rsine.class);
 
+    public static CmdParams cmdParams;
+
     public static void main(String[] args) {
         try {
-            CmdParams cmdParams = new CmdParams(args);
+            cmdParams = new CmdParams(args);
             Server server = new Server(cmdParams.port);
 
             ContextHandler context = new ServletContextHandler();
@@ -28,7 +30,7 @@ public class Rsine {
             server.setHandler(context);
 
             DispatcherServlet dispatcherServlet = new DispatcherServlet();
-            dispatcherServlet.setContextConfigLocation("classpath:rsine-spring.xml");
+            dispatcherServlet.setContextConfigLocation("classpath:application-context.xml");
 
             ServletHandler handler = new ServletHandler();
             handler.addServletWithMapping(new ServletHolder(dispatcherServlet), "/*");

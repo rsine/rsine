@@ -1,14 +1,14 @@
-package at.punkt.lod2.local;
+package at.punkt.lod2.integration;
 
 import com.jayway.awaitility.Awaitility;
-import eu.lod2.rsine.service.ChangeTripleService;
-import eu.lod2.rsine.service.RsineController;
 import eu.lod2.rsine.changesetstore.ChangeSetStore;
+import eu.lod2.rsine.service.ChangeTripleService;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openrdf.OpenRDFException;
 import org.openrdf.repository.RepositoryException;
@@ -25,9 +25,6 @@ import java.util.concurrent.TimeUnit;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"LocalTest-context.xml"})
 public class ChangesetPostTest {
-
-    @Autowired
-    private RsineController rsineController;
 
     @Autowired
     private ChangeSetStore changeSetStore;
