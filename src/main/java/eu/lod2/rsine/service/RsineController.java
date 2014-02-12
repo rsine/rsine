@@ -1,5 +1,7 @@
 package eu.lod2.rsine.service;
 
+import eu.lod2.rsine.feedback.DuplicateFeedbackException;
+import eu.lod2.rsine.feedback.FeedbackService;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.SubscriptionNotFoundException;
 import eu.lod2.rsine.remotenotification.RemoteChangeSetService;
@@ -19,7 +21,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.StringReader;
-import java.net.URISyntaxException;
 
 @Controller
 public class RsineController {
@@ -104,16 +105,20 @@ public class RsineController {
 
     @RequestMapping(value = "feedback", method = RequestMethod.POST)
     @ResponseBody
-    public void feedback(HttpServletResponse response) throws IOException {
+    public void feedback(HttpServletResponse response,
+                         @RequestParam String issueId,
+                         @RequestParam String rating,
+                         @RequestParam String msgId) throws IOException
+    {
         try {
-            feedbackService.handleFeedback();
+            feedbackService.handleFeedback(issueId, rating, msgId);
             response.setStatus(HttpServletResponse.SC_OK);
-        }
-        catch (URISyntaxException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid feedback request");
         }
         catch (IOException e) {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Could not access feedback file");
+        }
+        catch (DuplicateFeedbackException e) {
+
         }
     }
 

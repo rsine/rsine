@@ -1,6 +1,6 @@
 package at.punkt.lod2.local;
 
-import eu.lod2.rsine.service.FeedbackService;
+import eu.lod2.rsine.feedback.FeedbackService;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
