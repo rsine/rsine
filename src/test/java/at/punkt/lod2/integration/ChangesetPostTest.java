@@ -7,7 +7,14 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.ContextHandler;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openrdf.OpenRDFException;
@@ -15,6 +22,7 @@ import org.openrdf.repository.RepositoryException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.web.servlet.DispatcherServlet;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -23,11 +31,38 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"LocalTest-context.xml"})
+@ContextConfiguration(locations = {"IntegrationTest-context.xml"})
 public class ChangesetPostTest {
 
     @Autowired
     private ChangeSetStore changeSetStore;
+
+    private static final int PORT = 2221;
+    private static Server server;
+
+    @BeforeClass
+    public static void setUp() throws Exception {
+        Server server = new Server(PORT);
+
+        ContextHandler context = new ServletContextHandler();
+        context.setContextPath("/");
+        server.setHandler(context);
+
+        DispatcherServlet dispatcherServlet = new DispatcherServlet();
+        //dispatcherServlet.setContextConfigLocation("classpath:IntegrationTest-context.xml");
+
+        ServletHandler handler = new ServletHandler();
+        handler.addServletWithMapping(new ServletHolder(dispatcherServlet), "/*");
+
+        context.setHandler(handler);
+
+        server.start();
+    }
+
+    @AfterClass
+    public static void tearDown() throws Exception {
+        server.stop();
+    }
 
     @Test
     public void postTripleChange() throws IOException {
@@ -111,7 +146,7 @@ public class ChangesetPostTest {
     }
 
     private int postChangeset(Properties properties) throws IOException {
-        HttpPost httpPost = new HttpPost("http://localhost:2221");
+        HttpPost httpPost = new HttpPost("http://localhost:" +PORT);
         StringWriter sw = new StringWriter();
         properties.store(sw, null);
         httpPost.setEntity(new StringEntity(sw.toString()));

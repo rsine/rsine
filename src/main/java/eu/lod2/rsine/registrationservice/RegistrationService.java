@@ -57,7 +57,7 @@ public class RegistrationService {
         for (Subscription subscription : subscriptions) {
             if (subscription.getSubscriptionId().equals(subscriptionId)) return subscription;
         }
-        throw new IllegalArgumentException();
+        throw new SubscriptionNotFoundException();
     }
 
 }

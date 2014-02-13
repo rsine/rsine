@@ -13,7 +13,7 @@
     <properties>
         <sesame.version>2.7.10</sesame.version>
         <springframework.version>3.2.4.RELEASE</springframework.version>
-        <jetty.version>9.1.1.v20140108</jetty.version>
+        <jetty.version>8.1.8.v20121106</jetty.version>
     </properties>
 
     <dependencies>
