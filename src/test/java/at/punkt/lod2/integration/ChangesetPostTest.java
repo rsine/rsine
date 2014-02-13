@@ -1,7 +1,5 @@
 package at.punkt.lod2.integration;
 
-import com.jayway.awaitility.Awaitility;
-import eu.lod2.rsine.changesetstore.ChangeSetStore;
 import eu.lod2.rsine.service.ChangeTripleService;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -16,40 +14,36 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.openrdf.OpenRDFException;
-import org.openrdf.repository.RepositoryException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.servlet.DispatcherServlet;
 
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Properties;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
+/*
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"IntegrationTest-context.xml"})
+*/
 public class ChangesetPostTest {
 
+    /*
     @Autowired
     private ChangeSetStore changeSetStore;
+    */
 
     private static final int PORT = 2221;
     private static Server server;
 
     @BeforeClass
     public static void setUp() throws Exception {
-        Server server = new Server(PORT);
+        server = new Server(PORT);
 
         ContextHandler context = new ServletContextHandler();
         context.setContextPath("/");
         server.setHandler(context);
 
         DispatcherServlet dispatcherServlet = new DispatcherServlet();
-        //dispatcherServlet.setContextConfigLocation("classpath:IntegrationTest-context.xml");
+        dispatcherServlet.setContextConfigLocation("classpath:application-context.xml");
 
         ServletHandler handler = new ServletHandler();
         handler.addServletWithMapping(new ServletHolder(dispatcherServlet), "/*");
@@ -116,9 +110,7 @@ public class ChangesetPostTest {
         Assert.assertEquals(400, postChangeset(props));
     }
 
-    /**
-     * Posting an update results in creation of a changeset with both removal and addition statements
-     */
+    /*
     @Test
     public void postUpdate() throws OpenRDFException, IOException
     {
@@ -144,6 +136,7 @@ public class ChangesetPostTest {
 
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until(new ChangeSetCountEquals(changeSetsBefore + 1));
     }
+    */
 
     private int postChangeset(Properties properties) throws IOException {
         HttpPost httpPost = new HttpPost("http://localhost:" +PORT);
@@ -155,6 +148,7 @@ public class ChangesetPostTest {
         return response.getStatusLine().getStatusCode();
     }
 
+    /*
     private class ChangeSetCountEquals implements Callable<Boolean> {
 
         private int targetValue;
@@ -167,7 +161,9 @@ public class ChangesetPostTest {
         public Boolean call() throws Exception {
             return changeSetStore.getChangeSetCount() == targetValue;
         }
-
     }
+    */
+
+
 
 }

@@ -39,6 +39,12 @@ public class RsineController {
     @Autowired
     private FeedbackService feedbackService;
 
+    @RequestMapping(value= "/test", method = RequestMethod.GET)
+    @ResponseBody
+    public void test() {
+        logger.info("test called");
+    }
+
     @RequestMapping(value = "/", method = RequestMethod.POST)
     @ResponseBody
     public void announceTriples(@RequestBody String announcedTriple, HttpServletResponse response) throws IOException {
