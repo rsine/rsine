@@ -118,7 +118,7 @@ public class RsineController {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Could not access feedback file");
         }
         catch (DuplicateFeedbackException e) {
-
+            response.sendError(HttpServletResponse.SC_CONFLICT);
         }
     }
 
