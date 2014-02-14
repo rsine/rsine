@@ -20,7 +20,7 @@
                 ?addition rdf:object ?value .
 
                 FILTER ((?csdate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime>) &&
-                        (?concept IN (<http://vocabulary.semantic-web.at/semweb/93>, <http://vocabulary.semantic-web.at/semweb/361>)) &&
+                        (?concept IN (<http://vocabulary.wolterskluwer.de/arbeitsrecht/10121>, <http://vocabulary.wolterskluwer.de/arbeitsrecht/11662>)) &&
                         (regex(str(?predicate), \"^http://www.w3.org/2004/02/skos/core#\"))
                        )
             }";
@@ -48,7 +48,7 @@
                 ?removal rdf:object ?value .
 
                 FILTER ((?csdate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime>) &&
-                        (?concept IN (<http://vocabulary.semantic-web.at/semweb/93>, <http://vocabulary.semantic-web.at/semweb/361>)) &&
+                        (?concept IN (<http://vocabulary.wolterskluwer.de/arbeitsrecht/10121>, <http://vocabulary.wolterskluwer.de/arbeitsrecht/11662>)) &&
                         (regex(str(?predicate), \"^http://www.w3.org/2004/02/skos/core#\"))
                        )
             }";

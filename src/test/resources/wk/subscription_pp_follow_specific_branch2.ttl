@@ -20,7 +20,7 @@
                 ?addition rdf:object ?value .
 
                 SERVICE <MANAGED_STORE_SPARQL_ENDPOINT> {
-                    ?concept skos:broader*|skos:narrower* <http://vocabulary.wolterskluwer.de/arbeitsrecht/10225>
+                    ?concept skos:broader*|skos:narrower* <http://vocabulary.wolterskluwer.de/arbeitsrecht/10504>
                 }
 
                 FILTER ((?csdate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime>) &&
@@ -30,7 +30,7 @@
 
         rsine:formatter [
             a rsine:vtlFormatter;
-            rsine:message "The property '$bindingSet.getValue('predicate')' of concept '$bindingSet.getValue('concept')' (which is member of a branch containing concept Arbeitsvertrag) has been changed to '$bindingSet.getValue('value')'";
+            rsine:message "The property '$bindingSet.getValue('predicate')' of concept '$bindingSet.getValue('concept')' (which is member of a branch containing concept Betriebsverfassung) has been changed to '$bindingSet.getValue('value')'";
         ];
       ];
 
