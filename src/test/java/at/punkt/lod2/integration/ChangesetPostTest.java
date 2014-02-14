@@ -1,20 +1,16 @@
 package at.punkt.lod2.integration;
 
+import eu.lod2.rsine.Rsine;
 import eu.lod2.rsine.service.ChangeTripleService;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.ContextHandler;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.springframework.web.servlet.DispatcherServlet;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -36,21 +32,7 @@ public class ChangesetPostTest {
 
     @BeforeClass
     public static void setUp() throws Exception {
-        server = new Server(PORT);
-
-        ContextHandler context = new ServletContextHandler();
-        context.setContextPath("/");
-        server.setHandler(context);
-
-        DispatcherServlet dispatcherServlet = new DispatcherServlet();
-        dispatcherServlet.setContextConfigLocation("classpath:application-context.xml");
-
-        ServletHandler handler = new ServletHandler();
-        handler.addServletWithMapping(new ServletHolder(dispatcherServlet), "/*");
-
-        context.setHandler(handler);
-
-        server.start();
+        server = Rsine.startServer(PORT);
     }
 
     @AfterClass
