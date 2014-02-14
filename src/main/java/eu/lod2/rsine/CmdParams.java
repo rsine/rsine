@@ -29,9 +29,6 @@ class CmdParams {
     @Parameter(names = {"-p", "--port"}, description = "Port where rsine listens for incoming connections")
     public Integer port;
 
-    @Parameter(names = {"-x", "--context"}, description = "Context appended to the service uri, e.g. http://localhost/{context}")
-    public String context = "";
-
     CmdParams(String[] args) {
         initPropertiesFromFile();
 
@@ -74,11 +71,6 @@ class CmdParams {
                 port = null;
             }
         }
-
-        if (context.isEmpty()) {
-            String contextFromProperty = properties.getProperty("context");
-            context = contextFromProperty != null ? contextFromProperty : "";
-        }
     }
 
     private String getFromPropsIfNull(String obj, String propertyKey) {
@@ -108,9 +100,6 @@ class CmdParams {
     private void logParamValues() {
         logger.info("Listening for changeset from managed store on port " + port);
         logger.info("SPARQL endpoint of managed store is set to " +managedStoreSparqlEndpoint);
-        if (!context.isEmpty()) {
-            logger.info("Service context is set to " +context);
-        }
         if (authoritativeUri == null) {
             logger.warn("Authoritative uri not set. This may cause problems with some notification queries and disables remote notification");
         }
