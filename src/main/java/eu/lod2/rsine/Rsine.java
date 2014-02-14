@@ -1,13 +1,13 @@
 package eu.lod2.rsine;
 
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.ContextLoaderListener;
+import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
 import java.security.InvalidParameterException;
@@ -25,17 +25,15 @@ public class Rsine {
             cmdParams = new CmdParams(args);
             Server server = new Server(cmdParams.port);
 
-            ContextHandler context = new ServletContextHandler();
-            context.setContextPath("/");
-            server.setHandler(context);
+            AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+            context.setConfigLocation("classpath:application-context.xml");
 
-            DispatcherServlet dispatcherServlet = new DispatcherServlet();
-            dispatcherServlet.setContextConfigLocation("classpath:application-context.xml");
-
-            ServletHandler handler = new ServletHandler();
-            handler.addServletWithMapping(new ServletHolder(dispatcherServlet), "/*");
-
-            context.setHandler(handler);
+            ServletContextHandler contextHandler = new ServletContextHandler();
+            contextHandler.setContextPath("/");
+            contextHandler.addServlet(new ServletHolder(new DispatcherServlet(context)), "/");
+            contextHandler.addEventListener(new ContextLoaderListener(context));
+//            contextHandler.setResourceBase(new ClassPathResource("static_content").getURI().toString());
+            server.setHandler(contextHandler);
 
             server.start();
         }
@@ -43,7 +41,7 @@ public class Rsine {
             logger.error("Insufficient parameters for starting the service");
         }
         catch (Exception e) {
-            logger.error("Error starting rsine service");
+            logger.error("Error starting rsine service", e);
         }
     }
 

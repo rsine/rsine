@@ -39,7 +39,7 @@ public class RsineController {
     @Autowired
     private FeedbackService feedbackService;
 
-    @RequestMapping(value= "/test", method = RequestMethod.GET)
+    @RequestMapping("/test")
     @ResponseBody
     public void test() {
         logger.info("test called");
