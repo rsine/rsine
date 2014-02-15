@@ -12,13 +12,13 @@
 
     <context:component-scan base-package="eu.lod2.rsine"/>
 
-    <bean name="managedStoreRepo" class="org.openrdf.repository.sail.SailRepository" init-method="initialize" destroy-method="shutDown">
+    <bean name="managedStoreRepo" class="org.openrdf.repository.sail.SailRepository" init-method="initialize">
         <constructor-arg>
             <bean class="org.openrdf.sail.memory.MemoryStore"/>
         </constructor-arg>
     </bean>
 
-    <bean name="changeSetRepo" class="org.openrdf.repository.sail.SailRepository" init-method="initialize" destroy-method="shutDown">
+    <bean name="changeSetRepo" class="org.openrdf.repository.sail.SailRepository" init-method="initialize">
         <constructor-arg>
             <bean class="org.openrdf.sail.memory.MemoryStore"/>
         </constructor-arg>

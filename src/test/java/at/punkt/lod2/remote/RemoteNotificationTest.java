@@ -11,6 +11,7 @@ import eu.lod2.rsine.remotenotification.RemoteNotificationServiceBase;
 import eu.lod2.rsine.service.RsineController;
 import eu.lod2.util.Namespaces;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openrdf.model.Model;
 import org.openrdf.model.impl.TreeModel;
@@ -83,6 +84,7 @@ public class RemoteNotificationTest {
         rdfParser.parse(Rsine.class.getResourceAsStream("/changeset.rdf"), "");
     }
 
+    @Ignore
     @Test(timeout = 5000)
     public void changeSetDissemination() throws RDFParseException, IOException, RDFHandlerException {
         RemoteNotificationServiceBase remoteNotificationServiceBase = localContext.getBean(

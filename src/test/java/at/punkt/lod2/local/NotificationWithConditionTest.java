@@ -1,9 +1,6 @@
 package at.punkt.lod2.local;
 
 import at.punkt.lod2.util.CountingNotifier;
-import eu.lod2.rsine.service.ChangeSetCreator;
-import eu.lod2.rsine.service.ChangeTripleService;
-import eu.lod2.rsine.service.PersistAndNotifyProvider;
 import eu.lod2.rsine.dissemination.messageformatting.BindingSetFormatter;
 import eu.lod2.rsine.dissemination.messageformatting.ToStringBindingSetFormatter;
 import eu.lod2.rsine.dissemination.notifier.logging.LoggingNotifier;
@@ -11,6 +8,9 @@ import eu.lod2.rsine.queryhandling.QueryEvaluator;
 import eu.lod2.rsine.registrationservice.Condition;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
+import eu.lod2.rsine.service.ChangeSetCreator;
+import eu.lod2.rsine.service.ChangeTripleService;
+import eu.lod2.rsine.service.PersistAndNotifyProvider;
 import eu.lod2.util.Namespaces;
 import org.junit.Assert;
 import org.junit.Before;
@@ -26,6 +26,7 @@ import org.openrdf.query.UpdateExecutionException;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -33,6 +34,7 @@ import java.io.IOException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"LocalTest-context.xml"})
+@DirtiesContext
 public class NotificationWithConditionTest {
 
     @Autowired

@@ -3,10 +3,10 @@ package at.punkt.lod2.local;
 import at.punkt.lod2.util.CountingNotifier;
 import at.punkt.lod2.util.Helper;
 import eu.lod2.rsine.Rsine;
-import eu.lod2.rsine.service.ChangeTripleService;
-import eu.lod2.rsine.service.PersistAndNotifyProvider;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
+import eu.lod2.rsine.service.ChangeTripleService;
+import eu.lod2.rsine.service.PersistAndNotifyProvider;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,6 +26,7 @@ import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParseException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -33,6 +34,7 @@ import java.io.IOException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"LocalTest-context.xml"})
+@DirtiesContext
 public class ConceptMergeTest {
 
     @Autowired
