@@ -1,26 +1,38 @@
 package at.punkt.lod2.integration;
 
-import eu.lod2.rsine.feedback.FeedbackService;
+import eu.lod2.rsine.Rsine;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.eclipse.jetty.server.Server;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"LocalTest-context.xml"})
 public class FeedbackServiceTest {
 
-    @Autowired
-    private FeedbackService feedbackService;
+    private Server server;
+    private File feedbackFile;
+    private final String FEEDBACKFILE_NAME = "/tmp/feedbackTest.txt";
+
+    @Before
+    public void setUp() throws Exception {
+        server = Rsine.initAndStart(2221, "test", null, FEEDBACKFILE_NAME);
+        feedbackFile = new File(FEEDBACKFILE_NAME);
+        feedbackFile.createNewFile();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        server.stop();
+        feedbackFile.delete();
+    }
 
     @Test
     public void feedbackLogged() throws IOException {
@@ -45,8 +57,9 @@ public class FeedbackServiceTest {
         Assert.assertEquals(2, getFeedbackFileLines() - feedbackLinesBefore);
     }
 
+
     private long getFeedbackFileLines() throws IOException {
-        BufferedReader reader = new BufferedReader(new FileReader(feedbackService.getOrCreateFeedbackFile()));
+        BufferedReader reader = new BufferedReader(new FileReader(feedbackFile));
         int lines = 0;
         while (reader.readLine() != null) lines++;
         reader.close();

@@ -1,34 +1,31 @@
 package eu.lod2.rsine.feedback;
 
-import eu.lod2.rsine.Rsine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashSet;
-import java.util.Properties;
 import java.util.Set;
 
 @Service
 public class FeedbackService {
 
     private final Logger logger = LoggerFactory.getLogger(FeedbackService.class);
+    private final String DEFAULT_FEEDBACK_FILENAME = "/tmp/feedback.txt";
 
     private Set<String> msgIdsWithReceivedFeedback = new HashSet<String>();
-    private String feedbackFileName;
+    private String feedbackFileName = DEFAULT_FEEDBACK_FILENAME;
 
-    public FeedbackService() throws IOException {
-        feedbackFileName = determineFeedbackFileName();
+    public FeedbackService() {
+        logger.warn("No feedback file name provided. Using '" +DEFAULT_FEEDBACK_FILENAME+ "'");
     }
 
-    private String determineFeedbackFileName() throws IOException {
-        Properties properties = new Properties();
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        InputStream stream = loader.getResourceAsStream(Rsine.propertiesFileName);
-
-        properties.load(stream);
-        return (String) properties.get("feedback.filename");
+    public FeedbackService(String feedbackFileName) throws IOException {
+        this.feedbackFileName = feedbackFileName;
     }
 
     public void handleFeedback(String issueId, String rating, String msgId) throws IOException {

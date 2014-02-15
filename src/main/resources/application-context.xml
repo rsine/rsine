@@ -46,6 +46,10 @@
         <constructor-arg value="5000" />
     </bean>
 
+    <bean id="feedbackService" class="eu.lod2.rsine.feedback.FeedbackService">
+        <constructor-arg value="#{cmdParams.feedbackFileName}" />
+    </bean>
+
     <bean id="postponedQueryHandler" class="eu.lod2.rsine.queryhandling.PostponedQueryHandler"/>
     <task:scheduled-tasks scheduler="taskScheduler">
         <task:scheduled ref="postponedQueryHandler" method="cleanUp" fixed-rate="20000"/>

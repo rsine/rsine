@@ -33,13 +33,17 @@ public class Rsine {
         }
     }
 
-    public static Server initAndStart(int port, String managedStoreSparqlEndpoint, String authoritativeUri)
+    public static Server initAndStart(int port,
+                                      String managedStoreSparqlEndpoint,
+                                      String authoritativeUri,
+                                      String feedbackFileName)
         throws Exception
     {
         cmdParams = new CmdParams();
         cmdParams.port = port;
         cmdParams.managedStoreSparqlEndpoint = managedStoreSparqlEndpoint;
         cmdParams.authoritativeUri = authoritativeUri;
+        cmdParams.feedbackFileName = feedbackFileName;
         return startServer();
     }
 

@@ -11,7 +11,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -19,13 +18,12 @@ import java.util.Properties;
 
 public class ChangesetPostTest {
 
-    private ApplicationContext applicationContext;
     private final int PORT = 2221;
     private Server server;
 
     @Before
     public void setUp() throws Exception {
-        server = Rsine.initAndStart(PORT, "test", null);
+        server = Rsine.initAndStart(PORT, "test", null, null);
     }
 
     @After

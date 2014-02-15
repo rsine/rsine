@@ -29,6 +29,8 @@ class CmdParams {
     @Parameter(names = {"-p", "--port"}, description = "Port where rsine listens for incoming connections")
     public Integer port;
 
+    public String feedbackFileName;
+
     CmdParams() {
     }
 
@@ -65,6 +67,7 @@ class CmdParams {
     private void loadUnsetValuesFromProperties() {
         authoritativeUri = getFromPropsIfNull(authoritativeUri, "managedstore.authUri");
         managedStoreSparqlEndpoint = getFromPropsIfNull(managedStoreSparqlEndpoint, "managedstore.endpoint");
+        feedbackFileName = getFromPropsIfNull(feedbackFileName, "feedback.filename");
 
         if (port == null) {
             try {
