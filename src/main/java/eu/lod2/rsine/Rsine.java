@@ -23,7 +23,7 @@ public class Rsine {
     public static void main(String[] args) {
         try {
             cmdParams = new CmdParams(args);
-            startServer(cmdParams.port);
+            startServer();
         }
         catch (InvalidParameterException e) {
             logger.error("Insufficient parameters for starting the service");
@@ -33,8 +33,18 @@ public class Rsine {
         }
     }
 
-    public static Server startServer(int port) throws Exception {
-        Server server = new Server(port);
+    public static Server initAndStart(int port, String managedStoreSparqlEndpoint, String authoritativeUri)
+        throws Exception
+    {
+        cmdParams = new CmdParams();
+        cmdParams.port = port;
+        cmdParams.managedStoreSparqlEndpoint = managedStoreSparqlEndpoint;
+        cmdParams.authoritativeUri = authoritativeUri;
+        return startServer();
+    }
+
+    private static Server startServer() throws Exception {
+        Server server = new Server(cmdParams.port);
 
         XmlWebApplicationContext context = new XmlWebApplicationContext();
         context.setConfigLocation("classpath:application-context.xml");

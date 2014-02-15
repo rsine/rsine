@@ -29,6 +29,9 @@ class CmdParams {
     @Parameter(names = {"-p", "--port"}, description = "Port where rsine listens for incoming connections")
     public Integer port;
 
+    CmdParams() {
+    }
+
     CmdParams(String[] args) {
         initPropertiesFromFile();
 
