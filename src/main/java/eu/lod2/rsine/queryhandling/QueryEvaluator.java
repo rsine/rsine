@@ -51,10 +51,16 @@ public class QueryEvaluator {
         usePolicy.checkEvaluationNeeded(query);
         String issuedQuery = fillInPlaceholders(query);
         long start = System.currentTimeMillis();
-        Collection<String> messages = createMessages(query, issuedQuery, managedStoreRepo.getConnection());
-        queryProfiler.log(issuedQuery, System.currentTimeMillis() - start);
 
-        return messages;
+        RepositoryConnection repCon = managedStoreRepo.getConnection();
+        try {
+            Collection<String> messages = createMessages(query, issuedQuery, repCon);
+            queryProfiler.log(issuedQuery, System.currentTimeMillis() - start);
+            return messages;
+        }
+        finally {
+            repCon.close();
+        }
     }
 
     private String fillInPlaceholders(NotificationQuery query) {

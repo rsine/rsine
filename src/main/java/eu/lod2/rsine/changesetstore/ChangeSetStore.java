@@ -1,19 +1,14 @@
 package eu.lod2.rsine.changesetstore;
 
-import eu.lod2.util.Namespaces;
-import info.aduna.iteration.Iterations;
 import org.openrdf.OpenRDFException;
 import org.openrdf.model.Graph;
 import org.openrdf.model.Statement;
-import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.TupleQueryResult;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.RepositoryResult;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.turtle.TurtleWriter;
 import org.slf4j.Logger;
@@ -72,22 +67,6 @@ public class ChangeSetStore {
 
             result.close();
             return bindingSets;
-        }
-        finally {
-            repCon.close();
-        }
-    }
-
-    public int getChangeSetCount() throws RepositoryException {
-        RepositoryConnection repCon = changeSetRepo.getConnection();
-
-        try {
-            RepositoryResult<Statement> result = repCon.getStatements(
-                    null,
-                    RDF.TYPE,
-                    ValueFactoryImpl.getInstance().createURI(Namespaces.CS_NAMESPACE.getName(), "ChangeSet"),
-                    false);
-            return Iterations.asList(result).size();
         }
         finally {
             repCon.close();

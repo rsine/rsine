@@ -12,6 +12,7 @@ import eu.lod2.rsine.service.ChangeSetCreator;
 import eu.lod2.rsine.service.ChangeTripleService;
 import eu.lod2.rsine.service.PersistAndNotifyProvider;
 import eu.lod2.util.Namespaces;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,6 +25,7 @@ import org.openrdf.model.impl.URIImpl;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.UpdateExecutionException;
 import org.openrdf.repository.Repository;
+import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
@@ -47,6 +49,7 @@ public class NotificationWithConditionTest {
     private Repository managedStoreRepo;
 
     private CountingNotifier countingNotifier;
+    private RepositoryConnection repCon;
 
     private Statement prefLabelStatement = new StatementImpl(
         new URIImpl("http://reegle.info/glossary/someConcept"),
@@ -55,8 +58,14 @@ public class NotificationWithConditionTest {
 
     @Before
     public void setUp() throws IOException, RepositoryException {
-        managedStoreRepo.getConnection().clear();
+        repCon = managedStoreRepo.getConnection();
+        repCon.clear();
         countingNotifier = new CountingNotifier();
+    }
+
+    @After
+    public void tearDown() throws RepositoryException {
+        repCon.close();
     }
 
     @Test
@@ -69,7 +78,7 @@ public class NotificationWithConditionTest {
                 new Condition(createPrefLabelCondition(), false)); // triple did not exist before
 
         persistChangeSet();
-        managedStoreRepo.getConnection().add(prefLabelStatement);
+        repCon.add(prefLabelStatement);
 
         Assert.assertEquals(1, countingNotifier.getNotificationCount());
     }
@@ -124,7 +133,7 @@ public class NotificationWithConditionTest {
 
         persistChangeSet(); // no notification should occur here because condition is not fulfilled
 
-        managedStoreRepo.getConnection().add(prefLabelStatement);
+        repCon.add(prefLabelStatement);
         persistChangeSet(); // here we get the one and only notification
 
         Assert.assertEquals(1, countingNotifier.getNotificationCount());

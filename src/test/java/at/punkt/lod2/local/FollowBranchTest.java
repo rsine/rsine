@@ -3,9 +3,10 @@ package at.punkt.lod2.local;
 import at.punkt.lod2.util.CountingNotifier;
 import at.punkt.lod2.util.Helper;
 import eu.lod2.rsine.Rsine;
-import eu.lod2.rsine.service.PersistAndNotifyProvider;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
+import eu.lod2.rsine.service.PersistAndNotifyProvider;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,6 +16,7 @@ import org.openrdf.model.Resource;
 import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.Repository;
+import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFHandlerException;
@@ -41,13 +43,20 @@ public class FollowBranchTest {
     private Repository managedStoreRepo;
 
     private CountingNotifier countingNotifier;
+    private RepositoryConnection repCon;
 
     @Before
     public void setUp() throws IOException, RDFParseException, RDFHandlerException, RepositoryException {
-        if (managedStoreRepo.getConnection().isEmpty()) {
-            managedStoreRepo.getConnection().add(Rsine.class.getResource("/reegle.rdf"), "", RDFFormat.RDFXML);
+        repCon = managedStoreRepo.getConnection();
+        if (repCon.isEmpty()) {
+            repCon.add(Rsine.class.getResource("/reegle.rdf"), "", RDFFormat.RDFXML);
             subscribe();
         }
+    }
+
+    @After
+    public void tearDown() throws RepositoryException {
+        repCon.close();
     }
 
     private void subscribe() throws RDFParseException, IOException, RDFHandlerException {
@@ -63,7 +72,7 @@ public class FollowBranchTest {
     public void followBranch() throws RepositoryException {
         //in reegle vocab: <http://reegle.info/glossary/676> skos:broader <http://reegle.info/glossary/1124>
 
-        Helper.setAltLabel(managedStoreRepo.getConnection(),
+        Helper.setAltLabel(repCon,
                 new URIImpl("http://reegle.info/glossary/676"),
                 new LiteralImpl("altlabel"),
                 persistAndNotifyProvider);

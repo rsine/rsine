@@ -7,6 +7,7 @@ import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.rsine.service.ChangeTripleService;
 import eu.lod2.rsine.service.PersistAndNotifyProvider;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,6 +22,7 @@ import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.OWL;
 import org.openrdf.model.vocabulary.SKOS;
 import org.openrdf.repository.Repository;
+import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFHandlerException;
@@ -47,11 +49,18 @@ public class ConceptMergeTest {
     private Repository managedStoreRepo;
 
     private CountingNotifier countingNotifier;
+    private RepositoryConnection repCon;
 
     @Before
     public void setUp() throws IOException, RDFParseException, RDFHandlerException, RepositoryException {
-        managedStoreRepo.getConnection().add(Rsine.class.getResource("/reegle.rdf"), "", RDFFormat.RDFXML);
+        repCon = managedStoreRepo.getConnection();
+        repCon.add(Rsine.class.getResource("/reegle.rdf"), "", RDFFormat.RDFXML);
         subscribe();
+    }
+
+    @After
+    public void tearDown() throws RepositoryException {
+        repCon.close();
     }
 
     private void subscribe() throws RDFParseException, IOException, RDFHandlerException {
@@ -69,12 +78,12 @@ public class ConceptMergeTest {
         String abandonedConcept = "http://reegle.info/glossary/422";
         Literal abandonedConceptPrefLabel = new LiteralImpl("combi storage tanks", "en");
 
-        Helper.setLabel(managedStoreRepo.getConnection(),
+        Helper.setLabel(repCon,
                 new URIImpl("http://reegle.info/glossary/1111"),
                 SKOS.PREF_LABEL,
                 new LiteralImpl("Ottakringer Helles", "en"),
                 persistAndNotifyProvider);
-        Helper.setAltLabel(managedStoreRepo.getConnection(),
+        Helper.setAltLabel(repCon,
                 new URIImpl(mainConcept),
                 abandonedConceptPrefLabel,
                 persistAndNotifyProvider);
@@ -84,7 +93,7 @@ public class ConceptMergeTest {
     }
 
     private void removeConcept(URI concept) throws RepositoryException {
-        managedStoreRepo.getConnection().add(concept, new URIImpl(OWL.NAMESPACE + "deprecated"), new BooleanLiteralImpl(true));
+        repCon.add(concept, new URIImpl(OWL.NAMESPACE + "deprecated"), new BooleanLiteralImpl(true));
 
         persistAndNotifyProvider.persistAndNotify(
                 Helper.createChangeSetModel(concept.stringValue(),
