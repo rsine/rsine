@@ -54,8 +54,6 @@ public class MinTimePassedEvaluationPolicyTest  {
         subscription.addQuery(createQuery(), new ToStringBindingSetFormatter());
         subscription.addNotifier(timeMeasureNotifier);
         registrationService.register(subscription, true);
-
-        Awaitility.await().atMost(10, TimeUnit.SECONDS).until(new CleanupSyncer());
     }
 
     private String createQuery() {
@@ -117,7 +115,7 @@ public class MinTimePassedEvaluationPolicyTest  {
     @Test
     public void changeLateEnoughForNotification() throws IOException {
         performChange();
-        Awaitility.await().atMost(1, TimeUnit.SECONDS).until(new NotificationDetector(timeMeasureNotifier));
+        Awaitility.await().atMost(2, TimeUnit.SECONDS).until(new NotificationDetector(timeMeasureNotifier));
 
         try {
             Thread.sleep(6000);
@@ -127,25 +125,16 @@ public class MinTimePassedEvaluationPolicyTest  {
         }
 
         performChange();
-        Awaitility.await().atMost(1, TimeUnit.SECONDS).until(new NotificationDetector(timeMeasureNotifier));
+        Awaitility.await().atMost(2, TimeUnit.SECONDS).until(new NotificationDetector(timeMeasureNotifier));
     }
 
     @Test
     public void lastChangeNotMissed() throws IOException {
         performChange();
-        Awaitility.await().atMost(1, TimeUnit.SECONDS).until(new NotificationDetector(timeMeasureNotifier));
+        Awaitility.await().atMost(2, TimeUnit.SECONDS).until(new NotificationDetector(timeMeasureNotifier));
 
         performChange();
         Awaitility.await().atMost(20, TimeUnit.SECONDS).until(new NotificationDetector(timeMeasureNotifier));
-    }
-
-    private class CleanupSyncer implements Callable<Boolean> {
-
-        @Override
-        public Boolean call() throws Exception {
-            return postponedQueryHandler.getQueueSize() == 0;
-        }
-
     }
 
     private class NotificationDetector implements Callable<Boolean> {

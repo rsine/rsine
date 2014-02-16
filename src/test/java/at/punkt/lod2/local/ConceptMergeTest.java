@@ -2,7 +2,6 @@ package at.punkt.lod2.local;
 
 import at.punkt.lod2.util.CountingNotifier;
 import at.punkt.lod2.util.Helper;
-import eu.lod2.rsine.Rsine;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.rsine.service.ChangeTripleService;
@@ -12,14 +11,13 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.openrdf.model.Literal;
-import org.openrdf.model.Model;
-import org.openrdf.model.Resource;
-import org.openrdf.model.URI;
+import org.openrdf.model.*;
 import org.openrdf.model.impl.BooleanLiteralImpl;
 import org.openrdf.model.impl.LiteralImpl;
+import org.openrdf.model.impl.StatementImpl;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.OWL;
+import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.SKOS;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
@@ -50,12 +48,37 @@ public class ConceptMergeTest {
 
     private CountingNotifier countingNotifier;
     private RepositoryConnection repCon;
+    private URI mainConceptUri, abandonedConceptUri;
+    private Literal abandonedConceptPrefLabel;
 
     @Before
     public void setUp() throws IOException, RDFParseException, RDFHandlerException, RepositoryException {
         repCon = managedStoreRepo.getConnection();
-        repCon.add(Rsine.class.getResource("/reegle.rdf"), "", RDFFormat.RDFXML);
+        addConcepts();
         subscribe();
+    }
+
+    private void addConcepts() throws RepositoryException {
+        mainConceptUri = new URIImpl("http://reegle.info/glossary/440");
+        abandonedConceptUri = new URIImpl("http://reegle.info/glossary/442");
+        abandonedConceptPrefLabel = new LiteralImpl("combi storage tanks", "en");
+
+        Statement mainConcept = new StatementImpl(mainConceptUri, RDF.TYPE, SKOS.CONCEPT);
+        Statement abandonedConcept = new StatementImpl(abandonedConceptUri, RDF.TYPE, SKOS.CONCEPT);
+        Statement abandonedConceptLabel = new StatementImpl(abandonedConceptUri, SKOS.PREF_LABEL, abandonedConceptPrefLabel);
+        repCon.add(mainConcept);
+        repCon.add(abandonedConcept);
+        repCon.add(abandonedConceptLabel);
+    }
+
+
+    private void subscribe() throws RDFParseException, IOException, RDFHandlerException {
+        countingNotifier = new CountingNotifier();
+
+        Model subscriptionModel = Helper.createModelFromResourceFile("/wk/subscription_pp_merge.ttl", RDFFormat.TURTLE);
+        Resource subscriptionId = registrationService.register(subscriptionModel, true);
+        Subscription subscription = registrationService.getSubscription(subscriptionId);
+        subscription.addNotifier(countingNotifier);
     }
 
     @After
@@ -63,31 +86,15 @@ public class ConceptMergeTest {
         repCon.close();
     }
 
-    private void subscribe() throws RDFParseException, IOException, RDFHandlerException {
-        countingNotifier = new CountingNotifier();
-
-        Model subscriptionModel = Helper.createModelFromResourceFile("/wk/subscription_pp_merge.ttl", RDFFormat.TURTLE);
-        Resource subscriptionId = registrationService.register(subscriptionModel);
-        Subscription subscription = registrationService.getSubscription(subscriptionId);
-        subscription.addNotifier(countingNotifier);
-    }
-
     @Test
     public void mergeDetection() throws RepositoryException {
-        String mainConcept = "http://reegle.info/glossary/440";
-        String abandonedConcept = "http://reegle.info/glossary/422";
-        Literal abandonedConceptPrefLabel = new LiteralImpl("combi storage tanks", "en");
-
         Helper.setLabel(repCon,
                 new URIImpl("http://reegle.info/glossary/1111"),
                 SKOS.PREF_LABEL,
                 new LiteralImpl("Ottakringer Helles", "en"),
                 persistAndNotifyProvider);
-        Helper.setAltLabel(repCon,
-                new URIImpl(mainConcept),
-                abandonedConceptPrefLabel,
-                persistAndNotifyProvider);
-        removeConcept(new URIImpl(abandonedConcept));
+        Helper.setAltLabel(repCon, mainConceptUri, abandonedConceptPrefLabel, persistAndNotifyProvider);
+        removeConcept(abandonedConceptUri);
 
         Assert.assertEquals(1, countingNotifier.getNotificationCount());
     }

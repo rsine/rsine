@@ -34,7 +34,7 @@ import java.io.IOException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"SparqlEndpointTest-context.xml"})
-@DirtiesContext
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class QualityNotificationsTest {
 
     @Autowired
@@ -99,7 +99,7 @@ public class QualityNotificationsTest {
             SKOS.BROADER,
             new URIImpl("http://reegle.info/glossary/1124"));
 
-        Assert.assertEquals(3, countingNotifier.getNotificationCount());
+        Assert.assertEquals(2, countingNotifier.getNotificationCount());
     }
 
     @Test
