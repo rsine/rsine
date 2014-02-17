@@ -38,6 +38,8 @@ public class ChangeTripleService {
     private PersistAndNotifyProvider persistAndNotifyProvider;
 
     void handleAnnouncedTriple(String announceTriple) throws IOException, RDFParseException, RDFHandlerException {
+        logger.debug("Incoming triple change announcement: " +announceTriple);
+
         Properties properties = new Properties();
         properties.load(new StringReader(announceTriple));
 
