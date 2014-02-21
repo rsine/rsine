@@ -13,8 +13,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -64,7 +66,7 @@ public class QueryDispatcher implements IQueryDispatcher {
     }
 
     private void dispatchForSubscription(Subscription subscription) throws RepositoryException {
-        logger.debug("Dispatching queries for subscription with id '" + subscription.getSubscriptionId() + "'");
+        logger.debug("Dispatching queries for subscription with id '" + subscription.getId() + "'");
         Iterator<NotificationQuery> queryIt = subscription.getQueries();
         while (queryIt.hasNext()) {
             issueQueryAndNotify(queryIt.next());
@@ -78,10 +80,15 @@ public class QueryDispatcher implements IQueryDispatcher {
     public synchronized void issueQueryAndNotify(NotificationQuery query, boolean evaluateImmediately)
             throws RepositoryException
     {
+        List<String> messages = new ArrayList<String>();
+
         try {
-            Collection<String> messages = queryEvaluator.evaluate(
+            Collection<String> queryMessages = queryEvaluator.evaluate(
                 query,
                 evaluateImmediately ? new ImmediateEvaluationPolicy() : evaluationPolicy);
+            messages.addAll(queryMessages);
+            appendSubscriptionDetails(messages, query.getSubscription());
+
             sendNotifications(messages, query.getSubscription());
             postponedQueryHandler.remove(query);
         }
@@ -106,6 +113,14 @@ public class QueryDispatcher implements IQueryDispatcher {
                 notifier.notify(messages);
             }
         }
+    }
+
+    private void appendSubscriptionDetails(Collection<String> messages, Subscription subscription) {
+        String rationale = "You receive this notification because of subscription '" +subscription.getId()+ "'";
+        if (!subscription.getDescription().isEmpty()) {
+            rationale += " (" +subscription.getDescription()+ ")";
+        }
+        messages.add(rationale);
     }
 
     private class Notification implements Runnable {

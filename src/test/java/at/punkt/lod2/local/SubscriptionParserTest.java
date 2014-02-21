@@ -45,4 +45,11 @@ public class SubscriptionParserTest {
         Assert.assertTrue(notificationQuery.getConditions().hasNext());
     }
 
+    @Test
+    public void queryWithDescription() throws RDFParseException, IOException, RDFHandlerException {
+        Model rdfSubscription = Helper.createModelFromResourceFile("/internal/subscriptionWithDescription.ttl", RDFFormat.TURTLE);
+        Subscription subscription = new SubscriptionParser(rdfSubscription).createSubscription();
+
+        Assert.assertTrue(subscription.getDescription().equals("description"));
+    }
 }

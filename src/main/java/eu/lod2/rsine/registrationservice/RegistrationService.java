@@ -41,8 +41,8 @@ public class RegistrationService {
         }
 
         subscriptions.add(subscription);
-        logger.info("Successfully registered subscription " +subscription.getSubscriptionId());
-        return subscription.getSubscriptionId();
+        logger.info("Successfully registered subscription " +subscription.getId());
+        return subscription.getId();
     }
 
     public synchronized void unregister(Resource subscriptionId) {
@@ -55,7 +55,7 @@ public class RegistrationService {
 
     public synchronized Subscription getSubscription(Resource subscriptionId) {
         for (Subscription subscription : subscriptions) {
-            if (subscription.getSubscriptionId().equals(subscriptionId)) return subscription;
+            if (subscription.getId().equals(subscriptionId)) return subscription;
         }
         throw new SubscriptionNotFoundException();
     }

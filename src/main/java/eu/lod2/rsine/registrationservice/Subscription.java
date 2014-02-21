@@ -11,27 +11,36 @@ import java.util.*;
 
 public class Subscription {
 
-    private static int id = 0;
+    private static int auto_id = 0;
 
-    private Resource subscriptionId;
+    private Resource id;
+    private String description = "";
     private Collection<NotificationQuery> queries = new HashSet<NotificationQuery>();
     private Collection<INotifier> notifiers;
 
     public Subscription() {
         ValueFactory valueFactory = ValueFactoryImpl.getInstance();
-        subscriptionId = valueFactory.createURI(
+        id = valueFactory.createURI(
             Namespaces.RSINE_NAMESPACE.getName(),
-            "subscriber_" +id);
+            "subscriber_" + auto_id);
         notifiers = new ArrayList<INotifier>();
-        id++;
+        auto_id++;
     }
 
-    public Resource getSubscriptionId() {
-        return subscriptionId;
+    public Resource getId() {
+        return id;
     }
 
-    public void setSubscriptionId(Resource subscriptionId) {
-        this.subscriptionId = subscriptionId;
+    public void setId(Resource id) {
+        this.id = id;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public Iterator<NotificationQuery> getQueries() {
@@ -60,11 +69,11 @@ public class Subscription {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof Subscription && subscriptionId.equals(((Subscription) obj).subscriptionId);
+        return obj instanceof Subscription && id.equals(((Subscription) obj).id);
     }
 
     @Override
     public int hashCode() {
-        return subscriptionId.hashCode();
+        return id.hashCode();
     }
 }
