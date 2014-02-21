@@ -37,7 +37,7 @@ public class RegistrationService {
             if (overwriteIfExisting) {
                 subscriptions.remove(subscription);
             }
-            else throw new SubscriptionExistsException();
+            else throw new SubscriptionExistsException("Subscription already registered");
         }
 
         subscriptions.add(subscription);
