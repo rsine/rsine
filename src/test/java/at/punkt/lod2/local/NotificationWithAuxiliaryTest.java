@@ -42,10 +42,8 @@ public class NotificationWithAuxiliaryTest {
 
     private final URI conceptUri = new URIImpl("http://localhost/conceptA");
     private final URI otherConceptUri = new URIImpl("http://localhost/conceptB");
-    private final Literal conceptUriLabelEn = new LiteralImpl("Concept A", "en");
-    private final Literal conceptUriLabelDe = new LiteralImpl("Konzept A", "de");
-    private final Literal otherConceptUriLabelEn = new LiteralImpl("Concept B", "en");
-    private final Literal otherConceptUriLabelDe = new LiteralImpl("Konzept B", "de");
+    private final Literal conceptUriLabel = new LiteralImpl("Concept A", "en");
+    private final Literal otherConceptUriLabel = new LiteralImpl("Concept B", "en");
     private final String velocityTemplate = "Hierarchical relation between" +
         "<a href=''$bindingSet.getValue('concept')''>'$bindingSet.getValue('conceptLabel')'</a> and "+
         "<a href=''$bindingSet.getValue('otherConcept')''>'$bindingSet.getValue('otherConceptLabel')'</a>";
@@ -76,10 +74,8 @@ public class NotificationWithAuxiliaryTest {
 
     private void addConceptData() throws RepositoryException {
         repCon.add(conceptUri, SKOS.BROADER, otherConceptUri);
-        repCon.add(conceptUri, SKOS.PREF_LABEL, conceptUriLabelEn);
-        repCon.add(conceptUri, SKOS.PREF_LABEL, conceptUriLabelDe);
-        repCon.add(otherConceptUri, SKOS.PREF_LABEL, otherConceptUriLabelEn);
-        repCon.add(otherConceptUri, SKOS.PREF_LABEL, otherConceptUriLabelDe);
+        repCon.add(conceptUri, SKOS.PREF_LABEL, conceptUriLabel);
+        repCon.add(otherConceptUri, SKOS.PREF_LABEL, otherConceptUriLabel);
     }
 
     private void registerSubscription(String query, BindingSetFormatter formatter) {
@@ -119,7 +115,7 @@ public class NotificationWithAuxiliaryTest {
     }
 
     private String createOtherConceptLabelQuery() {
-        return Namespaces.SKOS_PREFIX + "SELECT ?otherConceptLabel WHERE {?otherConcept skos:prefLabel ?conceptLabel}";
+        return Namespaces.SKOS_PREFIX + "SELECT ?otherConceptLabel WHERE {?otherConcept skos:prefLabel ?otherConceptLabel}";
     }
 
     @After
@@ -131,8 +127,8 @@ public class NotificationWithAuxiliaryTest {
     public void prefLabelsInMessage() throws IOException {
         persistChangeSet();
 
-        Assert.assertTrue(messageConcatenatingNotifier.message.contains(conceptUriLabelEn.getLabel()));
-        Assert.assertTrue(messageConcatenatingNotifier.message.contains(otherConceptUriLabelEn.getLabel()));
+        Assert.assertTrue(messageConcatenatingNotifier.message.contains(conceptUriLabel.getLabel()));
+        Assert.assertTrue(messageConcatenatingNotifier.message.contains(otherConceptUriLabel.getLabel()));
     }
 
     private void persistChangeSet() throws IOException {

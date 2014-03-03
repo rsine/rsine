@@ -24,11 +24,9 @@
         rsine:auxiliary [
             spin:text "SELECT ?conceptLabel WHERE {
                 ?concept skos:prefLabel ?conceptLabel .
-                FILTER(langMatches(lang(?conceptLabel), 'DEFAULT_LANG'))
             }";
             spin:text "SELECT ?otherConceptLabel WHERE {
                 ?otherConcept skos:prefLabel ?otherConceptLabel;
-                FILTER(langMatches(lang(?otherConceptLabel), 'DEFAULT_LANG'))
             }";
         ];
 

@@ -5,9 +5,8 @@ import eu.lod2.rsine.queryhandling.policies.IEvaluationPolicy;
 import eu.lod2.rsine.registrationservice.Condition;
 import eu.lod2.rsine.registrationservice.NotificationQuery;
 import org.openrdf.OpenRDFException;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.BooleanQuery;
-import org.openrdf.query.QueryLanguage;
+import org.openrdf.query.*;
+import org.openrdf.query.algebra.evaluation.QueryBindingSet;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.slf4j.Logger;
@@ -38,9 +37,7 @@ public class QueryEvaluator {
 
     private String authoritativeUri = "";
 
-    public QueryEvaluator() {
-
-    }
+    public QueryEvaluator() {}
 
     public QueryEvaluator(String authoritativeUri) {
         this.authoritativeUri = authoritativeUri;
@@ -93,6 +90,8 @@ public class QueryEvaluator {
 
         Collection<String> messages = new HashSet<String>();
         for (BindingSet bs : results) {
+            evaluateAuxiliary(query.getAuxiliaryQueries(), bs);
+
             if (evaluateConditions(query.getConditions(), bs, managedStoreCon)) {
                 messages.add(query.getBindingSetFormatter().toMessage(bs));
             }
@@ -129,6 +128,35 @@ public class QueryEvaluator {
             logger.error("Error evaluating condition. Query: '" +condition.getAskQuery()+ "'", e);
         }
         return false;
+    }
+
+    private void evaluateAuxiliary(Iterator<String> auxQueries, BindingSet bindingSet) throws OpenRDFException {
+        RepositoryConnection repCon = managedStoreRepo.getConnection();
+        try {
+            if (bindingSet instanceof QueryBindingSet) {
+                while (auxQueries.hasNext()) {
+                    addBindings(auxQueries.next(), repCon, (QueryBindingSet) bindingSet);
+                }
+            }
+            else {
+                logger.error("Cannot extend binding set");
+            }
+        } catch (MalformedQueryException e) {
+            e.printStackTrace();
+        } finally {
+            repCon.close();
+        }
+    }
+
+    private void addBindings(String query,
+                             RepositoryConnection repCon,
+                             QueryBindingSet bindingSet)
+        throws OpenRDFException
+    {
+        TupleQueryResult result = repCon.prepareTupleQuery(QueryLanguage.SPARQL, query).evaluate();
+        while (result.hasNext()) {
+            bindingSet.addAll(result.next());
+        }
     }
 
 }
