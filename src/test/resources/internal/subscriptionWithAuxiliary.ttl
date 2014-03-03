@@ -1,12 +1,9 @@
 @prefix spin: <http://spinrdf.org/sp/> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix rsine: <http://lod2.eu/rsine/> .
-@prefix dcterms: <http://purl.org/dc/terms/>.
 
-<http://example.org/chr> a rsine:Subscription;
+[] a rsine:Subscription;
     rsine:query [
-        dcterms:description "Notification on circular hierarchical relations";
-
         spin:text "PREFIX cs:<http://purl.org/vocab/changeset/schema#>
             PREFIX spin:<http://spinrdf.org/sp/>
             PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -24,38 +21,23 @@
                 FILTER (?csdate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime>)
             }";
 
-        rsine:condition [
-            spin:text "PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
-                ASK {
-                    ?concept skos:broader+ ?otherConcept .
-                    ?otherConcept skos:broader+ ?concept
-                }";
-            rsine:expect true;
-        ];
-
         rsine:auxiliary [
             spin:text "SELECT ?conceptLabel WHERE {
                 ?concept skos:prefLabel ?conceptLabel .
-                FILTER(langMatches(lang(?conceptLabel), "DEFAULT_LANG"))
+                FILTER(langMatches(lang(?conceptLabel), 'DEFAULT_LANG'))
             }";
             spin:text "SELECT ?otherConceptLabel WHERE {
                 ?otherConcept skos:prefLabel ?otherConceptLabel;
-                FILTER(langMatches(lang(?otherConceptLabel), "DEFAULT_LANG"))
+                FILTER(langMatches(lang(?otherConceptLabel), 'DEFAULT_LANG'))
             }";
         ];
 
         rsine:formatter [
             a rsine:vtlFormatter;
-            rsine:message "The concepts <a href="'$bindingSet.getValue('concept')'">'$bindingSet.getValue('conceptLabel')'</a> and
-                <a href="'$bindingSet.getValue('otherConcept')'">'$bindingSet.getValue('otherConceptLabel')'</a> form a hierarchical cycle";
+            rsine:message "The concepts <a href=''$bindingSet.getValue('concept')''>'$bindingSet.getValue('conceptLabel')'</a> and
+                <a href=''$bindingSet.getValue('otherConcept')''>'$bindingSet.getValue('otherConceptLabel')'</a> form a hierarchical cycle";
         ];
-      ];
 
-    rsine:notifier [
-        a rsine:loggingNotifier;
-    ];
-
-    rsine:notifier [
-        a rsine:emailNotifier;
-        foaf:mbox <mailto:c.mader@semantic-web.at>
     ].
+
+

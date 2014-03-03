@@ -13,6 +13,7 @@ import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParseException;
 
 import java.io.IOException;
+import java.util.Iterator;
 
 public class SubscriptionParserTest {
 
@@ -52,4 +53,20 @@ public class SubscriptionParserTest {
 
         Assert.assertTrue(subscription.getDescription().equals("description"));
     }
+
+    @Test
+    public void queryWithAuxiliaryInfo() throws RDFParseException, IOException, RDFHandlerException {
+        Model rdfSubscription = Helper.createModelFromResourceFile("/internal/subscriptionWithAuxiliary.ttl", RDFFormat.TURTLE);
+        Subscription subscription = new SubscriptionParser(rdfSubscription).createSubscription();
+
+        NotificationQuery notificationQuery = subscription.getQueries().next();
+        Iterator<String> queryIt = notificationQuery.getAuxiliaryQueries();
+        int count = 0;
+        while (queryIt.hasNext()) {
+            count++;
+            queryIt.next();
+        }
+        Assert.assertEquals(2, count);
+    }
+
 }

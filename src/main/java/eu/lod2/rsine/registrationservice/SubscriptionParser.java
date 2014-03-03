@@ -118,10 +118,12 @@ public class SubscriptionParser {
                 (Resource) query,
                 valueFactory.createURI(Namespaces.SPIN.getName(), "text"),
                 null).objectString();
-            notificationQueries.add(new NotificationQuery(sparql,
+            NotificationQuery notificationQuery = new NotificationQuery(sparql,
                     getFormatter((Resource) query),
-                    getConditions((Resource) query),
-                    subscription));
+                    subscription);
+            notificationQuery.setConditions(getConditions((Resource) query));
+            notificationQuery.setAuxiliary(getAuxiliary((Resource) query));
+            notificationQueries.add(notificationQuery);
         }
 
         return notificationQueries;
@@ -161,6 +163,26 @@ public class SubscriptionParser {
         }
 
         return conditions;
+    }
+
+    private Auxiliary getAuxiliary(Resource query) {
+        Set<Value> allAuxiliaries = rdfSubscription.filter(
+                query,
+                valueFactory.createURI(Namespaces.RSINE_NAMESPACE.getName(), "auxiliary"),
+                null).objects();
+
+        Auxiliary auxiliary = new Auxiliary();
+        for (Value condition : allAuxiliaries) {
+            Set<Value> allAuxQueries = rdfSubscription.filter(
+                (Resource) condition,
+                valueFactory.createURI(Namespaces.SPIN.getName(), "text"),
+                null).objects();
+            for (Value auxQuery : allAuxQueries) {
+                auxiliary.addQuery(auxQuery.stringValue());
+            }
+        }
+
+        return auxiliary;
     }
 
 }

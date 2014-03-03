@@ -6,6 +6,7 @@ import eu.lod2.rsine.dissemination.messageformatting.ToStringBindingSetFormatter
 import eu.lod2.rsine.dissemination.notifier.logging.LoggingNotifier;
 import eu.lod2.rsine.queryhandling.QueryEvaluator;
 import eu.lod2.rsine.registrationservice.Condition;
+import eu.lod2.rsine.registrationservice.NotificationQuery;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.rsine.service.ChangeSetCreator;
@@ -33,6 +34,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"LocalTest-context.xml"})
@@ -85,9 +87,14 @@ public class NotificationWithConditionTest {
 
     private void registerSubscription(String query, BindingSetFormatter formatter, Condition condition) {
         Subscription subscription = new Subscription();
-        subscription.addQuery(query, formatter, condition);
+
+        NotificationQuery notificationQuery = new NotificationQuery(query, formatter, subscription);
+        notificationQuery.setConditions(Arrays.asList(condition));
+        subscription.addQuery(notificationQuery);
+
         subscription.addNotifier(new LoggingNotifier());
         subscription.addNotifier(countingNotifier);
+
         registrationService.register(subscription, true);
     }
 
