@@ -6,6 +6,7 @@ import eu.lod2.rsine.dissemination.messageformatting.ToStringBindingSetFormatter
 import eu.lod2.rsine.dissemination.notifier.INotifier;
 import eu.lod2.rsine.queryhandling.PostponedQueryHandler;
 import eu.lod2.rsine.queryhandling.QueryEvaluator;
+import eu.lod2.rsine.registrationservice.NotificationQuery;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.rsine.service.ChangeTripleService;
@@ -51,7 +52,7 @@ public class MinTimePassedEvaluationPolicyTest  {
     @Before
     public void setUp() throws IOException, RepositoryException, RDFParseException, QueryEvaluationException, MalformedQueryException {
         Subscription subscription = new Subscription();
-        subscription.addQuery(createQuery(), new ToStringBindingSetFormatter());
+        subscription.addQuery(new NotificationQuery(createQuery(), new ToStringBindingSetFormatter(), subscription));
         subscription.addNotifier(timeMeasureNotifier);
         registrationService.register(subscription, true);
     }

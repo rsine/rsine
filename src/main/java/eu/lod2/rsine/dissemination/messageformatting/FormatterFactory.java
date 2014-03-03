@@ -31,7 +31,7 @@ public class FormatterFactory {
             new URIImpl(Namespaces.RSINE_NAMESPACE.getName() + "message"),
             null).objectLiteral();
 
-        return new VelocityBindingSetFormatter(message);
+        return new VelocityBindingSetFormatter(message.getLabel());
     }
 
 }

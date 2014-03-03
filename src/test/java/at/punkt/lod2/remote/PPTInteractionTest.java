@@ -6,6 +6,7 @@ import at.punkt.lod2.util.Helper;
 import com.jayway.awaitility.Awaitility;
 import eu.lod2.rsine.dissemination.messageformatting.ToStringBindingSetFormatter;
 import eu.lod2.rsine.queryhandling.QueryEvaluator;
+import eu.lod2.rsine.registrationservice.NotificationQuery;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.rsine.service.RsineController;
@@ -44,7 +45,7 @@ public class PPTInteractionTest {
 
     private void subscribeForRemoteReferencesAtRemoteRsine() {
         Subscription subscription = new Subscription();
-        subscription.addQuery(createMappingQuery(), new ToStringBindingSetFormatter());
+        subscription.addQuery(new NotificationQuery(createMappingQuery(), new ToStringBindingSetFormatter(), subscription));
         subscription.addNotifier(countingNotifier = new CountingNotifier());
 
         RegistrationService remoteRegistrationService = remoteContext.getBean(

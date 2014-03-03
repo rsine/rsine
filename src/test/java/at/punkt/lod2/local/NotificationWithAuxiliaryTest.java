@@ -1,11 +1,15 @@
 package at.punkt.lod2.local;
 
 import eu.lod2.rsine.dissemination.messageformatting.BindingSetFormatter;
-import eu.lod2.rsine.dissemination.messageformatting.ToStringBindingSetFormatter;
+import eu.lod2.rsine.dissemination.messageformatting.VelocityBindingSetFormatter;
 import eu.lod2.rsine.dissemination.notifier.INotifier;
-import eu.lod2.rsine.dissemination.notifier.logging.LoggingNotifier;
 import eu.lod2.rsine.queryhandling.QueryEvaluator;
-import eu.lod2.rsine.registrationservice.*;
+import eu.lod2.rsine.registrationservice.Auxiliary;
+import eu.lod2.rsine.registrationservice.NotificationQuery;
+import eu.lod2.rsine.registrationservice.RegistrationService;
+import eu.lod2.rsine.registrationservice.Subscription;
+import eu.lod2.rsine.service.ChangeSetCreator;
+import eu.lod2.rsine.service.ChangeTripleService;
 import eu.lod2.rsine.service.PersistAndNotifyProvider;
 import eu.lod2.util.Namespaces;
 import org.junit.After;
@@ -14,8 +18,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openrdf.model.Literal;
+import org.openrdf.model.Model;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.LiteralImpl;
+import org.openrdf.model.impl.StatementImpl;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.SKOS;
 import org.openrdf.repository.Repository;
@@ -27,7 +33,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collection;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -41,6 +46,9 @@ public class NotificationWithAuxiliaryTest {
     private final Literal conceptUriLabelDe = new LiteralImpl("Konzept A", "de");
     private final Literal otherConceptUriLabelEn = new LiteralImpl("Concept B", "en");
     private final Literal otherConceptUriLabelDe = new LiteralImpl("Konzept B", "de");
+    private final String velocityTemplate = "Hierarchical relation between" +
+        "<a href=''$bindingSet.getValue('concept')''>'$bindingSet.getValue('conceptLabel')'</a> and "+
+        "<a href=''$bindingSet.getValue('otherConcept')''>'$bindingSet.getValue('otherConceptLabel')'</a>";
 
     @Autowired
     private RegistrationService registrationService;
@@ -63,7 +71,7 @@ public class NotificationWithAuxiliaryTest {
 
         registerSubscription(
                 createBroaderRelationQuery(),
-                new ToStringBindingSetFormatter());
+                new VelocityBindingSetFormatter(velocityTemplate));
     }
 
     private void addConceptData() throws RepositoryException {
@@ -78,7 +86,9 @@ public class NotificationWithAuxiliaryTest {
         Subscription subscription = new Subscription();
 
         NotificationQuery notificationQuery = new NotificationQuery(query, formatter, subscription);
-
+        Auxiliary auxiliary = new Auxiliary();
+        auxiliary.addQuery(createConceptLabelQuery());
+        auxiliary.addQuery(createOtherConceptLabelQuery());
         notificationQuery.setAuxiliary(auxiliary);
         subscription.addQuery(notificationQuery);
 
@@ -90,7 +100,7 @@ public class NotificationWithAuxiliaryTest {
         return Namespaces.SKOS_PREFIX+
                 Namespaces.CS_PREFIX+
                 Namespaces.DCTERMS_PREFIX+
-                "SELECT ?sub ?obj " +
+                "SELECT ?concept ?otherConcept " +
                 "WHERE {" +
                     "?cs a cs:ChangeSet . " +
                     "?cs cs:createdDate ?csdate . " +
@@ -100,8 +110,16 @@ public class NotificationWithAuxiliaryTest {
                     "?addition rdf:predicate skos:broader . " +
                     "?addition rdf:object ?otherConcept . "+
 
-                    "FILTER ((?csdate > \"" + QueryEvaluator.QUERY_LAST_ISSUED+ "\"^^<http://www.w3.org/2001/XMLSchema#dateTime>)" +
+                    "FILTER (?csdate > \"" + QueryEvaluator.QUERY_LAST_ISSUED+ "\"^^<http://www.w3.org/2001/XMLSchema#dateTime>)" +
                 "}";
+    }
+
+    private String createConceptLabelQuery() {
+        return Namespaces.SKOS_PREFIX + "SELECT ?conceptLabel WHERE {?concept skos:prefLabel ?conceptLabel}";
+    }
+
+    private String createOtherConceptLabelQuery() {
+        return Namespaces.SKOS_PREFIX + "SELECT ?otherConceptLabel WHERE {?otherConcept skos:prefLabel ?conceptLabel}";
     }
 
     @After
@@ -110,9 +128,19 @@ public class NotificationWithAuxiliaryTest {
     }
 
     @Test
-    public void prefLabelsInMessage() {
-        //messageConcatenatingNotifier.message;
-        Assert.fail();
+    public void prefLabelsInMessage() throws IOException {
+        persistChangeSet();
+
+        Assert.assertTrue(messageConcatenatingNotifier.message.contains(conceptUriLabelEn.getLabel()));
+        Assert.assertTrue(messageConcatenatingNotifier.message.contains(otherConceptUriLabelEn.getLabel()));
+    }
+
+    private void persistChangeSet() throws IOException {
+        Model changeSet = new ChangeSetCreator().assembleChangeset(
+            new StatementImpl(otherConceptUri, SKOS.BROADER, conceptUri),
+            null,
+            ChangeTripleService.CHANGETYPE_ADD);
+        persistAndNotifyProvider.persistAndNotify(changeSet, true);
     }
 
     private class MessageConcatenatingNotifier implements INotifier {

@@ -5,6 +5,7 @@ import at.punkt.lod2.util.ExpectedCountReached;
 import com.jayway.awaitility.Awaitility;
 import eu.lod2.rsine.Rsine;
 import eu.lod2.rsine.dissemination.messageformatting.BindingSetFormatter;
+import eu.lod2.rsine.registrationservice.NotificationQuery;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.rsine.remotenotification.RemoteNotificationServiceBase;
@@ -50,7 +51,7 @@ public class RemoteNotificationTest {
 
     private void registerRemoteChangeSubscriber() {
         Subscription subscription = new Subscription();
-        subscription.addQuery(createRemoteReferencesDetectionQuery(), new RemoteReferencesFormatter());
+        subscription.addQuery(new NotificationQuery(createRemoteReferencesDetectionQuery(), new RemoteReferencesFormatter(), subscription));
         subscription.addNotifier(countingNotifier);
 
         RegistrationService remoteRegistrationService = localContext.getBean(
