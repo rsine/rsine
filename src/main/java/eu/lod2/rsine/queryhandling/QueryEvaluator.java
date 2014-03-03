@@ -118,9 +118,7 @@ public class QueryEvaluator {
     {
         try {
             BooleanQuery booleanQuery = managedStoreCon.prepareBooleanQuery(QueryLanguage.SPARQL, condition.getAskQuery());
-            for (String bindingName : bs.getBindingNames()) {
-                booleanQuery.setBinding(bindingName, bs.getBinding(bindingName).getValue());
-            }
+            setBinding(booleanQuery, bs);
 
             return booleanQuery.evaluate() == condition.getExpectedResult();
         }
@@ -128,6 +126,12 @@ public class QueryEvaluator {
             logger.error("Error evaluating condition. Query: '" +condition.getAskQuery()+ "'", e);
         }
         return false;
+    }
+
+    private void setBinding(Operation query, BindingSet bindingSet) {
+        for (String bindingName : bindingSet.getBindingNames()) {
+            query.setBinding(bindingName, bindingSet.getBinding(bindingName).getValue());
+        }
     }
 
     private void evaluateAuxiliary(Iterator<String> auxQueries, BindingSet bindingSet) throws OpenRDFException {
@@ -153,7 +157,10 @@ public class QueryEvaluator {
                              QueryBindingSet bindingSet)
         throws OpenRDFException
     {
-        TupleQueryResult result = repCon.prepareTupleQuery(QueryLanguage.SPARQL, query).evaluate();
+        TupleQuery tupleQuery = repCon.prepareTupleQuery(QueryLanguage.SPARQL, query);
+        setBinding(tupleQuery, bindingSet);
+
+        TupleQueryResult result = tupleQuery.evaluate();
         while (result.hasNext()) {
             bindingSet.addAll(result.next());
         }
