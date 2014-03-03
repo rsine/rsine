@@ -162,7 +162,8 @@ public class QueryEvaluator {
 
         TupleQueryResult result = tupleQuery.evaluate();
         while (result.hasNext()) {
-            bindingSet.addAll(result.next());
+            BindingSet resultBindings = result.next();
+            bindingSet.addAll(resultBindings);
         }
     }
 

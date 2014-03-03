@@ -4,7 +4,6 @@ import eu.lod2.rsine.dissemination.messageformatting.BindingSetFormatter;
 import eu.lod2.rsine.dissemination.messageformatting.VelocityBindingSetFormatter;
 import eu.lod2.rsine.dissemination.notifier.INotifier;
 import eu.lod2.rsine.queryhandling.QueryEvaluator;
-import eu.lod2.rsine.registrationservice.Auxiliary;
 import eu.lod2.rsine.registrationservice.NotificationQuery;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
@@ -33,6 +32,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -44,9 +44,9 @@ public class NotificationWithAuxiliaryTest {
     private final URI otherConceptUri = new URIImpl("http://localhost/conceptB");
     private final Literal conceptUriLabel = new LiteralImpl("Concept A", "en");
     private final Literal otherConceptUriLabel = new LiteralImpl("Concept B", "en");
-    private final String velocityTemplate = "Hierarchical relation between" +
-        "<a href=''$bindingSet.getValue('concept')''>'$bindingSet.getValue('conceptLabel')'</a> and "+
-        "<a href=''$bindingSet.getValue('otherConcept')''>'$bindingSet.getValue('otherConceptLabel')'</a>";
+    private final String velocityTemplate = "Hierarchical relation between " +
+        "<a href='$bindingSet.getValue('concept')'>$bindingSet.getValue('conceptLabel').getLabel()</a> and "+
+        "<a href='$bindingSet.getValue('otherConcept')'>$bindingSet.getValue('otherConceptLabel').getLabel()</a>";
 
     @Autowired
     private RegistrationService registrationService;
@@ -82,10 +82,7 @@ public class NotificationWithAuxiliaryTest {
         Subscription subscription = new Subscription();
 
         NotificationQuery notificationQuery = new NotificationQuery(query, formatter, subscription);
-        Auxiliary auxiliary = new Auxiliary();
-        auxiliary.addQuery(createConceptLabelQuery());
-        auxiliary.addQuery(createOtherConceptLabelQuery());
-        notificationQuery.setAuxiliary(auxiliary);
+        notificationQuery.addAuxiliaryQueries(Arrays.asList(createConceptLabelQuery(), createOtherConceptLabelQuery()));
         subscription.addQuery(notificationQuery);
 
         subscription.addNotifier(messageConcatenatingNotifier);

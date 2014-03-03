@@ -122,8 +122,9 @@ public class SubscriptionParser {
                     getFormatter((Resource) query),
                     subscription);
             notificationQuery.setConditions(getConditions((Resource) query));
-            notificationQuery.setAuxiliary(getAuxiliary((Resource) query));
+            notificationQuery.addAuxiliaryQueries(getAuxiliaryQueries((Resource) query));
             notificationQueries.add(notificationQuery);
+
         }
 
         return notificationQueries;
@@ -165,24 +166,25 @@ public class SubscriptionParser {
         return conditions;
     }
 
-    private Auxiliary getAuxiliary(Resource query) {
+    private Collection<String> getAuxiliaryQueries(Resource query) {
+        Collection<String> auxQueries = new ArrayList<String>();
+
         Set<Value> allAuxiliaries = rdfSubscription.filter(
                 query,
                 valueFactory.createURI(Namespaces.RSINE_NAMESPACE.getName(), "auxiliary"),
                 null).objects();
 
-        Auxiliary auxiliary = new Auxiliary();
         for (Value condition : allAuxiliaries) {
             Set<Value> allAuxQueries = rdfSubscription.filter(
                 (Resource) condition,
                 valueFactory.createURI(Namespaces.SPIN.getName(), "text"),
                 null).objects();
             for (Value auxQuery : allAuxQueries) {
-                auxiliary.addQuery(auxQuery.stringValue());
+                auxQueries.add(auxQuery.stringValue());
             }
         }
 
-        return auxiliary;
+        return auxQueries;
     }
 
 }

@@ -34,20 +34,22 @@
         ];
 
         rsine:auxiliary [
-            spin:text "SELECT ?conceptLabel WHERE {
-                ?concept skos:prefLabel ?conceptLabel .
-                FILTER(langMatches(lang(?conceptLabel), "DEFAULT_LANG"))
-            }";
-            spin:text "SELECT ?otherConceptLabel WHERE {
-                ?otherConcept skos:prefLabel ?otherConceptLabel;
-                FILTER(langMatches(lang(?otherConceptLabel), "DEFAULT_LANG"))
-            }";
+            spin:text "PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+                SELECT ?conceptLabel WHERE {
+                    ?concept skos:prefLabel ?conceptLabel .
+                    FILTER(langMatches(lang(?conceptLabel), 'en'))
+                }";
+            spin:text "PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+                SELECT ?otherConceptLabel WHERE {
+                    ?otherConcept skos:prefLabel ?otherConceptLabel .
+                    FILTER(langMatches(lang(?otherConceptLabel), 'en'))
+                }";
         ];
 
         rsine:formatter [
             a rsine:vtlFormatter;
-            rsine:message "The concepts <a href="'$bindingSet.getValue('concept')'">'$bindingSet.getValue('conceptLabel')'</a> and
-                <a href="'$bindingSet.getValue('otherConcept')'">'$bindingSet.getValue('otherConceptLabel')'</a> form a hierarchical cycle";
+            rsine:message "The concepts <a href='$bindingSet.getValue('concept')'>$bindingSet.getValue('conceptLabel').getLabel()</a> and
+                <a href='$bindingSet.getValue('otherConcept')'>$bindingSet.getValue('otherConceptLabel').getLabel()</a> form a hierarchical cycle";
         ];
       ];
 

@@ -87,9 +87,11 @@ public class QueryDispatcher implements IQueryDispatcher {
                 query,
                 evaluateImmediately ? new ImmediateEvaluationPolicy() : evaluationPolicy);
             messages.addAll(queryMessages);
-            appendSubscriptionDetails(messages, query.getSubscription());
 
-            sendNotifications(messages, query.getSubscription());
+            if (!messages.isEmpty()) {
+                appendSubscriptionDetails(messages, query.getSubscription());
+                sendNotifications(messages, query.getSubscription());
+            }
             postponedQueryHandler.remove(query);
         }
         catch (OpenRDFException e) {
@@ -103,7 +105,7 @@ public class QueryDispatcher implements IQueryDispatcher {
     private void sendNotifications(Collection<String> messages, Subscription subscription) {
         Iterator<INotifier> notifierIt = subscription.getNotifierIterator();
 
-        while (!messages.isEmpty() && notifierIt.hasNext()) {
+        while (notifierIt.hasNext()) {
             INotifier notifier = notifierIt.next();
 
             if (asyncNotification) {
