@@ -25,15 +25,17 @@ solutions for RDF data:
  * [openRDF](http://www.openrdf.org/): We developed a reference implementation of a `RepositoryConnectionListener` that forwards
  triple changes to rsine. The implementation is not published yet.
 
-### Example Use-cases
+### Example Use-case
 
-## Usage
+Thesaurus management
+
+## Installation
 
 ### Requirements
 
 ### Building from Source
 
-### Running Rsine
+## Usage
 
 ## Subscriptions
 
@@ -45,8 +47,6 @@ solutions for RDF data:
 
 ### LOD2 Project
 
-WKD use-case
-
 ## Future Work
 
 ## Contributors
@@ -56,3 +56,5 @@ WKD use-case
 * Helmut Nagy ([@nagyhel](https://github.com/nagyhel))
 
 ## Copyright
+
+Please see our [Contributor Agreement](https://raw.github.com/rsine/rsine/devel/rsine_contribution_agreement.pdf).
