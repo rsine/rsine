@@ -27,7 +27,18 @@ solutions for RDF data:
 
 ### Example Use-case
 
-Thesaurus management
+Development of controlled vocabularies (e.g., thesauri) is typically a manual and error-prone process. [SKOS](http://www.w3.org/2004/02/skos/)
+has been widely accepted as a schema to to publish thesauri on the Web of Data. During development, vocabularies tend to become
+increasingly complex and in many cases they are edited and curated by more than one person. However, the [SKOS reference](http://www.w3.org/TR/skos-reference/)
+defines a number of basic integrity constraints that should be met and which can easily be missed. Such constraints encompass, e.g.,
+
+ * Non-disjoint labels (One concept has identical preferred and alternative labels)
+ * Relation clashes (Hierarchically related concepts are also associatively related)
+ * Mapping clashes (Concepts mapped by skos:exactMatch must not be also related by a hierarchical mapping property)
+
+Furthermore, custom vocabulary or use-case-specific constraints could be specified. Rsine is able to cover the constraints
+outlined above and is, of course, capable to notify subscribers of any number of additional custom-defined constraints.
+Also see the section *Integration Examples* below for additional information on rsine usage scenarios.
 
 ## Installation
 
