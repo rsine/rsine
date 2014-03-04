@@ -14,12 +14,9 @@
         </encoder>
     </appender>
 
-    <root level="${root-level:-DEBUG}">
-        <appender-ref ref="FILE" />
-    </root>
-
     <root level="${root-level:-INFO}">
         <appender-ref ref="STDOUT" />
+        <appender-ref ref="FILE" />
     </root>
 
 </configuration>
