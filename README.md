@@ -94,9 +94,23 @@ To get a synopsis on the supported parameters, type <tt>java -jar rsine-cmd.jar 
  that resolve to different hosts. If you do not provide any value for this parameter, rsine will try to automatically
  detect it from the managed store sparql endpoint URI.
 
+Summarizing, you are required to provide at least the SPARQL endpoint of your managed store (-s), all other parameters are
+optional.
+
 ## Subscriptions
 
-## Notifications
+### Components
+content
+
+### Changeset Selection
+
+### Condition
+
+### Auxiliary Query
+
+### Formatter
+
+### Notifier
 
 ## Integration Examples
 
