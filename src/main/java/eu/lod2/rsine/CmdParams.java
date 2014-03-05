@@ -17,17 +17,17 @@ class CmdParams {
     private Properties properties;
     private JCommander jc;
 
-    @Parameter(names = {"-a", "--authoritative-uri"}, description = "URI scheme of local resources")
-    public String authoritativeUri;
-
-    @Parameter(names = {"-h", "--help"}, description = "Outputs commannd line parameter description")
-    boolean help = false;
-
     @Parameter(names = {"-s", "--sparql-endpoint"}, description = "URI of managed store SPARQL endpoint")
     public String managedStoreSparqlEndpoint;
 
+    @Parameter(names = {"-a", "--authoritative-uri"}, description = "URI scheme of local resources")
+    public String authoritativeUri;
+
     @Parameter(names = {"-p", "--port"}, description = "Port where rsine listens for incoming connections")
-    public Integer port;
+    public Integer port = 2221;
+
+    @Parameter(names = {"-h", "--help"}, description = "Outputs commannd line parameter description")
+    boolean help = false;
 
     public String feedbackFileName;
 

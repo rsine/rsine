@@ -22,7 +22,7 @@ solutions for RDF data:
 
  * [Virtuoso](http://virtuoso.openlinksw.com/): To establish interoperability with rsine, the provided
  [vad package](https://github.com/rsine/rsineVad) must installed
- * [openRDF](http://www.openrdf.org/): We developed a reference implementation of a `RepositoryConnectionListener` that forwards
+ * [openRDF](http://www.openrdf.org/): We developed a reference implementation of a <tt>RepositoryConnectionListener</tt> that forwards
  triple changes to rsine. The implementation is not published yet.
 
 ### Example Use-case
@@ -42,11 +42,54 @@ Also see the section *Integration Examples* below for additional information on 
 
 ## Installation
 
-### Requirements
+Requirements:
 
-### Building from Source
+ * Verify that Java version 1.7 or greater is installed: <tt>javac -version</tt>
+ * Make sure Maven version 3.0 or greater is installed: <tt>mvn -v</tt>
+ * Make sure you have the current version of the [git version control system](http://git-scm.com/) installed on your system
+
+### Build from Source
+
+#### Configuration before building (optional)
+
+If you know in advance for what SPARQL endpoint you want to configure rsine, you can set this information in the
+<tt>application.properties</tt> file, located in the <tt>rsine/src/main/resources</tt> directory. However, you can also
+skip this step and set the relevant parameters at runtime (i.e. when starting the rsine service).
+
+#### Performing the Build
+
+1. Get the sourcecode by cloning the rsine repository: <tt>git clone https://github.com/rsine/rsine.git</tt>)
+2. Change into the newly created <tt>rsine</tt> directory and build the application: <tt>mvn -DskipTests=true package</tt>
+
+The file <tt>rsine-cmd.jar</tt> is now available in the directory <tt>rsine/target</tt>
+
+Known Issues:
+
+ * When building rsine with tests enabled (i.e. without the <tt>-DskipTests=true</tt> switch) it can happen that the build
+fails due to non-successful tests. This happens when all tests are run consecutively and seems to be caused by some
+concurrency issue in the test setup. As far as we know, these failing tests do not affect the functionality of the rsine
+application.
 
 ## Usage
+
+1. Change to the <tt>rsine/target</tt> directory
+2. Run the tool using <tt>java -jar rsine-cmd.jar</tt>
+
+### Configuration
+
+As describe above, rsine reads it's configuration data from the file <tt>application.properties</tt> which is provided
+at compile time. If you decided not to edit this file before compilation (see description above) you can set the most
+essential parameters on the command line:
+
+### Commandline Parameters
+
+To get a synopsis on the supported parameters, type <tt>java -jar rsine-cmd.jar --help</tt>.
+
+ * <tt>-s, --sparql-endpoint</tt>
+ * <tt>-a, --authoritative-uri</tt>
+ * <tt>-p, --port</tt>
+
+### Configuration
 
 ## Subscriptions
 
@@ -59,6 +102,8 @@ Also see the section *Integration Examples* below for additional information on 
 ### LOD2 Project
 
 ## Future Work
+
+## Publications
 
 ## Contributors
 

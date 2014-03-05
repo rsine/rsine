@@ -23,7 +23,7 @@ public class Rsine {
     public static void main(String[] args) {
         try {
             cmdParams = new CmdParams(args);
-            startServer();
+            if (!cmdParams.help) startServer();
         }
         catch (InvalidParameterException e) {
             logger.error("Insufficient parameters for starting the service");
@@ -44,6 +44,7 @@ public class Rsine {
         cmdParams.managedStoreSparqlEndpoint = managedStoreSparqlEndpoint;
         cmdParams.authoritativeUri = authoritativeUri;
         cmdParams.feedbackFileName = feedbackFileName;
+
         return startServer();
     }
 
