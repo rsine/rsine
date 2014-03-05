@@ -99,10 +99,42 @@ optional.
 
 ## Subscriptions
 
+Subscriptions are RDF documents that are sent to <tt>http://{rsinehost}/register</tt> by HTTP post (<tt>{rsinehost}</tt>
+being the host where the rsine service is running). A simple example can be viewed [here](https://raw.github.com/rsine/rsine/devel/src/test/resources/internal/emailNotifierSubscription.ttl), but also more [complex subscriptions](https://raw.github.com/rsine/rsine/devel/src/test/resources/quality/cyclic_hierarchical_relations.ttl) are possible.
+
 ### Components
-content
+
+Subscriptions contain of two mandatory parts: The *query* which specifies the resources the subscriber is interested to
+ get notifications about and one or more *notifiers* that define the way notification messages should be disseminated. The
+ basic structure looks like this:
+
+1. Query
+  * Changeset Selection
+  * Condition (optional)
+  * Auxiliary Query (optional)
+  * Formatter (optional)
+2. Notifier(s)
 
 ### Changeset Selection
+
+A changeset selection is responsible for selecting the type of change a subscriber is interested in. It is a mandatory
+component of the query part. The following example shows a changeset selection that states interest in all newly created (<tt>?cs cs:addition ?addition</tt>) preferred labels (<tt>?addition rdf:predicate skos:prefLabel</tt>) of a concept (<tt>?addition rdf:subject ?concept</tt>) and its value (<tt>?addition rdf:object ?newLabel</tt>).
+
+```
+rsine:query [
+    spin:text "PREFIX cs:<http://purl.org/vocab/changeset/schema#>
+        PREFIX spin:<http://spinrdf.org/sp/>
+        PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+        SELECT ?concept ?newLabel WHERE {
+            ?cs a cs:ChangeSet .
+            ?cs cs:addition ?addition .
+            ?addition rdf:subject ?concept .
+            ?addition rdf:predicate skos:prefLabel .
+            ?addition rdf:object ?newLabel
+        }";
+    ];
+```
 
 ### Condition
 
@@ -115,12 +147,29 @@ content
 ## Integration Examples
 
 ### qSKOS
+[qSKOS](https://github.com/cmader/qSKOS/) is an open-source project that aims to identify potential quality problems ('quality issues') in SKOS vocabularies and provides a way to automatically check against a catalog of these quality issues. It features it's own API and is available as a standalone [Java application](https://github.com/cmader/qSKOS/releases/latest) as well as [Web application](http://qskos.poolparty.biz/login).
+
+Some of the checks qSKOS performs have already been integrated into rsine to demonstrate how these technologies can complement each other.
 
 ### LOD2 Project
 
+In the course of the [LOD2 project](http://lod2.eu/WikiArticle/Project.html), rsine is installed in an evaluation environment at [Wolters Kluwer Germany](http://www.wolterskluwer.de/). The goal is to evaluate the impact of integrating subscription/notification services in controlled vocabulary development processes with a focus on vocabulary quality. The work is currently ongoing and results will be published soon.
+
 ## Future Work
+Work on rsine is not yet finished. Although we were able to showcase it's usefulness in the examples above, we plan to
+extend our work in the following directions:
+
+ * Notification queries simplification (Changeset Selection)
+ * Redesign rsine service URIs to fully comply with the REST principles
+ * Integration/utilization of stream reasoning technologies
+ * Publish the rsine RDF subscription schema
+ * GUI for creating subscriptions
 
 ## Publications
+Coming soon:
+
+ * LOD2 Deliverable D5.3.1
+ * LOD2 Book
 
 ## Contributors
 
