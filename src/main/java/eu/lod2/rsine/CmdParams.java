@@ -7,6 +7,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.InvalidParameterException;
 import java.util.Properties;
 
@@ -77,6 +79,10 @@ class CmdParams {
                 port = null;
             }
         }
+
+        if (authoritativeUri == null) {
+            autoConfAuthUri();
+        }
     }
 
     private String getFromPropsIfNull(String obj, String propertyKey) {
@@ -84,6 +90,17 @@ class CmdParams {
             return (String) properties.get(propertyKey);
         }
         return obj;
+    }
+
+    private void autoConfAuthUri() {
+        URI sparqlEndpointUri = null;
+        try {
+            sparqlEndpointUri = new URI(managedStoreSparqlEndpoint);
+            authoritativeUri = sparqlEndpointUri.getScheme() +"://"+ sparqlEndpointUri.getHost();
+        }
+        catch (URISyntaxException e) {
+            logger.warn("Could not autodetect authoritative URI: managed store sparql endpoint is not a valid URI");
+        }
     }
 
     private void checkParams() {

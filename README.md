@@ -85,11 +85,14 @@ essential parameters on the command line:
 
 To get a synopsis on the supported parameters, type <tt>java -jar rsine-cmd.jar --help</tt>.
 
- * <tt>-s, --sparql-endpoint</tt>
- * <tt>-a, --authoritative-uri</tt>
- * <tt>-p, --port</tt>
-
-### Configuration
+ * <tt>-s, --sparql-endpoint</tt>: The URI of the SPARQL endpoint where the managed store can be queried.
+ * <tt>-p, --port</tt>: The port where rsine listens for connections (i.e., triple announcements and subscription requests).
+ * <tt>-a, --authoritative-uri</tt>: This parameter needs to be provided in order to help rsine determine which resources
+ are locally defined and managed (i.e. in the managed store) and which resources constitute an 'external' link. For example,
+ if you develop a thesaurus in your managed store whose concept URIs all start with <tt>http://myvocabulary.org/concept/</tt>
+ you would set this URI as the authoritative uri. Thus rsine can detect whenever you link to 'external' resources on the Web
+ that resolve to different hosts. If you do not provide any value for this parameter, rsine will try to automatically
+ detect it from the managed store sparql endpoint URI.
 
 ## Subscriptions
 
