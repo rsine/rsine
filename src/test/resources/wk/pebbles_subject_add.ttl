@@ -1,0 +1,49 @@
+@prefix spin: <http://spinrdf.org/sp/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix rsine: <http://lod2.eu/rsine/> .
+
+[] a rsine:Subscription;
+    rsine:query [
+        spin:text "PREFIX cs:<http://purl.org/vocab/changeset/schema#>
+            PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+            PREFIX dcterms:<http://purl.org/dc/terms/>
+
+            SELECT ?document ?newsubject WHERE {
+                ?cs a cs:ChangeSet .
+                ?cs cs:createdDate ?csdate .
+                ?cs cs:addition ?addition .
+
+                ?addition rdf:subject ?document .
+                ?addition rdf:predicate dcterms:subject .
+                ?addition rdf:object ?newsubject .
+
+                FILTER (?csdate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime>)
+            }";
+
+        rsine:auxiliary [
+            spin:text "PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>
+                SELECT ?newSubjectLabel WHERE {
+                    ?newsubject rdfs:label ?newSubjectLabel
+                }";
+            spin:text "PREFIX dcterms:<http://purl.org/dc/terms/>
+                SELECT ?documentTitle WHERE {
+                    ?document dcterms:title ?documentTitle
+                }";
+        ];
+
+        rsine:formatter [
+            a rsine:vtlFormatter;
+            rsine:message "The subject '$bindingSet.getValue('newSubjectLabel').getLabel()' has been added to document
+                <a href='#'>'$bindingSet.getValue('documentTitle').getLabel()'</a>";
+        ];
+    ];
+
+    rsine:notifier [
+        a rsine:loggingNotifier;
+    ];
+
+    rsine:notifier [
+        a rsine:emailNotifier;
+        foaf:mbox <mailto:c.mader@semantic-web.at>
+    ].
