@@ -201,7 +201,34 @@ rsine:formatter [
 
 ### Notifier
 
+The components that are responsible for disseminating the generated messages to the users are defined by the property
+ <tt>rsine:notifier</tt> in the subscription. Currently we support two notifiers: the <tt>rsine:loggingNotifier</tt> and
+ the <tt>rsine:emailNotifier</tt>. Whereas the former is mainly intended for debugging purposes, the latter is capable
+ to, as the name implies, deliver the notification messages to the provided email address.
+
+Here is how to add the logging notifier to your subscription:
+
+```
+rsine:notifier [
+    a rsine:loggingNotifier;
+];
+```
+
+If you want the notifications to be sent out by email, you'll want to use something like this:
+
+```
+rsine:notifier [
+    a rsine:emailNotifier;
+    foaf:mbox <mailto:c.mader@myhost.at>
+];
+```
+
+Also note that currently for the <tt>emailNotifier</tt> to work, it expects an SMTP host on localhost, accessible at port
+ 25. However, this can be changed by manually editing the file <tt>application.properties</tt> (see Section 'Build from Source').
+
 ### Putting it All Together
+A working subscription that sends out proper notificatons whenever two concepts are hierarchically connected and form
+ a cycle can be viewed [here](https://raw.github.com/rsine/rsine/devel/src/test/resources/quality/cyclic_hierarchical_relations.ttl).
 
 ## Integration Examples
 
@@ -227,7 +254,7 @@ extend our work in the following directions:
 ## Publications
 Coming soon:
 
- * LOD2 Deliverable D5.3.1
+ * LOD2 Deliverables D5.3.1 and D7.3
  * LOD2 Book
 
 ## Contributors
