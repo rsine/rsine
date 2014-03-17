@@ -55,6 +55,10 @@ public class Helper {
         return model;
     }
 
+    public static Model createChangeSetModel(Statement statement, String changeType) {
+        return new ChangeSetCreator().assembleChangeset(statement, null, changeType);
+    }
+
     public static Model createChangeSetModel(String subjUri, String predUri, Value obj, String changeType) {
         return new ChangeSetCreator().assembleChangeset(
                 new StatementImpl(new URIImpl(subjUri), new URIImpl(predUri), obj),

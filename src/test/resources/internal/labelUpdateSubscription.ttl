@@ -8,7 +8,7 @@
             PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
             PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
 
-            SELECT ?oldLabel ?newLabel WHERE {
+            SELECT ?oldLabel ?newLabel ?dateDiff WHERE {
                 ?addCs cs:createdDate ?addCsDate .
                 ?remCs cs:createdDate ?remCsDate .
 
@@ -23,15 +23,15 @@
                 ?addition rdf:predicate skos:prefLabel .
                 ?addition rdf:object ?newLabel .
 
-                FILTER (?remCsDate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime>)
-
-                // removal less than 1 second before addition => counts as update
-                ?addCsDate - ?remCsDate < 1s
+                BIND (seconds(?addCsDate) - seconds(?remCsDate) AS ?dateDiff)
+                FILTER (?remCsDate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime> &&
+                        ?oldLabel != ?newLabel)
 
             }";
 
-    ];
+        rsine:formatter [
+            a rsine:vtlFormatter;
+            rsine:message "'$bindingSet.getValue('oldLabel')' -> '$bindingSet.getValue('newLabel')', diff: '$bindingSet.getValue('dateDiff')'";
+        ]
 
-    rsine:notifier [
-        a rsine:loggingNotifier;
     ].
