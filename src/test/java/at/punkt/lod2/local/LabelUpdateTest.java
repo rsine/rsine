@@ -63,7 +63,7 @@ public class LabelUpdateTest {
         }
     }
 
-    private void setLabels() throws RepositoryException {
+    private void setLabels() throws RepositoryException, InterruptedException {
         URI conceptUri = new URIImpl("http://example.orf/concept1");
         Literal origPrefLabel = new LiteralImpl("concept");
         Literal updatedPrefLabel = new LiteralImpl("updated concept");
@@ -79,13 +79,15 @@ public class LabelUpdateTest {
                 Helper.createChangeSetModel(defPrefLabel, ChangeTripleService.CHANGETYPE_REMOVE),
                 true);
 
+        Thread.sleep(1000);
+
         persistAndNotifyProvider.persistAndNotify(
                 Helper.createChangeSetModel(updatePrefLabel, ChangeTripleService.CHANGETYPE_ADD),
                 true);
     }
 
     @Test
-    public void performUpdate() throws RepositoryException {
+    public void performUpdate() throws RepositoryException, InterruptedException {
         setLabels();
     }
 
