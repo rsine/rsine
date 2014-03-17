@@ -1,4 +1,4 @@
-![rsine](https://raw.github.com/rsine/rsine/devel/src/main/resources/rsine_transparent.png "rsine")
+![rsine](https://raw.github.com/rsine/rsine/master/src/main/resources/rsine_transparent.png "rsine")
 
 ## About
 
@@ -100,7 +100,7 @@ optional.
 ## Subscriptions
 
 Subscriptions are RDF documents that are sent to <tt>http://{rsinehost}/register</tt> by HTTP post (<tt>{rsinehost}</tt>
-being the host where the rsine service is running). A simple example can be viewed [here](https://raw.github.com/rsine/rsine/devel/src/test/resources/internal/emailNotifierSubscription.ttl), but also more [complex subscriptions](https://raw.github.com/rsine/rsine/devel/src/test/resources/quality/cyclic_hierarchical_relations.ttl) are possible.
+being the host where the rsine service is running). A simple example can be viewed [here](https://raw.github.com/rsine/rsine/master/src/test/resources/internal/emailNotifierSubscription.ttl), but also more [complex subscriptions](https://raw.github.com/rsine/rsine/master/src/test/resources/quality/cyclic_hierarchical_relations.ttl) are possible.
 
 ### Components
 
@@ -138,11 +138,97 @@ rsine:query [
 
 ### Condition
 
+In addition to getting notified on occurrence of certain changesets, in many cases it is necessary to further specify
+ conditions that must be met for the notification to be triggered. Suppose, e.g., you want to check if two concepts
+ are connected by a hierarchical cycle you can use the following condition rule in your subscription:
+
+```
+rsine:condition [
+    spin:text "PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+        ASK {
+            ?concept skos:broader+ ?otherConcept .
+            ?otherConcept skos:broader+ ?concept
+        }";
+    rsine:expect true;
+];
+```
+
+Conditions are SPARQL ASK queries that can access the bindings from the changeset selection. A condition is met if the
+ query results in the same value as stated by <tt>rsine:expect</tt>.
+
 ### Auxiliary Query
+
+When crafting your notification subscriptions it is useful to provide a human-readable message that will be delivered to
+ the subscribers. In these messages you often need to refer to data that are not part of the triple selection queries (
+ changeset selection and conditions). E.g., you want the notification message to be *concept 'cat' has been hierarchically
+ related to concept 'carnivore'* you also need to access the concept's preferred labels. The way to this are auxiliary
+ queries. They do not influence the decision process of whether or not a notification 'fires' but are intended to bind values
+ for information that is otherwise important.
+
+Auxiliary queries also have access to the bindings from the changeset selection.  The following code snippet demonstrates
+ how to bind the concept's labels to a variable with auxiliary queries:
+
+```
+rsine:auxiliary [
+    spin:text "PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+        SELECT ?conceptLabel WHERE {
+            ?concept skos:prefLabel ?conceptLabel .
+            FILTER(langMatches(lang(?conceptLabel), 'en'))
+        }";
+    spin:text "PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+        SELECT ?otherConceptLabel WHERE {
+            ?otherConcept skos:prefLabel ?otherConceptLabel .
+            FILTER(langMatches(lang(?otherConceptLabel), 'en'))
+        }";
+];
+```
 
 ### Formatter
 
+In order to send meaningful messages to notification subscribers, rsine provides a way to define a template that holds
+ the desired information. This can be done by defining <tt>rsine:formatter</tt>s in your subscription. Currently we provide
+ the <tt>rsine:vtlFormatter</tt> that can access the bindings from the changeset selections, conditions and auxiliary queries
+ using the [Apache Velocity Engine](http://velocity.apache.org/). For our *hierarchical cycle* example, the following
+ snippet illustrates how to formulate such a message template:
+
+```
+rsine:formatter [
+    a rsine:vtlFormatter;
+    rsine:message "The concepts <a href='$bindingSet.getValue('concept')'>$bindingSet.getValue('conceptLabel').getLabel()</a> and
+        <a href='$bindingSet.getValue('otherConcept')'>$bindingSet.getValue('otherConceptLabel').getLabel()</a> form a hierarchical cycle";
+];
+```
+
 ### Notifier
+
+The components that are responsible for disseminating the generated messages to the users are defined by the property
+ <tt>rsine:notifier</tt> in the subscription. Currently we support two notifiers: the <tt>rsine:loggingNotifier</tt> and
+ the <tt>rsine:emailNotifier</tt>. Whereas the former is mainly intended for debugging purposes, the latter is capable
+ to, as the name implies, deliver the notification messages to the provided email address.
+
+Here is how to add the logging notifier to your subscription:
+
+```
+rsine:notifier [
+    a rsine:loggingNotifier;
+];
+```
+
+If you want the notifications to be sent out by email, you'll want to use something like this:
+
+```
+rsine:notifier [
+    a rsine:emailNotifier;
+    foaf:mbox <mailto:c.mader@myhost.at>
+];
+```
+
+Also note that currently for the <tt>emailNotifier</tt> to work, it expects an SMTP host on localhost, accessible at port
+ 25. However, this can be changed by manually editing the file <tt>application.properties</tt> (see Section 'Build from Source').
+
+### Putting it All Together
+A working subscription that sends out proper notificatons whenever two concepts are hierarchically connected and form
+ a cycle can be viewed [here](https://raw.github.com/rsine/rsine/master/src/test/resources/quality/cyclic_hierarchical_relations.ttl).
 
 ## Integration Examples
 
@@ -168,7 +254,7 @@ extend our work in the following directions:
 ## Publications
 Coming soon:
 
- * LOD2 Deliverable D5.3.1
+ * LOD2 Deliverables D5.3.1 and D7.3
  * LOD2 Book
 
 ## Contributors
@@ -179,4 +265,4 @@ Coming soon:
 
 ## Copyright
 
-Please see our [Contributor Agreement](https://raw.github.com/rsine/rsine/devel/rsine_contribution_agreement.pdf).
+Please see our [Contributor Agreement](https://raw.github.com/rsine/rsine/master/rsine_contribution_agreement.pdf).
