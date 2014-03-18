@@ -1,7 +1,7 @@
 package at.punkt.lod2.local;
 
+import at.punkt.lod2.util.CountingNotifier;
 import at.punkt.lod2.util.Helper;
-import eu.lod2.rsine.dissemination.notifier.INotifier;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
 import eu.lod2.rsine.service.ChangeTripleService;
@@ -24,10 +24,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.IOException;
-import java.util.Collection;
+import org.junit.Assert;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"LocalTest-context.xml"})
+@ContextConfiguration(locations = {"LocalTestImmediateEval-context.xml"})
 public class LabelUpdateTest {
 
     @Autowired
@@ -35,14 +35,12 @@ public class LabelUpdateTest {
 
     @Autowired
     private PersistAndNotifyProvider persistAndNotifyProvider;
-
-    @Autowired
-    private Repository managedStoreRepo;
-
-    private Notifier notifier = new Notifier();
+    
+    private CountingNotifier notifier;
 
     @Before
     public void setUp() throws IOException, RDFParseException, RDFHandlerException, RepositoryException {
+        notifier = new CountingNotifier();
         subscribe();
     }
 
@@ -55,21 +53,11 @@ public class LabelUpdateTest {
         subscription.addNotifier(notifier);
     }
 
-    private class Notifier implements INotifier {
-
-        @Override
-        public void notify(Collection<String> messages) {
-            System.out.println(messages.toString());
-        }
-    }
-
-    private void setLabels() throws RepositoryException, InterruptedException {
+    private void setLabels(int delay) throws RepositoryException, InterruptedException {
         URI conceptUri = new URIImpl("http://example.orf/concept1");
-        Literal origPrefLabel = new LiteralImpl("concept");
-        Literal updatedPrefLabel = new LiteralImpl("updated concept");
 
-        Statement defPrefLabel = new StatementImpl(conceptUri, SKOS.PREF_LABEL, origPrefLabel);
-        Statement updatePrefLabel = new StatementImpl(conceptUri, SKOS.PREF_LABEL, updatedPrefLabel);
+        Statement defPrefLabel = new StatementImpl(conceptUri, SKOS.PREF_LABEL, new LiteralImpl("concept"));
+        Statement updatePrefLabel = new StatementImpl(conceptUri, SKOS.PREF_LABEL, new LiteralImpl("updated concept"));
 
         persistAndNotifyProvider.persistAndNotify(
                 Helper.createChangeSetModel(defPrefLabel, ChangeTripleService.CHANGETYPE_ADD),
@@ -79,7 +67,7 @@ public class LabelUpdateTest {
                 Helper.createChangeSetModel(defPrefLabel, ChangeTripleService.CHANGETYPE_REMOVE),
                 true);
 
-        Thread.sleep(1000);
+        Thread.sleep(delay);
 
         persistAndNotifyProvider.persistAndNotify(
                 Helper.createChangeSetModel(updatePrefLabel, ChangeTripleService.CHANGETYPE_ADD),
@@ -87,8 +75,15 @@ public class LabelUpdateTest {
     }
 
     @Test
-    public void performUpdate() throws RepositoryException, InterruptedException {
-        setLabels();
+    public void performUpdateOnTime() throws RepositoryException, InterruptedException {
+        setLabels(1000);
+        Assert.assertEquals(1, notifier.getNotificationCount());
     }
 
+    @Test
+    public void performUpdateTimediffTooLong() throws RepositoryException, InterruptedException {
+        setLabels(3000);
+        Assert.assertEquals(0, notifier.getNotificationCount());
+    }
+    
 }
