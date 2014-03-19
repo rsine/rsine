@@ -1,4 +1,4 @@
-![rsine](https://raw.github.com/rsine/rsine/master/src/main/resources/rsine_transparent.png "rsine")
+![rsine](https://raw.github.com/rsine/rsine/devel/src/main/resources/rsine_transparent.png "rsine")
 
 ## About
 
@@ -100,7 +100,7 @@ optional.
 ## Subscriptions
 
 Subscriptions are RDF documents that are sent to <tt>http://{rsinehost}/register</tt> by HTTP post (<tt>{rsinehost}</tt>
-being the host where the rsine service is running). A simple example can be viewed [here](https://raw.github.com/rsine/rsine/master/src/test/resources/internal/emailNotifierSubscription.ttl), but also more [complex subscriptions](https://raw.github.com/rsine/rsine/master/src/test/resources/quality/cyclic_hierarchical_relations.ttl) are possible.
+being the host where the rsine service is running). A simple example can be viewed [here](https://raw.github.com/rsine/rsine/devel/src/test/resources/internal/emailNotifierSubscription.ttl), but also more [complex subscriptions](https://raw.github.com/rsine/rsine/devel/src/test/resources/quality/cyclic_hierarchical_relations.ttl) are possible.
 
 ### Components
 
@@ -224,11 +224,21 @@ rsine:notifier [
 ```
 
 Also note that currently for the <tt>emailNotifier</tt> to work, it expects an SMTP host on localhost, accessible at port
- 25. However, this can be changed by manually editing the file <tt>application.properties</tt> (see Section 'Build from Source').
+ 25 per default. However, this can be changed by manually editing the file <tt>application.properties</tt> (see Section 'Build from Source').
 
 ### Putting it All Together
+
+#### Example Subscriptions
+
 A working subscription that sends out proper notificatons whenever two concepts are hierarchically connected and form
- a cycle can be viewed [here](https://raw.github.com/rsine/rsine/master/src/test/resources/quality/cyclic_hierarchical_relations.ttl).
+ a cycle can be viewed [here](https://raw.github.com/rsine/rsine/devel/src/test/resources/quality/cyclic_hierarchical_relations.ttl).
+
+#### Registering Subscriptions
+
+Rsine accepts subscriptions via a HTTP post to the <tt>/register</tt> URI. So, if you run rsine locally this URI would
+ be <tt>http://localhost:2221/register</tt>. For testing, you can use [curl](http://curl.haxx.se/) to register subscriptions, 
+ e.g., with <tt>curl -X POST -d @cyclic_hierarchical_relations.ttl --header "Content-Type: text/turtle" http://localhost:2221/register</tt>.
+ Currently all subscriptions are lost if rsine is shut down, so you will have to re-register them again on restart.
 
 ## Integration Examples
 
@@ -265,4 +275,4 @@ Coming soon:
 
 ## Copyright
 
-Please see our [Contributor Agreement](https://raw.github.com/rsine/rsine/master/rsine_contribution_agreement.pdf).
+Please see our [Contributor Agreement](https://raw.github.com/rsine/rsine/devel/rsine_contribution_agreement.pdf).
