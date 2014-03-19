@@ -23,6 +23,8 @@
                 ?addition rdf:predicate skos:prefLabel .
                 ?addition rdf:object ?newLabel .
 
+                ?addition cs:precedingChangeSet ?removal .
+
                 FILTER (?remCsDate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime> &&
                         ?oldLabel != ?newLabel &&
                         seconds(?remCsDate) - seconds(?addCsDate) < 2 &&
@@ -35,7 +37,11 @@
 
         rsine:formatter [
             a rsine:vtlFormatter;
-            rsine:message "'$bindingSet.getValue('oldLabel')' -> '$bindingSet.getValue('newLabel')', diff: '$bindingSet.getValue('dateDiff')'";
+            rsine:message "'$bindingSet.getValue('oldLabel')' -> '$bindingSet.getValue('newLabel')'";
         ]
+  ];
 
-    ].
+  rsine:notifier [
+      a rsine:loggingNotifier;
+  ].
+
