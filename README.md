@@ -224,11 +224,21 @@ rsine:notifier [
 ```
 
 Also note that currently for the <tt>emailNotifier</tt> to work, it expects an SMTP host on localhost, accessible at port
- 25. However, this can be changed by manually editing the file <tt>application.properties</tt> (see Section 'Build from Source').
+ 25 per default. However, this can be changed by manually editing the file <tt>application.properties</tt> (see Section 'Build from Source').
 
 ### Putting it All Together
+
+#### Example Subscriptions
+
 A working subscription that sends out proper notificatons whenever two concepts are hierarchically connected and form
  a cycle can be viewed [here](https://raw.github.com/rsine/rsine/devel/src/test/resources/quality/cyclic_hierarchical_relations.ttl).
+
+#### Registering Subscriptions
+
+Rsine accepts subscriptions via a HTTP post to the <tt>/register</tt> URI. So, if you run rsine locally this URI would
+ be <tt>http://localhost:2221/register</tt>. For testing, you can use [curl](http://curl.haxx.se/) to register subscriptions, 
+ e.g., with <tt>curl -X POST -d @cyclic_hierarchical_relations.ttl --header "Content-Type: text/turtle" http://localhost:2221/register</tt>.
+ Currently all subscriptions are lost if rsine is shut down, so you will have to re-register them again on restart.
 
 ## Integration Examples
 
