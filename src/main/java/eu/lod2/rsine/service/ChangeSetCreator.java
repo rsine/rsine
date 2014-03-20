@@ -15,7 +15,6 @@ import java.util.HashSet;
 @Component
 public class ChangeSetCreator {
 
-    private static URI prevChangeSetUri;
     private final ValueFactory valueFactory = ValueFactoryImpl.getInstance();
 
     public Model assembleChangeset(Statement affectedStatement, Statement secondaryStatement, String changeType) {
@@ -31,13 +30,10 @@ public class ChangeSetCreator {
         model.add(new StatementImpl(changeSet,
             valueFactory.createURI(Namespaces.CS_NAMESPACE.getName(), "createdDate"),
             valueFactory.createLiteral(new Date())));
+        model.add(new StatementImpl(changeSet,
+            valueFactory.createURI(Namespaces.RSINE_NAMESPACE.getName(), "createdTimeStamp"),
+            valueFactory.createLiteral(System.currentTimeMillis())));
         
-        if (prevChangeSetUri != null) {
-            model.add(new StatementImpl(changeSet,
-                valueFactory.createURI(Namespaces.CS_NAMESPACE.getName(), "precedingChangeSet"),
-                prevChangeSetUri));            
-        }
-
         if (changeType.equals(ChangeTripleService.CHANGETYPE_REMOVE)) {
             addActionStatement(model, changeSet, affectedStatement, "removal");
         }
@@ -49,7 +45,6 @@ public class ChangeSetCreator {
             addActionStatement(model, changeSet, secondaryStatement, "addition");
         }
         
-        prevChangeSetUri = changeSet;
         return model;
     }
 
