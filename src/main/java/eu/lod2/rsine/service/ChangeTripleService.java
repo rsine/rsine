@@ -1,10 +1,6 @@
-package eu.lod2.rsine.changesetservice;
+package eu.lod2.rsine.service;
 
-import eu.lod2.rsine.queryhandling.EvaluationPostponedException;
 import eu.lod2.util.ItemNotFoundException;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.message.BasicHttpEntityEnclosingRequest;
 import org.openrdf.model.Model;
 import org.openrdf.model.Statement;
 import org.openrdf.rio.RDFHandlerException;
@@ -15,7 +11,7 @@ import org.openrdf.rio.turtle.TurtleParserFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -23,10 +19,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
-@Component
-public class ChangeTripleHandler extends PostRequestHandler {
+@Service
+public class ChangeTripleService {
 
-    private final Logger logger = LoggerFactory.getLogger(ChangeTripleHandler.class);
+    private final Logger logger = LoggerFactory.getLogger(ChangeTripleService.class);
 
     public static String POST_BODY_AFFECTEDTRIPLE = "affectedTriple";
     public static String POST_BODY_SECONDARYTRIPLE = "secondaryTriple";
@@ -41,35 +37,17 @@ public class ChangeTripleHandler extends PostRequestHandler {
     @Autowired
     private PersistAndNotifyProvider persistAndNotifyProvider;
 
-    @Override
-    protected void handlePost(BasicHttpEntityEnclosingRequest request, HttpResponse response) {
-        logger.debug("Handling change triple request");
+    void handleAnnouncedTriple(String announceTriple) throws IOException, RDFParseException, RDFHandlerException {
+        logger.debug("Incoming triple change announcement: " +announceTriple);
 
-        try {
-            Properties properties = new Properties();
-            properties.load(request.getEntity().getContent());
+        Properties properties = new Properties();
+        properties.load(new StringReader(announceTriple));
 
-            String changeType = getValueForName(POST_BODY_CHANGETYPE, properties);
-            List<Statement> triples = extractStatements(properties, changeType);
+        String changeType = getValueForName(POST_BODY_CHANGETYPE, properties);
+        List<Statement> triples = extractStatements(properties, changeType);
 
-            Model changeSet = changeSetCreator.assembleChangeset(triples.get(0), triples.get(1), changeType);
-            persistAndNotifyProvider.persistAndNotify(changeSet, false);
-        }
-        catch (ItemNotFoundException e) {
-            errorResponse(response, "No triple or change type provided");
-        }
-        catch (RDFParseException e) {
-            errorResponse(response, "Error parsing provided triple");
-        }
-        catch (IOException e) {
-            errorResponse(response, e.getMessage());
-        }
-        catch (RDFHandlerException e) {
-            errorResponse(response, e.getMessage());
-        }
-        catch (EvaluationPostponedException e) {
-            // ignore; when encountering this exception do nothing (special)
-        }
+        Model changeSet = changeSetCreator.assembleChangeset(triples.get(0), triples.get(1), changeType);
+        persistAndNotifyProvider.persistAndNotify(changeSet, false);
     }
 
     private String getValueForName(String key, Properties properties) {
@@ -104,16 +82,6 @@ public class ChangeTripleHandler extends PostRequestHandler {
         parser.setRDFHandler(singleStatementHandler);
         parser.parse(new StringReader(triple.trim()), "http://some.base.uri/");
         return singleStatementHandler.getStatement();
-    }
-
-    private void errorResponse(HttpResponse response, String message) {
-        logger.error(message);
-        response.setStatusCode(HttpStatus.SC_BAD_REQUEST);
-        response.setReasonPhrase(message);
-    }
-
-    public void setPersistAndNotifyProvider(PersistAndNotifyProvider persistAndNotifyProvider) {
-        this.persistAndNotifyProvider = persistAndNotifyProvider;
     }
 
     private class SingleStatementHandler extends RDFHandlerBase {

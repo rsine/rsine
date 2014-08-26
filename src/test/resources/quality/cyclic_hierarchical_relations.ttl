@@ -1,9 +1,12 @@
 @prefix spin: <http://spinrdf.org/sp/> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix rsine: <http://lod2.eu/rsine/> .
+@prefix dcterms: <http://purl.org/dc/terms/>.
 
 <http://example.org/chr> a rsine:Subscription;
     rsine:query [
+        dcterms:description "Notification on circular hierarchical relations";
+
         spin:text "PREFIX cs:<http://purl.org/vocab/changeset/schema#>
             PREFIX spin:<http://spinrdf.org/sp/>
             PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -30,9 +33,23 @@
             rsine:expect true;
         ];
 
+        rsine:auxiliary [
+            spin:text "PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+                SELECT ?conceptLabel WHERE {
+                    ?concept skos:prefLabel ?conceptLabel .
+                    FILTER(langMatches(lang(?conceptLabel), 'en'))
+                }";
+            spin:text "PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+                SELECT ?otherConceptLabel WHERE {
+                    ?otherConcept skos:prefLabel ?otherConceptLabel .
+                    FILTER(langMatches(lang(?otherConceptLabel), 'en'))
+                }";
+        ];
+
         rsine:formatter [
             a rsine:vtlFormatter;
-            rsine:message "The concepts '$bindingSet.getValue('concept')' and '$bindingSet.getValue('otherConcept')' form a hierarchical cycle";
+            rsine:message "The concepts <a href='$bindingSet.getValue('concept')'>$bindingSet.getValue('conceptLabel').getLabel()</a> and
+                <a href='$bindingSet.getValue('otherConcept')'>$bindingSet.getValue('otherConceptLabel').getLabel()</a> form a hierarchical cycle";
         ];
       ];
 

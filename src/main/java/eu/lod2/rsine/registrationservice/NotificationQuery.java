@@ -13,24 +13,17 @@ public class NotificationQuery {
     private String sparqlQuery;
     private Date lastIssued = new Date(0);
     private Subscription subscription;
-    private Collection<Condition> conditions = new ArrayList<Condition>();
 
-    NotificationQuery(String sparqlQuery,
+    private Collection<Condition> conditions = new ArrayList<Condition>();
+    private Collection<String> auxiliaryQueries = new ArrayList<String>();
+
+    public NotificationQuery(String sparqlQuery,
                       BindingSetFormatter bindingSetFormatter,
                       Subscription subscription)
     {
         this.sparqlQuery = sparqlQuery;
         this.bindingSetFormatter = bindingSetFormatter;
         this.subscription = subscription;
-    }
-
-    NotificationQuery(String sparqlQuery,
-                      BindingSetFormatter bindingSetFormatter,
-                      Collection<Condition> conditions,
-                      Subscription subscription)
-    {
-        this(sparqlQuery, bindingSetFormatter, subscription);
-        this.conditions = conditions;
     }
 
     public void updateLastIssued() {
@@ -45,8 +38,18 @@ public class NotificationQuery {
         return sparqlQuery;
     }
 
+    public void setConditions(Collection<Condition> conditions) {
+        this.conditions = conditions;
+    }
     public Iterator<Condition> getConditions() {
         return conditions.iterator();
+    }
+
+    public void addAuxiliaryQueries(Collection<String> auxiliaryQuery) {
+        auxiliaryQueries.addAll(auxiliaryQuery);
+    }
+    public Iterator<String> getAuxiliaryQueries() {
+        return auxiliaryQueries.iterator();
     }
 
     public BindingSetFormatter getBindingSetFormatter() {

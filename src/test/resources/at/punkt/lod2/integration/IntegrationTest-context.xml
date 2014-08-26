@@ -12,22 +12,10 @@
 
     <context:component-scan base-package="eu.lod2.rsine"/>
 
-    <bean name="managedStoreRepo" class="org.openrdf.repository.sail.SailRepository" init-method="initialize" destroy-method="shutDown">
-        <constructor-arg>
-            <bean class="org.openrdf.sail.memory.MemoryStore"/>
-        </constructor-arg>
-    </bean>
-
     <bean name="changeSetRepo" class="org.openrdf.repository.sail.SailRepository" init-method="initialize" destroy-method="shutDown">
         <constructor-arg>
             <bean class="org.openrdf.sail.memory.MemoryStore"/>
         </constructor-arg>
     </bean>
 
-    <bean name="queryDispatcher" class="eu.lod2.rsine.queryhandling.QueryDispatcher">
-        <constructor-arg value="false"/>
-    </bean>
-
-    <bean id="remoteServiceDetector" class="eu.lod2.rsine.remotenotification.UnavailableRemoteServiceDetector"/>
-    <bean id="remoteNotificationServiceBase" class="eu.lod2.rsine.remotenotification.NullRemoteNotificationService"/>
 </beans>

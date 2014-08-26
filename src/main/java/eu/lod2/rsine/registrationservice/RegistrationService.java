@@ -19,7 +19,7 @@ public class RegistrationService {
     public RegistrationService() {
     }
 
-    public void register(Subscription subscription, boolean deleteOthers) {
+    public synchronized void register(Subscription subscription, boolean deleteOthers) {
         if (deleteOthers) {
             subscriptions.clear();
         }
@@ -27,39 +27,37 @@ public class RegistrationService {
     }
 
     public synchronized Resource register(Model subscriptionData) {
+        return register(subscriptionData, false);
+    }
+
+    public synchronized Resource register(Model subscriptionData, boolean overwriteIfExisting) {
         Subscription subscription = new SubscriptionParser(subscriptionData).createSubscription();
 
         if (subscriptions.contains(subscription)) {
-            throw new SubscriptionExistsException();
+            if (overwriteIfExisting) {
+                subscriptions.remove(subscription);
+            }
+            else throw new SubscriptionExistsException("Subscription already registered");
         }
 
         subscriptions.add(subscription);
-        logger.info("Successfully registered subscription " +subscription.getSubscriptionId());
-        return subscription.getSubscriptionId();
+        logger.info("Successfully registered subscription " +subscription.getId());
+        return subscription.getId();
     }
 
-    public void unregister(Resource subscriptionId) {
-        subscriptions.remove(getSubscriptionById(subscriptionId));
+    public synchronized void unregister(Resource subscriptionId) {
+        subscriptions.remove(getSubscription(subscriptionId));
     }
 
-    private Subscription getSubscriptionById(Resource subscriptionId){
-        for (Subscription subscription : subscriptions){
-            if(subscription.getSubscriptionId().equals(subscriptionId)){
-                return subscription;
-            }
-        }        
-        throw new SubscriptionNotFoundException();
-    }
-
-    public Iterator<Subscription> getSubscriptionIterator() {
+    public synchronized Iterator<Subscription> getSubscriptionIterator() {
         return subscriptions.iterator();
     }
 
-    public Subscription getSubscription(Resource subscriptionId) {
+    public synchronized Subscription getSubscription(Resource subscriptionId) {
         for (Subscription subscription : subscriptions) {
-            if (subscription.getSubscriptionId().equals(subscriptionId)) return subscription;
+            if (subscription.getId().equals(subscriptionId)) return subscription;
         }
-        throw new IllegalArgumentException();
+        throw new SubscriptionNotFoundException();
     }
 
 }

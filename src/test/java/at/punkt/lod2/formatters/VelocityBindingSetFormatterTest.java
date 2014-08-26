@@ -7,7 +7,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openrdf.model.Model;
-import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.query.*;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
@@ -27,9 +26,9 @@ public class VelocityBindingSetFormatterTest {
 
     @Before
     public void setUp() throws RDFParseException, IOException, RDFHandlerException, RepositoryException {
-        velocityBindingSetFormatter = new VelocityBindingSetFormatter(new LiteralImpl(
+        velocityBindingSetFormatter = new VelocityBindingSetFormatter(
             "The preferred label of the concept '$bindingSet.getValue('to_concept')' " +
-            "has been changed to $bindingSet.getValue('added_label')", "en"));
+            "has been changed to $bindingSet.getValue('added_label')");
 
         Model vocab = Helper.createModelFromResourceFile("/reegle.rdf", RDFFormat.RDFXML);
         Repository repository = new SailRepository(new MemoryStore());

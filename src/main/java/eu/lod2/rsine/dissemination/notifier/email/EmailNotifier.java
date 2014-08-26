@@ -51,7 +51,7 @@ public class EmailNotifier implements INotifier {
 
             message.setFrom(new InternetAddress(from));
             message.setSubject(subject);
-            message.setText(createMessageText(messages).toString());
+            message.setContent(createMessageText(messages).toString(), "text/html; charset=utf-8");
 
             logger.info("Sending email notification");
             Transport.send(message);

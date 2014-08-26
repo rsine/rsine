@@ -10,6 +10,7 @@ import eu.lod2.util.Namespaces;
 import org.openrdf.model.*;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.impl.ValueFactoryImpl;
+import org.openrdf.model.vocabulary.DCTERMS;
 import org.openrdf.model.vocabulary.RDF;
 
 import java.util.*;
@@ -26,7 +27,8 @@ public class SubscriptionParser {
     public Subscription createSubscription() {
         Subscription subscription = new Subscription();
 
-        setSubscriptionId(subscription);
+        setId(subscription);
+        setDescription(subscription);
 
         for (INotifier notifier : createNotifiers()) {
             subscription.addNotifier(notifier);
@@ -39,14 +41,21 @@ public class SubscriptionParser {
         return subscription;
     }
 
-    public void setSubscriptionId(Subscription subscription) {
+    private void setId(Subscription subscription) {
         Set<Resource> subscriptionResources = rdfSubscription.filter(
             null,
             RDF.TYPE,
             valueFactory.createURI(Namespaces.RSINE_NAMESPACE.getName(), "Subscription")).subjects();
 
         for (Resource subscriptionResource : subscriptionResources) {
-            subscription.setSubscriptionId(subscriptionResource);
+            subscription.setId(subscriptionResource);
+        }
+    }
+
+    private void setDescription(Subscription subscription) {
+        Set<Value> descriptions = rdfSubscription.filter(null, DCTERMS.DESCRIPTION, null).objects();
+        if (!descriptions.isEmpty()) {
+            subscription.setDescription(descriptions.iterator().next().stringValue());
         }
     }
 
@@ -109,10 +118,13 @@ public class SubscriptionParser {
                 (Resource) query,
                 valueFactory.createURI(Namespaces.SPIN.getName(), "text"),
                 null).objectString();
-            notificationQueries.add(new NotificationQuery(sparql,
+            NotificationQuery notificationQuery = new NotificationQuery(sparql,
                     getFormatter((Resource) query),
-                    getConditions((Resource) query),
-                    subscription));
+                    subscription);
+            notificationQuery.setConditions(getConditions((Resource) query));
+            notificationQuery.addAuxiliaryQueries(getAuxiliaryQueries((Resource) query));
+            notificationQueries.add(notificationQuery);
+
         }
 
         return notificationQueries;
@@ -152,6 +164,27 @@ public class SubscriptionParser {
         }
 
         return conditions;
+    }
+
+    private Collection<String> getAuxiliaryQueries(Resource query) {
+        Collection<String> auxQueries = new ArrayList<String>();
+
+        Set<Value> allAuxiliaries = rdfSubscription.filter(
+                query,
+                valueFactory.createURI(Namespaces.RSINE_NAMESPACE.getName(), "auxiliary"),
+                null).objects();
+
+        for (Value condition : allAuxiliaries) {
+            Set<Value> allAuxQueries = rdfSubscription.filter(
+                (Resource) condition,
+                valueFactory.createURI(Namespaces.SPIN.getName(), "text"),
+                null).objects();
+            for (Value auxQuery : allAuxQueries) {
+                auxQueries.add(auxQuery.stringValue());
+            }
+        }
+
+        return auxQueries;
     }
 
 }

@@ -12,28 +12,23 @@
 
     <context:component-scan base-package="eu.lod2.rsine"/>
 
-    <bean id="managedServerSparqlQuery" class="java.lang.String">
-        <constructor-arg value="http://localhost:3030/dataset/query" />
+    <bean name="managedStoreRepo" class="org.openrdf.repository.sail.SailRepository" init-method="initialize" destroy-method="shutDown">
+        <constructor-arg>
+            <bean class="org.openrdf.sail.memory.MemoryStore"/>
+        </constructor-arg>
     </bean>
 
-    <bean id="managedServerSparqlUpdate" class="java.lang.String">
-        <constructor-arg value="http://localhost:3030/dataset/update" />
+    <bean name="changeSetRepo" class="org.openrdf.repository.sail.SailRepository" init-method="initialize" destroy-method="shutDown">
+        <constructor-arg>
+            <bean class="org.openrdf.sail.memory.MemoryStore"/>
+        </constructor-arg>
     </bean>
 
-    <bean id="changeSetService" class="eu.lod2.rsine.changesetservice.ChangeSetService">
-        <constructor-arg value="2221"/>
+    <bean name="queryDispatcher" class="eu.lod2.rsine.queryhandling.QueryDispatcher">
+        <constructor-arg value="false"/>
     </bean>
 
-    <bean id="helper" class="at.punkt.lod2.util.Helper">
-        <constructor-arg value="2221"/>
-    </bean>
-
-    <bean id="queryEvaluator" class="eu.lod2.rsine.queryhandling.QueryEvaluator">
-        <constructor-arg index="0" ref="managedServerSparqlQuery" />
-        <constructor-arg index="1" value="" />
-    </bean>
-
+    <bean id="evaluationPolicy" class="eu.lod2.rsine.queryhandling.policies.ImmediateEvaluationPolicy"/>
     <bean id="remoteServiceDetector" class="eu.lod2.rsine.remotenotification.UnavailableRemoteServiceDetector"/>
     <bean id="remoteNotificationServiceBase" class="eu.lod2.rsine.remotenotification.NullRemoteNotificationService"/>
-
 </beans>

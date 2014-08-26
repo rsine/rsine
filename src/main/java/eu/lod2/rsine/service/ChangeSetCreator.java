@@ -1,4 +1,4 @@
-package eu.lod2.rsine.changesetservice;
+package eu.lod2.rsine.service;
 
 import eu.lod2.util.Namespaces;
 import org.openrdf.model.*;
@@ -15,7 +15,7 @@ import java.util.HashSet;
 @Component
 public class ChangeSetCreator {
 
-    private ValueFactory valueFactory = ValueFactoryImpl.getInstance();
+    private final ValueFactory valueFactory = ValueFactoryImpl.getInstance();
 
     public Model assembleChangeset(Statement affectedStatement, Statement secondaryStatement, String changeType) {
         Model model = new TreeModel(new HashSet<Namespace>(Arrays.asList(Namespaces.RSINE_NAMESPACE, Namespaces.CS_NAMESPACE)));
@@ -30,18 +30,21 @@ public class ChangeSetCreator {
         model.add(new StatementImpl(changeSet,
             valueFactory.createURI(Namespaces.CS_NAMESPACE.getName(), "createdDate"),
             valueFactory.createLiteral(new Date())));
-
-        if (changeType.equals(ChangeTripleHandler.CHANGETYPE_REMOVE)) {
+        model.add(new StatementImpl(changeSet,
+            valueFactory.createURI(Namespaces.RSINE_NAMESPACE.getName(), "createdTimeStamp"),
+            valueFactory.createLiteral(System.currentTimeMillis())));
+        
+        if (changeType.equals(ChangeTripleService.CHANGETYPE_REMOVE)) {
             addActionStatement(model, changeSet, affectedStatement, "removal");
         }
-        else if (changeType.equals(ChangeTripleHandler.CHANGETYPE_ADD)) {
+        else if (changeType.equals(ChangeTripleService.CHANGETYPE_ADD)) {
             addActionStatement(model, changeSet, affectedStatement, "addition");
         }
-        else if (changeType.equals(ChangeTripleHandler.CHANGETYPE_UPDATE)) {
+        else if (changeType.equals(ChangeTripleService.CHANGETYPE_UPDATE)) {
             addActionStatement(model, changeSet, affectedStatement, "removal");
             addActionStatement(model, changeSet, secondaryStatement, "addition");
         }
-
+        
         return model;
     }
 

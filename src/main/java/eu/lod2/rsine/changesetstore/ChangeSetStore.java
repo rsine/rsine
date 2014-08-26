@@ -1,44 +1,37 @@
 package eu.lod2.rsine.changesetstore;
 
+import org.openrdf.OpenRDFException;
 import org.openrdf.model.Graph;
 import org.openrdf.model.Statement;
+import org.openrdf.query.BindingSet;
+import org.openrdf.query.QueryLanguage;
+import org.openrdf.query.TupleQueryResult;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.turtle.TurtleWriter;
-import org.openrdf.sail.nativerdf.NativeStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 
 @Component
 public class ChangeSetStore {
 
     private final Logger logger = LoggerFactory.getLogger(ChangeSetStore.class);
-    private Repository repository;
-    private boolean isInitialized;
 
-    public ChangeSetStore() {
-        File tempDir = new File(createDataDirName());
-        repository = new SailRepository(new NativeStore(tempDir));
-    }
-
-    private String createDataDirName() {
-        return System.getProperty("java.io.tmpdir") + File.separator + System.currentTimeMillis();
-    }
+    @Autowired
+    private Repository changeSetRepo;
 
     public synchronized void persistChangeSet(Graph changeSet) throws RepositoryException {
-        ensureInitialized();
-
-        RepositoryConnection repCon = repository.getConnection();
+        RepositoryConnection repCon = changeSetRepo.getConnection();
         repCon.add(changeSet);
-
         repCon.close();
         logger.debug("created changeset: " +formatChangeSet(changeSet));
     }
@@ -61,16 +54,22 @@ public class ChangeSetStore {
         return sw.toString();
     }
 
+    public synchronized Collection<BindingSet> evaluateQuery(String query) throws OpenRDFException {
+        Collection<BindingSet> bindingSets = new ArrayList<BindingSet>();
 
-    public Repository getRepository() throws RepositoryException {
-        ensureInitialized();
-        return repository;
-    }
+        RepositoryConnection repCon = changeSetRepo.getConnection();
+        try {
+            TupleQueryResult result = repCon.prepareTupleQuery(QueryLanguage.SPARQL, query).evaluate();
 
-    private synchronized void ensureInitialized() throws RepositoryException {
-        if (!isInitialized) {
-            repository.initialize();
-            isInitialized = true;
+            while (result.hasNext()) {
+                bindingSets.add(result.next());
+            }
+
+            result.close();
+            return bindingSets;
+        }
+        finally {
+            repCon.close();
         }
     }
 

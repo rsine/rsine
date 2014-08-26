@@ -1,63 +1,76 @@
 package at.punkt.lod2.local;
 
 import at.punkt.lod2.util.CountingNotifier;
-import at.punkt.lod2.util.ExpectedCountReached;
-import at.punkt.lod2.util.Helper;
-import com.jayway.awaitility.Awaitility;
-import eu.lod2.rsine.Rsine;
-import eu.lod2.rsine.changesetservice.ChangeTripleHandler;
 import eu.lod2.rsine.dissemination.messageformatting.BindingSetFormatter;
 import eu.lod2.rsine.dissemination.messageformatting.ToStringBindingSetFormatter;
 import eu.lod2.rsine.dissemination.notifier.logging.LoggingNotifier;
 import eu.lod2.rsine.queryhandling.QueryEvaluator;
 import eu.lod2.rsine.registrationservice.Condition;
+import eu.lod2.rsine.registrationservice.NotificationQuery;
+import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
+import eu.lod2.rsine.service.ChangeSetCreator;
+import eu.lod2.rsine.service.ChangeTripleService;
+import eu.lod2.rsine.service.PersistAndNotifyProvider;
 import eu.lod2.util.Namespaces;
-import org.apache.jena.fuseki.Fuseki;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.openrdf.model.Model;
+import org.openrdf.model.Statement;
+import org.openrdf.model.impl.LiteralImpl;
+import org.openrdf.model.impl.StatementImpl;
+import org.openrdf.model.impl.URIImpl;
 import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.UpdateExecutionException;
+import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.sparql.SPARQLConnection;
-import org.openrdf.repository.sparql.SPARQLRepository;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.IOException;
-import java.util.Properties;
-import java.util.concurrent.TimeUnit;
+import java.util.Arrays;
 
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-public class ConditionalNotificationTest {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations = {"LocalTest-context.xml"})
+@DirtiesContext
+public class NotificationWithConditionTest {
 
-    private Helper helper;
-    private Rsine rsine;
+    @Autowired
+    private RegistrationService registrationService;
+
+    @Autowired
+    private PersistAndNotifyProvider persistAndNotifyProvider;
+
+    @Autowired
+    private Repository managedStoreRepo;
+
     private CountingNotifier countingNotifier;
-    private ApplicationContext applicationContext;
+    private RepositoryConnection repCon;
+
+    private Statement prefLabelStatement = new StatementImpl(
+        new URIImpl("http://reegle.info/glossary/someConcept"),
+        new URIImpl("http://www.w3.org/2004/02/skos/core#prefLabel"),
+        new LiteralImpl("some preflabel", "en"));
 
     @Before
     public void setUp() throws IOException, RepositoryException {
-        Helper.initFuseki("dataset");
-
+        repCon = managedStoreRepo.getConnection();
+        repCon.clear();
         countingNotifier = new CountingNotifier();
-        applicationContext = new ClassPathXmlApplicationContext("/at/punkt/lod2/local/LocalTest-context.xml");
-        helper = applicationContext.getBean(Helper.class);
-        rsine = applicationContext.getBean(Rsine.class);
-        rsine.start();
     }
 
     @After
-    public void tearDown() throws Exception {
-        Fuseki.getServer().stop();
-        rsine.stop();
+    public void tearDown() throws RepositoryException {
+        repCon.close();
     }
 
-    @Test(timeout = 10000)
+    @Test
     public void propertyCreated()
         throws IOException, RepositoryException, MalformedQueryException, UpdateExecutionException
     {
@@ -66,18 +79,23 @@ public class ConditionalNotificationTest {
                 new ToStringBindingSetFormatter(),
                 new Condition(createPrefLabelCondition(), false)); // triple did not exist before
 
-        postTripleChange();
-        insertIntoManagedStore();
+        persistChangeSet();
+        repCon.add(prefLabelStatement);
 
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
+        Assert.assertEquals(1, countingNotifier.getNotificationCount());
     }
 
     private void registerSubscription(String query, BindingSetFormatter formatter, Condition condition) {
         Subscription subscription = new Subscription();
-        subscription.addQuery(query, formatter, condition);
+
+        NotificationQuery notificationQuery = new NotificationQuery(query, formatter, subscription);
+        notificationQuery.setConditions(Arrays.asList(condition));
+        subscription.addQuery(notificationQuery);
+
         subscription.addNotifier(new LoggingNotifier());
         subscription.addNotifier(countingNotifier);
-        rsine.registerSubscription(subscription);
+
+        registrationService.register(subscription, true);
     }
 
     private String createPropertyCreatedQuery() {
@@ -103,30 +121,15 @@ public class ConditionalNotificationTest {
         return Namespaces.SKOS_PREFIX + "ASK {?sub skos:prefLabel ?obj}";
     }
 
-    private void insertIntoManagedStore()
-        throws MalformedQueryException, RepositoryException, UpdateExecutionException
-    {
-        String managedServerSparqlEndpoint = applicationContext.getBean("managedServerSparqlUpdate", String.class);
-        RepositoryConnection repCon = new SPARQLConnection(new SPARQLRepository(managedServerSparqlEndpoint));
-        repCon.prepareUpdate(QueryLanguage.SPARQL, "INSERT DATA {" +getPrefLabelTriple()+ "}").execute();
-        repCon.close();
+    private void persistChangeSet() throws IOException {
+        Model changeSet = new ChangeSetCreator().assembleChangeset(
+            prefLabelStatement,
+            null,
+            ChangeTripleService.CHANGETYPE_ADD);
+        persistAndNotifyProvider.persistAndNotify(changeSet, true);
     }
 
-    private String getPrefLabelTriple() {
-        return "<http://reegle.info/glossary/someConcept> <http://www.w3.org/2004/02/skos/core#prefLabel> \"some preflabel\"@en .";
-    }
-
-    private void postTripleChange() throws IOException {
-        Properties props = new Properties();
-        props.setProperty(ChangeTripleHandler.POST_BODY_CHANGETYPE, ChangeTripleHandler.CHANGETYPE_ADD);
-        props.setProperty(
-            ChangeTripleHandler.POST_BODY_AFFECTEDTRIPLE,
-            getPrefLabelTriple());
-
-        helper.postChangeset(props);
-    }
-
-    @Test(timeout = 10000)
+    @Test
     public void propertyChanged()
         throws IOException, MalformedQueryException, RepositoryException, UpdateExecutionException
     {
@@ -135,12 +138,12 @@ public class ConditionalNotificationTest {
                 new ToStringBindingSetFormatter(),
                 new Condition(createPrefLabelCondition(), true)); // triple did exist before
 
-        postTripleChange(); // no notification should occur here because condition is not fulfilled
+        persistChangeSet(); // no notification should occur here because condition is not fulfilled
 
-        insertIntoManagedStore();
-        postTripleChange(); // here we get the one and only notification
+        repCon.add(prefLabelStatement);
+        persistChangeSet(); // here we get the one and only notification
 
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(new ExpectedCountReached(countingNotifier, 1));
+        Assert.assertEquals(1, countingNotifier.getNotificationCount());
     }
 
 }

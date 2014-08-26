@@ -1,20 +1,16 @@
 package eu.lod2.rsine;
 
-import eu.lod2.rsine.changesetservice.ChangeSetService;
-import eu.lod2.rsine.changesetservice.StopListener;
-import eu.lod2.rsine.registrationservice.RegistrationService;
-import eu.lod2.rsine.registrationservice.Subscription;
-import eu.lod2.rsine.remotenotification.RemoteNotificationServiceBase;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.ContextLoaderListener;
+import org.springframework.web.context.support.XmlWebApplicationContext;
+import org.springframework.web.servlet.DispatcherServlet;
 
-import java.io.IOException;
 import java.security.InvalidParameterException;
-import java.util.Iterator;
 
 @Component
 public class Rsine {
@@ -22,58 +18,51 @@ public class Rsine {
     public final static String propertiesFileName = "application.properties";
     private final static Logger logger = LoggerFactory.getLogger(Rsine.class);
 
-    @Autowired
-    private ChangeSetService changeSetService;
-
-    @Autowired
-    private RegistrationService registrationService;
-
-    @Autowired
-    private RemoteNotificationServiceBase remoteNotificationService;
-
     public static CmdParams cmdParams;
-
-    public Rsine() {
-    }
-
-    public void start() throws IOException {
-        changeSetService.start();
-    }
-
-    public void stop() throws IOException, InterruptedException {
-        changeSetService.stop();
-    }
-
-    public void stop(StopListener listener) throws IOException, InterruptedException {
-        changeSetService.setStopListener(listener);
-        stop();
-    }
 
     public static void main(String[] args) {
         try {
             cmdParams = new CmdParams(args);
-            ApplicationContext applicationContext = new ClassPathXmlApplicationContext("application-context.xml");
-            Rsine rsine = (Rsine) applicationContext.getBean("rsine");
-            rsine.start();
-        }
-        catch (IOException e) {
-            logger.error("Error setting up network connection", e);
+            if (!cmdParams.help) startServer();
         }
         catch (InvalidParameterException e) {
             logger.error("Insufficient parameters for starting the service");
         }
+        catch (Exception e) {
+            logger.error("Error starting rsine service", e);
+        }
     }
 
-    /**
-     * These methods are intended for testing only
-     */
-    public void registerSubscription(Subscription subscription) {
-        registrationService.register(subscription, true);
+    public static Server initAndStart(int port,
+                                      String managedStoreSparqlEndpoint,
+                                      String authoritativeUri,
+                                      String feedbackFileName)
+        throws Exception
+    {
+        cmdParams = new CmdParams();
+        cmdParams.port = port;
+        cmdParams.managedStoreSparqlEndpoint = managedStoreSparqlEndpoint;
+        cmdParams.authoritativeUri = authoritativeUri;
+        cmdParams.feedbackFileName = feedbackFileName;
+
+        return startServer();
     }
 
-    public Iterator<Subscription> getSubscriptions() {
-        return registrationService.getSubscriptionIterator();
+    private static Server startServer() throws Exception {
+        Server server = new Server(cmdParams.port);
+
+        XmlWebApplicationContext context = new XmlWebApplicationContext();
+        context.setConfigLocation("classpath:application-context.xml");
+
+        ServletContextHandler contextHandler = new ServletContextHandler();
+        contextHandler.setContextPath("/");
+
+        contextHandler.addServlet(new ServletHolder(new DispatcherServlet(context)), "/*");
+        contextHandler.addEventListener(new ContextLoaderListener(context));
+        server.setHandler(contextHandler);
+
+        server.start();
+        return server;
     }
-    // ---
 
 }

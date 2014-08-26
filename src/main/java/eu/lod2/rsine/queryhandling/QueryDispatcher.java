@@ -6,15 +6,17 @@ import eu.lod2.rsine.queryhandling.policies.ImmediateEvaluationPolicy;
 import eu.lod2.rsine.registrationservice.NotificationQuery;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
+import org.openrdf.OpenRDFException;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -37,6 +39,15 @@ public class QueryDispatcher implements IQueryDispatcher {
     private IEvaluationPolicy evaluationPolicy;
 
     private ExecutorService notificationExecutor = Executors.newFixedThreadPool(NUM_NOTIFY_THREADS);
+    private boolean asyncNotification;
+
+    public QueryDispatcher() {
+
+    }
+
+    public QueryDispatcher(boolean asyncNotification) {
+        this.asyncNotification = asyncNotification;
+    }
 
     @Override
     public void trigger() {
@@ -55,7 +66,7 @@ public class QueryDispatcher implements IQueryDispatcher {
     }
 
     private void dispatchForSubscription(Subscription subscription) throws RepositoryException {
-        logger.debug("Dispatching queries for subscription with id '" + subscription.getSubscriptionId() + "'");
+        logger.debug("Dispatching queries for subscription with id '" + subscription.getId() + "'");
         Iterator<NotificationQuery> queryIt = subscription.getQueries();
         while (queryIt.hasNext()) {
             issueQueryAndNotify(queryIt.next());
@@ -66,20 +77,24 @@ public class QueryDispatcher implements IQueryDispatcher {
         issueQueryAndNotify(query, false);
     }
 
-    public synchronized void issueQueryAndNotify(NotificationQuery query, boolean forceEvaluation)
+    public synchronized void issueQueryAndNotify(NotificationQuery query, boolean evaluateImmediately)
             throws RepositoryException
     {
+        List<String> messages = new ArrayList<String>();
+
         try {
-            List<String> messages = queryEvaluator.evaluate(
+            Collection<String> queryMessages = queryEvaluator.evaluate(
                 query,
-                forceEvaluation ? new ImmediateEvaluationPolicy() : evaluationPolicy);
-            sendNotifications(messages, query.getSubscription());
+                evaluateImmediately ? new ImmediateEvaluationPolicy() : evaluationPolicy);
+            messages.addAll(queryMessages);
+
+            if (!messages.isEmpty()) {
+                appendSubscriptionDetails(messages, query.getSubscription());
+                sendNotifications(messages, query.getSubscription());
+            }
             postponedQueryHandler.remove(query);
         }
-        catch (MalformedQueryException e) {
-            logger.error("NotificationQuery malformed", e);
-        }
-        catch (QueryEvaluationException e) {
+        catch (OpenRDFException e) {
             logger.error("Could not evaluate query", e);
         }
         catch (EvaluationPostponedException e) {
@@ -89,9 +104,25 @@ public class QueryDispatcher implements IQueryDispatcher {
 
     private void sendNotifications(Collection<String> messages, Subscription subscription) {
         Iterator<INotifier> notifierIt = subscription.getNotifierIterator();
-        while (!messages.isEmpty() && notifierIt.hasNext()) {
-            notificationExecutor.execute(new Notification(notifierIt.next(), messages));
-        }        
+
+        while (notifierIt.hasNext()) {
+            INotifier notifier = notifierIt.next();
+
+            if (asyncNotification) {
+                notificationExecutor.execute(new Notification(notifier, messages));
+            }
+            else {
+                notifier.notify(messages);
+            }
+        }
+    }
+
+    private void appendSubscriptionDetails(Collection<String> messages, Subscription subscription) {
+        String rationale = "You receive this notification because of subscription '" +subscription.getId()+ "'";
+        if (!subscription.getDescription().isEmpty()) {
+            rationale += " (" +subscription.getDescription()+ ")";
+        }
+        messages.add(rationale);
     }
 
     private class Notification implements Runnable {

@@ -8,7 +8,8 @@
             PREFIX spin:<http://spinrdf.org/sp/>
             PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
             PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
-						PREFIX dcterms:<http://purl.org/dc/terms/>
+            PREFIX dcterms:<http://purl.org/dc/terms/>
+
             SELECT ?concept ?creator WHERE {
                 ?cs a cs:ChangeSet .
                 ?cs cs:createdDate ?csdate .

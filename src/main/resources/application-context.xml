@@ -4,6 +4,7 @@
        xmlns:util="http://www.springframework.org/schema/util"
        xmlns:task="http://www.springframework.org/schema/task"
        xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
 	   					   http://www.springframework.org/schema/beans/spring-beans.xsd
 	   					   http://www.springframework.org/schema/util
@@ -11,18 +12,23 @@
 	   					   http://www.springframework.org/schema/context
 	   					   http://www.springframework.org/schema/context/spring-context.xsd
                            http://www.springframework.org/schema/task
-                           http://www.springframework.org/schema/task/spring-task-3.0.xsd">
+                           http://www.springframework.org/schema/task/spring-task-3.0.xsd"
+>
 
     <context:component-scan base-package="eu.lod2.rsine"/>
     <util:constant id="cmdParams" static-field="eu.lod2.rsine.Rsine.cmdParams"/>
 
-    <bean id="changeSetService" class="eu.lod2.rsine.changesetservice.ChangeSetService">
-        <constructor-arg value="#{cmdParams.context}"/>
-        <constructor-arg value="#{cmdParams.changesListeningPort}"/>
+    <bean name="managedStoreRepo" class="org.openrdf.repository.sparql.SPARQLRepository" init-method="initialize" destroy-method="shutDown">
+        <constructor-arg value="#{cmdParams.managedStoreSparqlEndpoint}" />
+    </bean>
+
+    <bean name="changeSetRepo" class="org.openrdf.repository.sail.SailRepository" init-method="initialize" destroy-method="shutDown">
+        <constructor-arg>
+            <bean class="org.openrdf.sail.memory.MemoryStore"/>
+        </constructor-arg>
     </bean>
 
     <bean id="queryEvaluator" class="eu.lod2.rsine.queryhandling.QueryEvaluator">
-        <constructor-arg value="#{cmdParams.managedStoreSparqlEndpoint}" />
         <constructor-arg value="#{cmdParams.authoritativeUri}" />
     </bean>
 
@@ -38,6 +44,10 @@
 
     <bean id="evaluationPolicy" class="eu.lod2.rsine.queryhandling.policies.MinTimePassedEvaluationPolicy">
         <constructor-arg value="5000" />
+    </bean>
+
+    <bean id="feedbackService" class="eu.lod2.rsine.feedback.FeedbackService">
+        <constructor-arg value="#{cmdParams.feedbackFileName}" />
     </bean>
 
     <bean id="postponedQueryHandler" class="eu.lod2.rsine.queryhandling.PostponedQueryHandler"/>
