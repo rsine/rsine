@@ -21,7 +21,7 @@ relies on getting information about the triples written to or removed from the m
 solutions for RDF data:
 
  * [Virtuoso](http://virtuoso.openlinksw.com/): To establish interoperability with rsine, the provided
- [vad package](https://github.com/rsine/rsineVad) must installed
+ [vad package](https://github.com/rsine/rsineVad) must installed. It has been tested and works with Virtuoso 6.1, however there are currently issues with Virtuoso 7.x. An alternative way for getting triple changes from Virtuoso is the [Transaction Log Parser](https://github.com/GeoKnow/trx_parser) developed in the course of the [GeoKnow project](http://geoknow.eu/Welcome.html)
  * [openRDF](http://www.openrdf.org/): We developed a reference implementation of a <tt>RepositoryConnectionListener</tt> that forwards
  triple changes to rsine. The implementation is not published yet.
 
