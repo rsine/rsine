@@ -9,7 +9,7 @@
             PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
             PREFIX rsine: <http://lod2.eu/rsine/>
 
-            SELECT ?oldLabel ?newLabel ?millisDiff WHERE {
+            SELECT ?oldLabel ?newLabel WHERE {
                 ?addCs cs:createdDate ?addCsDate .
                 ?addCs cs:precedingChangeSet ?remCs .
 
