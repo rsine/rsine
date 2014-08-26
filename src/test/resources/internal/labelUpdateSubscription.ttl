@@ -1,0 +1,43 @@
+@prefix spin: <http://spinrdf.org/sp/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix rsine: <http://lod2.eu/rsine/> .
+
+<http://example.org/labelUpdate> a rsine:Subscription;
+    rsine:query [
+        spin:text "PREFIX cs:<http://purl.org/vocab/changeset/schema#>
+            PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+            PREFIX rsine: <http://lod2.eu/rsine/>
+
+            SELECT ?oldLabel ?newLabel WHERE {
+                ?addCs cs:createdDate ?addCsDate .
+                ?addCs cs:precedingChangeSet ?remCs .
+
+                ?addCs cs:addition ?addition .
+                ?remCs cs:removal ?removal .
+                
+                ?removal rdf:subject ?concept .
+                ?removal rdf:predicate skos:prefLabel .
+                ?removal rdf:object ?oldLabel .
+
+                ?addition rdf:subject ?concept .
+                ?addition rdf:predicate skos:prefLabel .
+                ?addition rdf:object ?newLabel .
+
+                ?addCs rsine:createdTimeStamp ?addTs .
+                ?remCs rsine:createdTimeStamp ?remTs .
+
+                FILTER (?addCsDate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime> &&
+                        ?addTs - ?remTs < 2000)
+            }";
+
+        rsine:formatter [
+            a rsine:vtlFormatter;
+            rsine:message "Label change: '$bindingSet.getValue('oldLabel')' -> '$bindingSet.getValue('newLabel')'";
+        ]
+  ];
+
+  rsine:notifier [
+      a rsine:loggingNotifier;
+  ].
+

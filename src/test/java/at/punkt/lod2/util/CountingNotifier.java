@@ -16,5 +16,9 @@ public class CountingNotifier implements INotifier {
     public synchronized int getNotificationCount() {
         return notificationCount;
     }
+    
+    public synchronized void reset() {
+        notificationCount = 0;
+    }
 
 }

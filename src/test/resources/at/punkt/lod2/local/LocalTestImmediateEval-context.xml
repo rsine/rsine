@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	   					   http://www.springframework.org/schema/beans/spring-beans.xsd
+	   					   http://www.springframework.org/schema/util
+	   					   http://www.springframework.org/schema/util/spring-util-3.0.xsd
+	   					   http://www.springframework.org/schema/context
+	   					   http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:component-scan base-package="eu.lod2.rsine"/>
+
+    <bean name="managedStoreRepo" class="org.openrdf.repository.sail.SailRepository" init-method="initialize" destroy-method="shutDown">
+        <constructor-arg>
+            <bean class="org.openrdf.sail.memory.MemoryStore"/>
+        </constructor-arg>
+    </bean>
+
+    <bean name="changeSetRepo" class="org.openrdf.repository.sail.SailRepository" init-method="initialize" destroy-method="shutDown">
+        <constructor-arg>
+            <bean class="org.openrdf.sail.memory.MemoryStore"/>
+        </constructor-arg>
+    </bean>
+
+    <bean name="queryDispatcher" class="eu.lod2.rsine.queryhandling.QueryDispatcher">
+        <constructor-arg value="false"/>
+    </bean>
+
+    <bean id="evaluationPolicy" class="eu.lod2.rsine.queryhandling.policies.ImmediateEvaluationPolicy"/>
+    <bean id="remoteServiceDetector" class="eu.lod2.rsine.remotenotification.UnavailableRemoteServiceDetector"/>
+    <bean id="remoteNotificationServiceBase" class="eu.lod2.rsine.remotenotification.NullRemoteNotificationService"/>
+</beans>
