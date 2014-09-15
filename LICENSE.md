@@ -2,7 +2,7 @@ rsine License
 ====================
 
 rsine is meant to be an free and open source for all now and in future. We encourage continuous, self sustainable development supported by both the open source community and commercial stake holders. This way both parties (community and commercial users)
-profit from each other by code and financial resources for core development. Therefore we adopted a dual licensing approach for rsine. All contributor need to agree and sign the CLA (https://github.com/rsine/rsine/blob/master/rsine_contribution_agreement.pdf), if they want to push in the master repository of rsine.
+profit from each other by code and financial resources for core development. Therefore we adopted a dual licensing approach for rsine. All contributor need to agree and sign the CLA (https://github.com/rsine/rsine/blob/master/ContributorAgreement_rsine.pdf), if they want to push in the master repository of rsine.
 
 Open source Software License
 ===========================
