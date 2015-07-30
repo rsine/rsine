@@ -9,6 +9,7 @@ import org.openrdf.model.vocabulary.RDF;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 
@@ -17,7 +18,9 @@ public class ChangeSetCreator {
 
     private final ValueFactory valueFactory = ValueFactoryImpl.getInstance();
 
-    public Model assembleChangeset(Statement affectedStatement, Statement secondaryStatement, String changeType) {
+    public Model assembleChangeset(Collection<Statement> addedStatements,
+                                   Collection<Statement> removedStatements)
+    {
         Model model = new TreeModel(new HashSet<Namespace>(Arrays.asList(Namespaces.RSINE_NAMESPACE, Namespaces.CS_NAMESPACE)));
 
         URI changeSet = valueFactory.createURI(

@@ -43,7 +43,7 @@ public class RsineController {
     @ResponseBody
     public void announceTriples(@RequestBody String announcedTriple, HttpServletResponse response) throws IOException {
         try {
-            changeTripleService.handleAnnouncedTriple(announcedTriple);
+            changeTripleService.handleAnnouncedTriples(announcedTriple);
         }
         catch (ItemNotFoundException e) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No triple or change type provided");

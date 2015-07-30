@@ -24,12 +24,8 @@ public class ChangeTripleService {
 
     private final Logger logger = LoggerFactory.getLogger(ChangeTripleService.class);
 
-    public static String POST_BODY_AFFECTEDTRIPLE = "affectedTriple";
-    public static String POST_BODY_SECONDARYTRIPLE = "secondaryTriple";
-    public static String POST_BODY_CHANGETYPE = "changeType";
-    public static String CHANGETYPE_ADD = "add";
-    public static String CHANGETYPE_REMOVE = "remove";
-    public static String CHANGETYPE_UPDATE = "update";
+    public static String POST_BODY_ADDEDTRIPLES = "addedTriples";
+    public static String POST_BODY_REMOVEDTRIPLES = "removedTriples";
 
     @Autowired
     private ChangeSetCreator changeSetCreator;
@@ -37,35 +33,36 @@ public class ChangeTripleService {
     @Autowired
     private PersistAndNotifyProvider persistAndNotifyProvider;
 
-    void handleAnnouncedTriple(String announceTriple) throws IOException, RDFParseException, RDFHandlerException {
-        logger.debug("Incoming triple change announcement: " +announceTriple);
+    void handleAnnouncedTriples(String announceTriples) throws IOException, RDFParseException, RDFHandlerException {
+        logger.debug("Incoming triple change announcement: " +announceTriples);
 
         Properties properties = new Properties();
-        properties.load(new StringReader(announceTriple));
+        properties.load(new StringReader(announceTriples));
 
-        String changeType = getValueForName(POST_BODY_CHANGETYPE, properties);
-        List<Statement> triples = extractStatements(properties, changeType);
+        String addedTriples = getValueForName(POST_BODY_ADDEDTRIPLES, properties);
+        String removedTriples = getValueForName(POST_BODY_REMOVEDTRIPLES, properties);
 
-        Model changeSet = changeSetCreator.assembleChangeset(triples.get(0), triples.get(1), changeType);
+        List<Statement> addedStatements = extractStatements(addedTriples);
+        List<Statement> removedStatements = extractStatements(removedTriples);
+
+
+        Model changeSet = changeSetCreator.assembleChangeset(addedStatements, removedStatements);
         persistAndNotifyProvider.persistAndNotify(changeSet, false);
     }
 
     private String getValueForName(String key, Properties properties) {
         String value = properties.getProperty(key);
-        if (value == null) {
-            throw new ItemNotFoundException("Key '" +key+ "' not found in request properties");
-        }
-        return value;
+        return value == null ? "" : value;
     }
 
     private List<Statement> extractStatements(Properties properties, String changeType)
             throws RDFParseException, IOException, RDFHandlerException
     {
         Statement secondaryTriple = null;
-        Statement affectedTriple = createStatement(getValueForName(POST_BODY_AFFECTEDTRIPLE, properties));
+        Statement affectedTriple = createStatement(getValueForName(POST_BODY_AFFECTEDTRIPLES, properties));
 
         try {
-            secondaryTriple = createStatement(getValueForName(POST_BODY_SECONDARYTRIPLE, properties));
+            secondaryTriple = createStatement(getValueForName(POST_BODY_SECONDARYTRIPLES, properties));
         }
         catch (ItemNotFoundException e) {
             if (changeType.equals(CHANGETYPE_UPDATE)) {
