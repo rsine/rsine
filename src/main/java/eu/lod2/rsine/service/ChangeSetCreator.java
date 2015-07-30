@@ -36,16 +36,13 @@ public class ChangeSetCreator {
         model.add(new StatementImpl(changeSet,
             valueFactory.createURI(Namespaces.RSINE_NAMESPACE.getName(), "createdTimeStamp"),
             valueFactory.createLiteral(System.currentTimeMillis())));
-        
-        if (changeType.equals(ChangeTripleService.CHANGETYPE_REMOVE)) {
-            addActionStatement(model, changeSet, affectedStatement, "removal");
+
+        for (Statement addition : addedStatements) {
+            addActionStatement(model, changeSet, addition, "addition");
         }
-        else if (changeType.equals(ChangeTripleService.CHANGETYPE_ADD)) {
-            addActionStatement(model, changeSet, affectedStatement, "addition");
-        }
-        else if (changeType.equals(ChangeTripleService.CHANGETYPE_UPDATE)) {
-            addActionStatement(model, changeSet, affectedStatement, "removal");
-            addActionStatement(model, changeSet, secondaryStatement, "addition");
+
+        for (Statement removal : removedStatements) {
+            addActionStatement(model, changeSet, removal, "addition");
         }
         
         return model;

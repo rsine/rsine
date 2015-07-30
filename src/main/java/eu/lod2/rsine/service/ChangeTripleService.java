@@ -1,6 +1,5 @@
 package eu.lod2.rsine.service;
 
-import eu.lod2.util.ItemNotFoundException;
 import org.openrdf.model.Model;
 import org.openrdf.model.Statement;
 import org.openrdf.rio.RDFHandlerException;
@@ -15,8 +14,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.Arrays;
-import java.util.List;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Properties;
 
 @Service
@@ -42,9 +41,8 @@ public class ChangeTripleService {
         String addedTriples = getValueForName(POST_BODY_ADDEDTRIPLES, properties);
         String removedTriples = getValueForName(POST_BODY_REMOVEDTRIPLES, properties);
 
-        List<Statement> addedStatements = extractStatements(addedTriples);
-        List<Statement> removedStatements = extractStatements(removedTriples);
-
+        Collection<Statement> addedStatements = extractStatements(addedTriples);
+        Collection<Statement> removedStatements = extractStatements(removedTriples);
 
         Model changeSet = changeSetCreator.assembleChangeset(addedStatements, removedStatements);
         persistAndNotifyProvider.persistAndNotify(changeSet, false);
@@ -55,44 +53,27 @@ public class ChangeTripleService {
         return value == null ? "" : value;
     }
 
-    private List<Statement> extractStatements(Properties properties, String changeType)
+    private Collection<Statement> extractStatements(String trigTriples)
             throws RDFParseException, IOException, RDFHandlerException
     {
-        Statement secondaryTriple = null;
-        Statement affectedTriple = createStatement(getValueForName(POST_BODY_AFFECTEDTRIPLES, properties));
-
-        try {
-            secondaryTriple = createStatement(getValueForName(POST_BODY_SECONDARYTRIPLES, properties));
-        }
-        catch (ItemNotFoundException e) {
-            if (changeType.equals(CHANGETYPE_UPDATE)) {
-                throw e;
-            }
-        }
-
-        return Arrays.asList(affectedTriple, secondaryTriple);
-    }
-
-    private Statement createStatement(String triple) throws RDFParseException, IOException, RDFHandlerException {
         RDFParser parser = new TriGParserFactory().getParser();
-        SingleStatementHandler singleStatementHandler = new SingleStatementHandler();
-        parser.setRDFHandler(singleStatementHandler);
-        parser.parse(new StringReader(triple.trim()), "http://some.base.uri/");
-        return singleStatementHandler.getStatement();
+        StatementsCollector statementsCollector = new StatementsCollector();
+        parser.setRDFHandler(statementsCollector);
+        parser.parse(new StringReader(trigTriples), "http://some.base.uri/");
+        return statementsCollector.getStatements();
     }
 
-    private class SingleStatementHandler extends RDFHandlerBase {
+    private class StatementsCollector extends RDFHandlerBase {
 
-        private Statement statement;
+        private Collection<Statement> statements = new ArrayList<Statement>();
 
         @Override
         public void handleStatement(Statement st) throws RDFHandlerException {
-            statement = st;
+            statements.add(st);
         }
 
-        Statement getStatement() {
-            if (statement == null) throw new ItemNotFoundException("No statement parsed");
-            return statement;
+        Collection<Statement> getStatements() {
+            return statements;
         }
 
     }
