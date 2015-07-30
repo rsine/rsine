@@ -7,7 +7,7 @@ import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParseException;
 import org.openrdf.rio.RDFParser;
 import org.openrdf.rio.helpers.RDFHandlerBase;
-import org.openrdf.rio.turtle.TurtleParserFactory;
+import org.openrdf.rio.trig.TriGParserFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,7 +77,7 @@ public class ChangeTripleService {
     }
 
     private Statement createStatement(String triple) throws RDFParseException, IOException, RDFHandlerException {
-        RDFParser parser = new TurtleParserFactory().getParser();
+        RDFParser parser = new TriGParserFactory().getParser();
         SingleStatementHandler singleStatementHandler = new SingleStatementHandler();
         parser.setRDFHandler(singleStatementHandler);
         parser.parse(new StringReader(triple.trim()), "http://some.base.uri/");

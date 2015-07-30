@@ -85,17 +85,20 @@ public class QueryEvaluator {
                                         String issuedQuery,
                                         RepositoryConnection managedStoreCon) throws OpenRDFException
     {
+        logger.debug("evaluating issued query '" +issuedQuery+ "'");
         Collection<BindingSet> results = changeSetStore.evaluateQuery(issuedQuery);
         query.updateLastIssued();
 
         Collection<String> messages = new HashSet<String>();
         for (BindingSet bs : results) {
+            logger.debug("evaluating auxiliary query");
             evaluateAuxiliary(query.getAuxiliaryQueries(), bs);
 
             if (evaluateConditions(query.getConditions(), bs, managedStoreCon)) {
                 messages.add(query.getBindingSetFormatter().toMessage(bs));
             }
         }
+        logger.debug("results processed");
 
         return messages;
     }
@@ -106,10 +109,12 @@ public class QueryEvaluator {
     {
         boolean allConditionsFulfilled = true;
 
+        logger.debug("Evaluating conditions");
         while (conditions.hasNext()) {
             Condition condition = conditions.next();
             allConditionsFulfilled &= evaluateCondition(condition, bs, managedStoreCon);
         }
+        logger.debug("Evaluating conditions done");
 
         return allConditionsFulfilled;
     }
@@ -120,7 +125,11 @@ public class QueryEvaluator {
             BooleanQuery booleanQuery = managedStoreCon.prepareBooleanQuery(QueryLanguage.SPARQL, condition.getAskQuery());
             setBinding(booleanQuery, bs);
 
-            return booleanQuery.evaluate() == condition.getExpectedResult();
+            logger.debug("Evaluating condition: '" +booleanQuery.toString()+ "'");
+            boolean conditionFulfilled = (booleanQuery.evaluate() == condition.getExpectedResult());
+
+            logger.debug("condition fulfilled: " +Boolean.toString(conditionFulfilled));
+            return conditionFulfilled;
         }
         catch (Exception e) {
             logger.error("Error evaluating condition. Query: '" +condition.getAskQuery()+ "'", e);
