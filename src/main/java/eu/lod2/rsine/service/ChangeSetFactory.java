@@ -51,7 +51,7 @@ public class ChangeSetFactory {
         }
 
         for (Statement removal : removedStatements) {
-            addActionStatement(model, changeSet, removal, "addition");
+            addActionStatement(model, changeSet, removal, "removal");
         }
         
         return model;

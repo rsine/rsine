@@ -97,7 +97,6 @@ public class RemoteNotificationTest {
 
     private class RemoteReferencesFormatter implements BindingSetFormatter {
 
-        @Override
         public String toMessage(BindingSet bindingSet) {
             String source = bindingSet.getValue("source").stringValue();
             String subj = bindingSet.getValue("subject").stringValue();

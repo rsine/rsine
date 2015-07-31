@@ -134,6 +134,8 @@ public class MinTimePassedEvaluationPolicyTest  {
 
         performChange();
         Awaitility.await().atMost(2, TimeUnit.SECONDS).until(new NotificationDetector(timeMeasureNotifier));
+
+        System.out.println("done2");
     }
 
     @Test
