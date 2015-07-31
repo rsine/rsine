@@ -2,21 +2,30 @@ package eu.lod2.rsine.service;
 
 import eu.lod2.util.Namespaces;
 import org.openrdf.model.*;
+import org.openrdf.model.impl.EmptyModel;
 import org.openrdf.model.impl.StatementImpl;
 import org.openrdf.model.impl.TreeModel;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.model.vocabulary.RDF;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
+import java.util.*;
 
 @Component
-public class ChangeSetCreator {
+public class ChangeSetFactory {
 
     private final ValueFactory valueFactory = ValueFactoryImpl.getInstance();
+    public enum StatementType {ADDITION, REMOVAL}
+
+    public Model assembleChangeset(StatementType type, Statement... statements) {
+        Collection<Statement> statsList = Arrays.asList(statements);
+        switch (type) {
+            case ADDITION: return assembleChangeset(statsList, Collections.EMPTY_LIST);
+            case REMOVAL: return assembleChangeset(Collections.EMPTY_LIST, statsList);
+        }
+
+        return new EmptyModel(null);
+    }
 
     public Model assembleChangeset(Collection<Statement> addedStatements,
                                    Collection<Statement> removedStatements)

@@ -27,7 +27,7 @@ public class ChangeTripleService {
     public static String POST_BODY_REMOVEDTRIPLES = "removedTriples";
 
     @Autowired
-    private ChangeSetCreator changeSetCreator;
+    private ChangeSetFactory changeSetFactory;
 
     @Autowired
     private PersistAndNotifyProvider persistAndNotifyProvider;
@@ -44,7 +44,7 @@ public class ChangeTripleService {
         Collection<Statement> addedStatements = extractStatements(addedTriples);
         Collection<Statement> removedStatements = extractStatements(removedTriples);
 
-        Model changeSet = changeSetCreator.assembleChangeset(addedStatements, removedStatements);
+        Model changeSet = changeSetFactory.assembleChangeset(addedStatements, removedStatements);
         persistAndNotifyProvider.persistAndNotify(changeSet, false);
     }
 

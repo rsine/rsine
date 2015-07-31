@@ -1,22 +1,24 @@
 package at.punkt.lod2.local;
 
-import at.punkt.lod2.util.Helper;
 import com.jayway.awaitility.Awaitility;
 import eu.lod2.rsine.dissemination.messageformatting.ToStringBindingSetFormatter;
 import eu.lod2.rsine.dissemination.notifier.INotifier;
-import eu.lod2.rsine.queryhandling.PostponedQueryHandler;
 import eu.lod2.rsine.queryhandling.QueryEvaluator;
 import eu.lod2.rsine.registrationservice.NotificationQuery;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
-import eu.lod2.rsine.service.ChangeTripleService;
+import eu.lod2.rsine.service.ChangeSetFactory;
 import eu.lod2.rsine.service.PersistAndNotifyProvider;
 import eu.lod2.util.Namespaces;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.openrdf.model.Model;
+import org.openrdf.model.Statement;
 import org.openrdf.model.impl.LiteralImpl;
+import org.openrdf.model.impl.StatementImpl;
+import org.openrdf.model.impl.URIImpl;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryException;
@@ -27,6 +29,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -47,7 +50,7 @@ public class MinTimePassedEvaluationPolicyTest  {
     private RegistrationService registrationService;
 
     @Autowired
-    private PostponedQueryHandler postponedQueryHandler;
+    private ChangeSetFactory changeSetFactory;
 
     @Before
     public void setUp() throws IOException, RepositoryException, RDFParseException, QueryEvaluationException, MalformedQueryException {
@@ -79,15 +82,19 @@ public class MinTimePassedEvaluationPolicyTest  {
     }
 
     protected void changePrefLabel() throws IOException {
-        persistAndNotifyProvider.persistAndNotify(
-                Helper.createChangeSetModel("http://reegle.info/glossary/1111",
-                        "http://www.w3.org/2004/02/skos/core#prefLabel",
-                        new LiteralImpl("Ottakringer Helles", "en"),
-                        "http://reegle.info/glossary/1111",
-                        "http://www.w3.org/2004/02/skos/core#prefLabel",
-                        new LiteralImpl("Schremser Edelmärzen", "en"),
-                        ChangeTripleService.CHANGETYPE_UPDATE),
-                true);
+        Statement oldStatement = new StatementImpl(
+                new URIImpl("http://reegle.info/glossary/1111"),
+                new URIImpl("http://www.w3.org/2004/02/skos/core#prefLabel"),
+                new LiteralImpl("Ottakringer Helles", "en"));
+
+        Statement newStatement = new StatementImpl(
+                new URIImpl("http://reegle.info/glossary/1111"),
+                new URIImpl("http://www.w3.org/2004/02/skos/core#prefLabel"),
+                new LiteralImpl("Schremser Edelmärzen", "en"));
+
+        Model updateChangeSet = changeSetFactory.assembleChangeset(
+                Arrays.asList(newStatement), Arrays.asList(oldStatement));
+        persistAndNotifyProvider.persistAndNotify(updateChangeSet, true);
     }
 
     @Test
@@ -146,7 +153,6 @@ public class MinTimePassedEvaluationPolicyTest  {
             this.notifier = notifier;
         }
 
-        @Override
         public Boolean call() throws Exception {
             return notifier.getMillisPassed() != null;
         }
@@ -162,7 +168,6 @@ public class MinTimePassedEvaluationPolicyTest  {
             time = System.currentTimeMillis();
         }
 
-        @Override
         public synchronized void notify(Collection<String> messages) {
             millisPassed = System.currentTimeMillis() - time;
         }

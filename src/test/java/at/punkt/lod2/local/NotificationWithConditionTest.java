@@ -9,8 +9,7 @@ import eu.lod2.rsine.registrationservice.Condition;
 import eu.lod2.rsine.registrationservice.NotificationQuery;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
-import eu.lod2.rsine.service.ChangeSetCreator;
-import eu.lod2.rsine.service.ChangeTripleService;
+import eu.lod2.rsine.service.ChangeSetFactory;
 import eu.lod2.rsine.service.PersistAndNotifyProvider;
 import eu.lod2.util.Namespaces;
 import org.junit.After;
@@ -49,6 +48,9 @@ public class NotificationWithConditionTest {
 
     @Autowired
     private Repository managedStoreRepo;
+
+    @Autowired
+    private ChangeSetFactory changeSetFactory;
 
     private CountingNotifier countingNotifier;
     private RepositoryConnection repCon;
@@ -122,10 +124,7 @@ public class NotificationWithConditionTest {
     }
 
     private void persistChangeSet() throws IOException {
-        Model changeSet = new ChangeSetCreator().assembleChangeset(
-            prefLabelStatement,
-            null,
-            ChangeTripleService.CHANGETYPE_ADD);
+        Model changeSet = changeSetFactory.assembleChangeset(ChangeSetFactory.StatementType.ADDITION, prefLabelStatement);
         persistAndNotifyProvider.persistAndNotify(changeSet, true);
     }
 

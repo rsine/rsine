@@ -4,9 +4,8 @@ import at.punkt.lod2.util.CountingNotifier;
 import at.punkt.lod2.util.Helper;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
-import eu.lod2.rsine.service.ChangeTripleService;
+import eu.lod2.rsine.service.ChangeSetFactory;
 import eu.lod2.rsine.service.PersistAndNotifyProvider;
-import java.io.IOException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,10 +23,10 @@ import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParseException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import java.io.IOException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"LocalTestImmediateEval-context.xml"})
@@ -40,7 +39,10 @@ public class LabelUpdateTest {
     private RegistrationService registrationService;
 
     @Autowired
-    private PersistAndNotifyProvider persistAndNotifyProvider;    
+    private PersistAndNotifyProvider persistAndNotifyProvider;
+
+    @Autowired
+    private ChangeSetFactory changeSetFactory;
 
     @Before
     public void setUp() throws IOException, RDFParseException, RDFHandlerException, RepositoryException {
@@ -59,17 +61,17 @@ public class LabelUpdateTest {
         Statement updatePrefLabel = new StatementImpl(concept2uri, SKOS.PREF_LABEL, new LiteralImpl("updated concept"));
 
         persistAndNotifyProvider.persistAndNotify(
-                Helper.createChangeSetModel(defPrefLabel, ChangeTripleService.CHANGETYPE_ADD),
+                changeSetFactory.assembleChangeset(ChangeSetFactory.StatementType.ADDITION, defPrefLabel),
                 true);
 
         persistAndNotifyProvider.persistAndNotify(
-                Helper.createChangeSetModel(defPrefLabel, ChangeTripleService.CHANGETYPE_REMOVE),
+                changeSetFactory.assembleChangeset(ChangeSetFactory.StatementType.REMOVAL, defPrefLabel),
                 true);
 
         Thread.sleep(delay);
 
         persistAndNotifyProvider.persistAndNotify(
-                Helper.createChangeSetModel(updatePrefLabel, ChangeTripleService.CHANGETYPE_ADD),
+                changeSetFactory.assembleChangeset(ChangeSetFactory.StatementType.ADDITION, updatePrefLabel),
                 true);
     }
 

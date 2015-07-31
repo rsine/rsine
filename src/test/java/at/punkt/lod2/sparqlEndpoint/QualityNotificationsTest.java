@@ -2,10 +2,13 @@ package at.punkt.lod2.sparqlEndpoint;
 
 import at.punkt.lod2.util.CountingNotifier;
 import at.punkt.lod2.util.Helper;
+import com.hp.hpl.jena.graph.NodeFactory;
+import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.sparql.core.DatasetGraph;
 import eu.lod2.rsine.Rsine;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
+import eu.lod2.rsine.service.ChangeSetFactory;
 import eu.lod2.rsine.service.PersistAndNotifyProvider;
 import org.apache.jena.fuseki.Fuseki;
 import org.junit.AfterClass;
@@ -15,12 +18,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
+import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.model.impl.StatementImpl;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.SKOS;
-import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFHandlerException;
@@ -44,7 +47,7 @@ public class QualityNotificationsTest {
     private PersistAndNotifyProvider persistAndNotifyProvider;
 
     @Autowired
-    private Repository managedStoreRepo;
+    private ChangeSetFactory changeSetFactory;
 
     private CountingNotifier countingNotifier;
     private static DatasetGraph datasetGraph;
@@ -78,9 +81,23 @@ public class QualityNotificationsTest {
     }
 
     public void addTriple(URI subject, URI predicate, URI object) throws RepositoryException {
-        Helper.addToDatasetAndPersist(new StatementImpl(subject, predicate, object),
+        addToDatasetAndPersist(new StatementImpl(subject, predicate, object),
                 datasetGraph,
                 persistAndNotifyProvider);
+    }
+
+    private void addToDatasetAndPersist(Statement statement,
+                                              DatasetGraph datasetGraph,
+                                              PersistAndNotifyProvider persistAndNotifyProvider)
+    {
+        datasetGraph.getDefaultGraph().add(new Triple(
+                NodeFactory.createURI(statement.getSubject().toString()),
+                NodeFactory.createURI(statement.getPredicate().toString()),
+                NodeFactory.createURI(statement.getObject().toString())));
+
+        persistAndNotifyProvider.persistAndNotify(
+                changeSetFactory.assembleChangeset(ChangeSetFactory.StatementType.ADDITION, statement),
+                true);
     }
 
     @Test
@@ -108,7 +125,7 @@ public class QualityNotificationsTest {
     {
         subscribe("/quality/disjoint_labels_violation.ttl");
 
-        Helper.addToDatasetAndPersist(
+        addToDatasetAndPersist(
                 new StatementImpl(new URIImpl("http://reegle.info/glossary/682"),
                         SKOS.ALT_LABEL,
                         new LiteralImpl("energy efficiency", "en")),
@@ -124,7 +141,7 @@ public class QualityNotificationsTest {
     {
         subscribe("/quality/disjoint_labels_violation.ttl");
 
-        Helper.addToDatasetAndPersist(
+        addToDatasetAndPersist(
                 new StatementImpl(new URIImpl("http://reegle.info/glossary/1063"),
                         SKOS.ALT_LABEL,
                         new LiteralImpl("emission", "en")),
@@ -164,10 +181,10 @@ public class QualityNotificationsTest {
     public void overlappingLabels() throws RDFParseException, IOException, RDFHandlerException, RepositoryException {
         subscribe("/quality/overlapping_labels.ttl");
 
-        Helper.addToDatasetAndPersist(
-            new StatementImpl(new URIImpl("http://reegle.info/glossary/357"), SKOS.ALT_LABEL, new LiteralImpl("Biogas", "en")),
-            datasetGraph,
-            persistAndNotifyProvider);
+        addToDatasetAndPersist(
+                new StatementImpl(new URIImpl("http://reegle.info/glossary/357"), SKOS.ALT_LABEL, new LiteralImpl("Biogas", "en")),
+                datasetGraph,
+                persistAndNotifyProvider);
 
         Assert.assertEquals(1, countingNotifier.getNotificationCount());
     }

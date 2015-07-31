@@ -1,12 +1,9 @@
 package at.punkt.lod2.util;
 
-import com.hp.hpl.jena.graph.NodeFactory;
-import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.sparql.core.DatasetGraph;
 import com.hp.hpl.jena.sparql.core.DatasetGraphFactory;
 import eu.lod2.rsine.Rsine;
-import eu.lod2.rsine.service.ChangeSetCreator;
-import eu.lod2.rsine.service.ChangeTripleService;
+import eu.lod2.rsine.service.ChangeSetFactory;
 import eu.lod2.rsine.service.PersistAndNotifyProvider;
 import org.apache.jena.fuseki.Fuseki;
 import org.apache.jena.fuseki.server.FusekiConfig;
@@ -15,11 +12,8 @@ import org.apache.jena.fuseki.server.ServerConfig;
 import org.apache.jena.riot.RDFDataMgr;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Model;
-import org.openrdf.model.Statement;
-import org.openrdf.model.Value;
 import org.openrdf.model.impl.StatementImpl;
 import org.openrdf.model.impl.TreeModel;
-import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.SKOS;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
@@ -55,67 +49,26 @@ public class Helper {
         return model;
     }
 
-    public static Model createChangeSetModel(Statement statement, String changeType) {
-        return new ChangeSetCreator().assembleChangeset(statement, null, changeType);
-    }
-
-    public static Model createChangeSetModel(String subjUri, String predUri, Value obj, String changeType) {
-        return new ChangeSetCreator().assembleChangeset(
-                new StatementImpl(new URIImpl(subjUri), new URIImpl(predUri), obj),
-                null,
-                changeType);
-    }
-
-    public static Model createChangeSetModel(String subjUri1, String predUri1, Value obj1,
-                                      String subjUri2, String predUri2, Value obj2,
-                                      String changeType)
-    {
-        return new ChangeSetCreator().assembleChangeset(
-                new StatementImpl(new URIImpl(subjUri1), new URIImpl(predUri1), obj1),
-                new StatementImpl(new URIImpl(subjUri2), new URIImpl(predUri2), obj2),
-                changeType);
-    }
-
     public static void setLabel(RepositoryConnection repCon,
-                                org.openrdf.model.URI concept,
-                                org.openrdf.model.URI labelType,
-                                Literal newlabel,
-                                PersistAndNotifyProvider persistAndNotifyProvider) throws RepositoryException
+                          org.openrdf.model.URI concept,
+                          org.openrdf.model.URI labelType,
+                          Literal newlabel,
+                          PersistAndNotifyProvider persistAndNotifyProvider) throws RepositoryException
     {
         repCon.add(concept, labelType, newlabel);
 
         persistAndNotifyProvider.persistAndNotify(
-                Helper.createChangeSetModel(concept.stringValue(),
-                        labelType.stringValue(),
-                        newlabel,
-                        ChangeTripleService.CHANGETYPE_ADD),
+                new ChangeSetFactory().assembleChangeset(ChangeSetFactory.StatementType.ADDITION,
+                        new StatementImpl(concept, labelType, newlabel)),
                 true);
     }
 
     public static void setAltLabel(RepositoryConnection repCon,
-                            org.openrdf.model.URI concept,
-                            Literal newAltLabel,
-                            PersistAndNotifyProvider persistAndNotifyProvider) throws RepositoryException
+                             org.openrdf.model.URI concept,
+                             Literal newAltLabel,
+                             PersistAndNotifyProvider persistAndNotifyProvider) throws RepositoryException
     {
         setLabel(repCon, concept, SKOS.ALT_LABEL, newAltLabel, persistAndNotifyProvider);
-    }
-
-    public static void addToDatasetAndPersist(Statement statement,
-                                              DatasetGraph datasetGraph,
-                                              PersistAndNotifyProvider persistAndNotifyProvider)
-    {
-        datasetGraph.getDefaultGraph().add(new Triple(
-                NodeFactory.createURI(statement.getSubject().toString()),
-                NodeFactory.createURI(statement.getPredicate().toString()),
-                NodeFactory.createURI(statement.getObject().toString())));
-
-        persistAndNotifyProvider.persistAndNotify(
-                Helper.createChangeSetModel(statement.getSubject().stringValue(),
-                        statement.getPredicate().stringValue(),
-                        statement.getObject(),
-                        ChangeTripleService.CHANGETYPE_ADD),
-                true);
-
     }
 
 }

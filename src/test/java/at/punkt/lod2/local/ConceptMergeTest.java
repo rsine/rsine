@@ -4,7 +4,7 @@ import at.punkt.lod2.util.CountingNotifier;
 import at.punkt.lod2.util.Helper;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
-import eu.lod2.rsine.service.ChangeTripleService;
+import eu.lod2.rsine.service.ChangeSetFactory;
 import eu.lod2.rsine.service.PersistAndNotifyProvider;
 import org.junit.After;
 import org.junit.Assert;
@@ -45,6 +45,9 @@ public class ConceptMergeTest {
 
     @Autowired
     private Repository managedStoreRepo;
+
+    @Autowired
+    private ChangeSetFactory changeSetFactory;
 
     private CountingNotifier countingNotifier;
     private RepositoryConnection repCon;
@@ -103,10 +106,10 @@ public class ConceptMergeTest {
         repCon.add(concept, new URIImpl(OWL.NAMESPACE + "deprecated"), new BooleanLiteralImpl(true));
 
         persistAndNotifyProvider.persistAndNotify(
-                Helper.createChangeSetModel(concept.stringValue(),
-                        OWL.NAMESPACE + "deprecated",
-                        new BooleanLiteralImpl(true),
-                        ChangeTripleService.CHANGETYPE_ADD),
+                changeSetFactory.assembleChangeset(ChangeSetFactory.StatementType.ADDITION,
+                        new StatementImpl(concept,
+                                new URIImpl(OWL.NAMESPACE + "deprecated"),
+                                new BooleanLiteralImpl(true))),
                 true);
     }
 

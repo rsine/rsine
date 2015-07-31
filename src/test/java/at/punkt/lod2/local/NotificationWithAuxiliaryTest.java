@@ -7,8 +7,7 @@ import eu.lod2.rsine.queryhandling.QueryEvaluator;
 import eu.lod2.rsine.registrationservice.NotificationQuery;
 import eu.lod2.rsine.registrationservice.RegistrationService;
 import eu.lod2.rsine.registrationservice.Subscription;
-import eu.lod2.rsine.service.ChangeSetCreator;
-import eu.lod2.rsine.service.ChangeTripleService;
+import eu.lod2.rsine.service.ChangeSetFactory;
 import eu.lod2.rsine.service.PersistAndNotifyProvider;
 import eu.lod2.util.Namespaces;
 import org.junit.After;
@@ -56,6 +55,9 @@ public class NotificationWithAuxiliaryTest {
 
     @Autowired
     private Repository managedStoreRepo;
+
+    @Autowired
+    private ChangeSetFactory changeSetFactory;
 
     private RepositoryConnection repCon;
     private MessageConcatenatingNotifier messageConcatenatingNotifier = new MessageConcatenatingNotifier();
@@ -129,10 +131,9 @@ public class NotificationWithAuxiliaryTest {
     }
 
     private void persistChangeSet() throws IOException {
-        Model changeSet = new ChangeSetCreator().assembleChangeset(
-            new StatementImpl(otherConceptUri, SKOS.BROADER, conceptUri),
-            null,
-            ChangeTripleService.CHANGETYPE_ADD);
+        Model changeSet = changeSetFactory.assembleChangeset(
+            ChangeSetFactory.StatementType.ADDITION,
+            new StatementImpl(otherConceptUri, SKOS.BROADER, conceptUri));
         persistAndNotifyProvider.persistAndNotify(changeSet, true);
     }
 
@@ -140,7 +141,6 @@ public class NotificationWithAuxiliaryTest {
 
         private String message = "";
 
-        @Override
         public void notify(Collection<String> messages) {
             for (String message : messages) {
                 this.message += message;
