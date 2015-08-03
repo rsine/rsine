@@ -1,0 +1,52 @@
+@prefix spin: <http://spinrdf.org/sp/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix rsine: <http://lod2.eu/rsine/> .
+@prefix dcterms: <http://purl.org/dc/terms/>.
+
+<http://example.org/aligned/np> a rsine:Subscription;
+    rsine:query [
+        dcterms:description "Notification project creation";
+
+        spin:text "PREFIX cs:<http://purl.org/vocab/changeset/schema#>
+            PREFIX spin:<http://spinrdf.org/sp/>
+            PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+            PREFIX void:<http://rdfs.org/ns/void#>
+            PREFIX dct:<http://purl.org/dc/terms/>
+
+            SELECT ?projName ?creator WHERE {
+                ?cs a cs:ChangeSet .
+                ?cs cs:createdDate ?csdate .
+                ?cs cs:addition ?projAdd .
+                ?cs cs:addition ?creatorAdd .
+                ?cs cs:addition ?projNameAdd .
+
+                ?projAdd rdf:subject ?proj .
+                ?projAdd rdf:predicate ?rdf:type .
+                ?projAdd rdf:object void:Dataset .
+
+                ?creatorAdd rdf:subject ?proj .
+                ?creatorAdd rdf:predicate dct:creator .
+                ?creatorAdd rdf:object ?creator .
+
+                ?projNameAdd rdf:subject ?proj .
+                ?projNameAdd rdf:predicate dct:title .
+                ?projNameAdd rdf:object ?projName .
+
+                FILTER (?csdate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime>)
+            }";
+
+        rsine:formatter [
+            a rsine:vtlFormatter;
+            rsine:message "A project named '$bindingSet.getValue('projName')' was created by '$bindingSet.getValue('creator')'";
+        ];
+      ];
+
+    rsine:notifier [
+        a rsine:loggingNotifier;
+    ].
+
+#    rsine:notifier [
+#        a rsine:emailNotifier;
+#        foaf:mbox <mailto:c.mader@semantic-web.at>
+#    ].
