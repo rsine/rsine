@@ -85,9 +85,9 @@ public class QueryEvaluator {
                                         String issuedQuery,
                                         RepositoryConnection managedStoreCon) throws OpenRDFException
     {
-        logger.debug("evaluating issued query '" +issuedQuery+ "'");
-        Collection<BindingSet> results = changeSetStore.evaluateQuery(issuedQuery);
+        logger.debug("evaluating issued query '" + issuedQuery + "'");
         query.updateLastIssued();
+        Collection<BindingSet> results = changeSetStore.evaluateQuery(issuedQuery);
 
         Collection<String> messages = new HashSet<String>();
         for (BindingSet bs : results) {

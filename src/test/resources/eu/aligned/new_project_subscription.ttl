@@ -33,12 +33,12 @@
                     rdf:predicate dct:title;
                     rdf:object ?projName.
 
-#                FILTER (?csdate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime>)
+                FILTER (?csdate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime>)
             }";
 
         rsine:formatter [
             a rsine:vtlFormatter;
-            rsine:message "A project named '$bindingSet.getValue('projName')' was created by '$bindingSet.getValue('creator')'";
+            rsine:message "A project named '$bindingSet.getValue('projName').getLabel()' was created by '$bindingSet.getValue('creator').getLabel()'";
         ]
     ];
 

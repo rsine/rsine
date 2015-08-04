@@ -21,7 +21,6 @@ public class MinTimePassedEvaluationPolicy implements IEvaluationPolicy {
         this.minMillisBetweenEvaluations = minMillisBetweenEvaluations;
     }
 
-    @Override
     public void checkEvaluationNeeded(NotificationQuery query) {
         Date queryLastIssued = query.getLastIssued();
         if (queryLastIssued == null) return;
