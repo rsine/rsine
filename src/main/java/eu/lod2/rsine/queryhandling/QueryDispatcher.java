@@ -42,14 +42,9 @@ public class QueryDispatcher implements IQueryDispatcher {
     private boolean asyncNotification;
 
     public QueryDispatcher() {
-
+        asyncNotification = false;
     }
 
-    public QueryDispatcher(boolean asyncNotification) {
-        this.asyncNotification = asyncNotification;
-    }
-
-    @Override
     public void trigger() {
         Iterator<Subscription> subscriptionIt = registrationService.getSubscriptionIterator();
         if (!subscriptionIt.hasNext()) {
@@ -74,7 +69,7 @@ public class QueryDispatcher implements IQueryDispatcher {
     }
 
     public synchronized void issueQueryAndNotify(NotificationQuery query) throws RepositoryException {
-        issueQueryAndNotify(query, false);
+        issueQueryAndNotify(query, true);
     }
 
     public synchronized void issueQueryAndNotify(NotificationQuery query, boolean evaluateImmediately)
@@ -135,7 +130,6 @@ public class QueryDispatcher implements IQueryDispatcher {
             this.messages = messages;
         }
 
-        @Override
         public void run() {
             notifier.notify(messages);
         }

@@ -93,10 +93,12 @@ class CmdParams {
     }
 
     private void autoConfAuthUri() {
-        URI sparqlEndpointUri = null;
         try {
-            sparqlEndpointUri = new URI(managedStoreSparqlEndpoint);
-            authoritativeUri = sparqlEndpointUri.getScheme() +"://"+ sparqlEndpointUri.getHost();
+            if (managedStoreSparqlEndpoint == null) authoritativeUri = "";
+            else {
+                URI sparqlEndpointUri = new URI(managedStoreSparqlEndpoint);
+                authoritativeUri = sparqlEndpointUri.getScheme() + "://" + sparqlEndpointUri.getHost();
+            }
         }
         catch (URISyntaxException e) {
             logger.warn("Could not autodetect authoritative URI: managed store sparql endpoint is not a valid URI");
@@ -107,9 +109,10 @@ class CmdParams {
         boolean incompleteParams = false;
 
         if (managedStoreSparqlEndpoint == null) {
-            logger.error("No SPARQL endpoint of the managed triple store provided");
-            incompleteParams = true;
+            logger.info("No SPARQL endpoint of the managed triple store provided");
+            managedStoreSparqlEndpoint = "";
         }
+
         if (port == null) {
             logger.error("No change listening port provided");
             incompleteParams = true;

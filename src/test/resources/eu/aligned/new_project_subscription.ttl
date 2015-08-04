@@ -33,7 +33,7 @@
                     rdf:predicate dct:title;
                     rdf:object ?projName.
 
-                FILTER (?csdate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime>)
+#                FILTER (?csdate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime>)
             }";
 
         rsine:formatter [

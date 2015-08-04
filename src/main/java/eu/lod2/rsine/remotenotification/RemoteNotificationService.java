@@ -39,7 +39,7 @@ class RemoteNotificationService extends RemoteNotificationServiceBase {
             }
         }
         catch (ServiceUnavailableException e) {
-            logger.warn("Remote service unavailable: " +e.getMessage());
+            logger.warn("Remote service unavailable: " + e.getMessage());
         }
     }
 
@@ -61,20 +61,21 @@ class RemoteNotificationService extends RemoteNotificationServiceBase {
     private Collection<Resource> getExternalResources(Model changeSet) {
         Resource statement = changeSet.filter(null, RDF.STATEMENT, null).objectResource();
 
-        Value subject = changeSet.filter(statement, RDF.SUBJECT, null).objectValue();
-        Value object = changeSet.filter(statement, RDF.OBJECT, null).objectValue();
+        Collection<Value> subject = changeSet.filter(statement, RDF.SUBJECT, null).objects();
+        Collection<Value> object = changeSet.filter(statement, RDF.OBJECT, null).objects();
 
         return filterExternalResources(subject, object);
     }
 
-    private Collection<Resource> filterExternalResources(Value... values) {
+    private Collection<Resource> filterExternalResources(Collection<Value>... allValues) {
         Collection<Resource> externalResources = new ArrayList<Resource>();
-        for (Value value : values) {
-            if (value instanceof Resource &&
-                !value.stringValue().toUpperCase().contains(authoritativeUri.toUpperCase()))
-            {
-                logger.info("Recognized resource '" +value.stringValue()+ " as external");
-                externalResources.add((Resource) value);
+        for (Collection<Value> valueCollection : allValues) {
+            for (Value value : valueCollection) {
+                if (value instanceof Resource &&
+                        !value.stringValue().toUpperCase().contains(authoritativeUri.toUpperCase())) {
+                    logger.info("Recognized resource '" + value.stringValue() + " as external");
+                    externalResources.add((Resource) value);
+                }
             }
         }
         return externalResources;
