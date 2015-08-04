@@ -42,7 +42,11 @@ public class QueryDispatcher implements IQueryDispatcher {
     private boolean asyncNotification;
 
     public QueryDispatcher() {
-        asyncNotification = false;
+
+    }
+
+    public QueryDispatcher(boolean asyncNotification) {
+        this.asyncNotification = asyncNotification;
     }
 
     public void trigger() {
