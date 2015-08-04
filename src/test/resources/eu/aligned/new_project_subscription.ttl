@@ -15,23 +15,23 @@
             PREFIX dct:<http://purl.org/dc/terms/>
 
             SELECT ?projName ?creator WHERE {
-                ?cs a cs:ChangeSet .
-                ?cs cs:createdDate ?csdate .
-                ?cs cs:addition ?projAdd .
-                ?cs cs:addition ?creatorAdd .
-                ?cs cs:addition ?projNameAdd .
+                ?cs a cs:ChangeSet;
+                    cs:createdDate ?csdate;
+                    cs:addition ?projAdd;
+                    cs:addition ?creatorAdd;
+                    cs:addition ?projNameAdd.
 
-                ?projAdd rdf:subject ?proj .
-                ?projAdd rdf:predicate ?rdf:type .
-                ?projAdd rdf:object void:Dataset .
+                ?projAdd rdf:subject ?proj;
+                    rdf:predicate rdf:type;
+                    rdf:object void:Dataset .
 
-                ?creatorAdd rdf:subject ?proj .
-                ?creatorAdd rdf:predicate dct:creator .
-                ?creatorAdd rdf:object ?creator .
+                ?creatorAdd rdf:subject ?proj;
+                    rdf:predicate dct:creator;
+                    rdf:object ?creator.
 
-                ?projNameAdd rdf:subject ?proj .
-                ?projNameAdd rdf:predicate dct:title .
-                ?projNameAdd rdf:object ?projName .
+                ?projNameAdd rdf:subject ?proj;
+                    rdf:predicate dct:title;
+                    rdf:object ?projName.
 
                 FILTER (?csdate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime>)
             }";
@@ -39,8 +39,8 @@
         rsine:formatter [
             a rsine:vtlFormatter;
             rsine:message "A project named '$bindingSet.getValue('projName')' was created by '$bindingSet.getValue('creator')'";
-        ];
-      ];
+        ]
+    ];
 
     rsine:notifier [
         a rsine:loggingNotifier;

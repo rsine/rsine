@@ -1,0 +1,18 @@
+<urn:void> {
+	<http://localhost/fsfsfsdxxxxyy> a <http://rdfs.org/ns/void#Dataset> ;
+		<http://purl.org/dc/terms/creator> "superadmin" ;
+		<http://purl.org/dc/terms/language> "en" ;
+		<http://www.semantic-web.at/ppcl/availablelanguages> "en" ;
+		<http://purl.org/dc/terms/date> "2015-08-04T08:18:28Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+		<http://purl.org/dc/terms/title> "fsfsfsdxxxxyy"@en ;
+		<http://rdfs.org/ns/void#sparqlEndpoint> <http://localhost/PoolParty/sparql/fsfsfsdxxxxyy> ;
+		<http://rdfs.org/ns/void#feature> _:node19rrqr0qtx94 .
+
+	_:node19rrqr0qtx94 a <http://rdfs.org/ns/void#TechnicalFeature> ;
+		<http://www.w3.org/2000/01/rdf-schema#label> "RDF/XML" ;
+		<http://purl.org/dc/terms/format> "application/rdf+xml" .
+
+	<http://localhost/fsfsfsdxxxxyy> <http://rdfs.org/ns/void#vocabulary> <http://www.w3.org/2004/02/skos/core#> ;
+		<http://www.semantic-web.at/ppcl/numberOfConcepts> "0"^^<http://www.w3.org/2001/XMLSchema#integer> ;
+		<http://www.semantic-web.at/ppcl/numberOfConceptSchemes> "0"^^<http://www.w3.org/2001/XMLSchema#integer> .
+}
