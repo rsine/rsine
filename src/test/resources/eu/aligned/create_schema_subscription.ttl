@@ -3,7 +3,7 @@
 @prefix rsine: <http://lod2.eu/rsine/> .
 @prefix dcterms: <http://purl.org/dc/terms/>.
 
-<http://example.org/aligned/np> a rsine:Subscription;
+<http://example.org/aligned/new_scheme> a rsine:Subscription;
     rsine:query [
         dcterms:description "Notification custom schema creation";
 
@@ -19,13 +19,13 @@
                 ?cs a cs:ChangeSet;
                     cs:createdDate ?csdate;
                     cs:addition ?schemeAdd;
-                    cs:addition ?schemeName.
+                    cs:addition ?schemeIdentifier.
 
                 ?schemeAdd rdf:subject ?scheme;
                     rdf:predicate rdf:type;
                     rdf:object swcs:CustomSchema.
 
-                ?schemeName rdf:subject ?scheme;
+                ?schemeIdentifier rdf:subject ?scheme;
                     rdf:predicate swcs:identifier;
                     rdf:object ?schemeName.
 
