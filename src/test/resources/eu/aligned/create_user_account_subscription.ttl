@@ -3,9 +3,9 @@
 @prefix rsine: <http://lod2.eu/rsine/> .
 @prefix dcterms: <http://purl.org/dc/terms/>.
 
-<http://example.org/aligned/new_custom_class> a rsine:Subscription;
+<http://example.org/aligned/new_account> a rsine:Subscription;
     rsine:query [
-        dcterms:description "Notification custom class creation";
+        dcterms:description "Notification user account creation";
 
         spin:text "PREFIX cs:<http://purl.org/vocab/changeset/schema#>
             PREFIX spin:<http://spinrdf.org/sp/>
@@ -15,27 +15,34 @@
             PREFIX dct:<http://purl.org/dc/terms/>
             PREFIX swcs:<http://schema.semantic-web.at/ppt/>
             PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>
+            PREFIX swcu:<http://schema.semantic-web.at/users/>
 
-            SELECT ?className WHERE {
+            SELECT ?userName (GROUP_CONCAT(?auth) AS ?auths) WHERE {
                 ?cs a cs:ChangeSet;
                     cs:createdDate ?csdate;
-                    cs:addition ?classAdd;
-                    cs:addition ?classInfo.
+                    cs:addition ?userAdd;
+                    cs:addition ?userAuth;
+                    cs:addition ?userInfo.
 
-                ?classAdd rdf:subject ?class;
+                ?userAdd rdf:subject ?user;
                     rdf:predicate rdf:type;
-                    rdf:object rdfs:Class.
+                    rdf:object swcu:User.
 
-                ?schemeInfo rdf:subject ?class;
-                    rdf:predicate rdfs:label;
-                    rdf:object ?className.
+                ?userAuth rdf:subject ?user;
+                    rdf:predicate swcu:grantedAuthority;
+                    rdf:object ?auth.
+
+                ?userInfo rdf:subject ?user;
+                    rdf:predicate swcu:username;
+                    rdf:object ?userName.
 
                 FILTER (?csdate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime>)
-            }";
+            }
+            GROUP BY ?userName";
 
         rsine:formatter [
             a rsine:vtlFormatter;
-            rsine:message "A custom class named '$bindingSet.getValue('className').getLabel()' has been added to scheme <unsupported> by user <unsupported>.";
+            rsine:message "A new user named '$bindingSet.getValue('userName').getLabel()' with the roles '$bindingSet.getValue('auths').getLabel()' has been created by user <unsupported>.";
         ]
     ];
 

@@ -58,10 +58,6 @@ public class ChangeSetStore {
         Collection<BindingSet> bindingSets = new ArrayList<BindingSet>();
 
         RepositoryConnection repCon = changeSetRepo.getConnection();
-
-        System.out.println(repCon.getStatements(null,null,null,false).asList().toString());
-        System.out.println("query: " +query);
-
         try {
             TupleQueryResult result = repCon.prepareTupleQuery(QueryLanguage.SPARQL, query).evaluate();
 
