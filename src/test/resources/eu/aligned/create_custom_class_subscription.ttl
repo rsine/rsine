@@ -14,27 +14,28 @@
             PREFIX void:<http://rdfs.org/ns/void#>
             PREFIX dct:<http://purl.org/dc/terms/>
             PREFIX swcs:<http://schema.semantic-web.at/ppt/>
+            PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>
 
-            SELECT ?schemeName WHERE {
+            SELECT ?className WHERE {
                 ?cs a cs:ChangeSet;
                     cs:createdDate ?csdate;
-                    cs:addition ?schemeAdd;
-                    cs:addition ?schemeIdentifier.
+                    cs:addition ?classAdd;
+                    cs:addition ?classInfo.
 
-                ?schemeAdd rdf:subject ?scheme;
+                ?classAdd rdf:subject ?class;
                     rdf:predicate rdf:type;
-                    rdf:object swcs:CustomSchema.
+                    rdf:object rdfs:Class.
 
-                ?schemeIdentifier rdf:subject ?scheme;
-                    rdf:predicate swcs:identifier;
-                    rdf:object ?schemeName.
+                ?schemeInfo rdf:subject ?class;
+                    rdf:predicate rdfs:label;
+                    rdf:object ?className.
 
                 FILTER (?csdate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime>)
             }";
 
         rsine:formatter [
             a rsine:vtlFormatter;
-            rsine:message "A custom scheme named '$bindingSet.getValue('schemeName').getLabel()' has been created by user <unsupported>.";
+            rsine:message "A custom class named '$bindingSet.getValue('className').getLabel()' has been added to scheme <unsupported> by user <unsupported>.";
         ]
     ];
 

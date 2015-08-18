@@ -34,7 +34,7 @@
 
         rsine:formatter [
             a rsine:vtlFormatter;
-            rsine:message "A custom scheme named '$bindingSet.getValue('schemeName').getLabel()' has been removed.";
+            rsine:message "A custom scheme named '$bindingSet.getValue('schemeName').getLabel()' has been removed by user <unsupported>.";
         ]
     ];
 
