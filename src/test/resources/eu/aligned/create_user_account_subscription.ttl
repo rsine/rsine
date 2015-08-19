@@ -17,7 +17,7 @@
             PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>
             PREFIX swcu:<http://schema.semantic-web.at/users/>
 
-            SELECT ?userName (GROUP_CONCAT(?auth) AS ?auths) WHERE {
+            SELECT ?userName (GROUP_CONCAT(?auth; separator=', ') AS ?auths) WHERE {
                 ?cs a cs:ChangeSet;
                     cs:createdDate ?csdate;
                     cs:addition ?userAdd;
@@ -38,7 +38,8 @@
 
                 FILTER (?csdate > 'QUERY_LAST_ISSUED'^^<http://www.w3.org/2001/XMLSchema#dateTime>)
             }
-            GROUP BY ?userName";
+            GROUP BY ?userName HAVING (STRLEN(?auths) > 0)
+            ";
 
         rsine:formatter [
             a rsine:vtlFormatter;
